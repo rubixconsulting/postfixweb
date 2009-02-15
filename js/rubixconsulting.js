@@ -3,7 +3,7 @@ Ext.namespace('RubixConsulting');
 RubixConsulting.user = function() {
 	// private variables
 	var loginWindow, user, viewport, west, center;
-	var domainGrid, removeDomainBtn, saveDomainBtn, revertDomainBtn;
+	var domainGrid, removeDomainBtn, saveDomainBtn, revertDomainBtn, domainMask;
 
 	var domainSm = new Ext.grid.CheckboxSelectionModel();
 	var domainsLoaded = false;
@@ -189,7 +189,7 @@ RubixConsulting.user = function() {
 							items: [
 								domainGrid = new Ext.grid.EditorGridPanel({
 									width: 325,
-									title: 'Virtual Email Domains',
+									title: 'Email Domains',
 									border: true,
 									id: 'domain-grid',
 									autoHeight: true,
@@ -283,17 +283,12 @@ RubixConsulting.user = function() {
 	}
 
 	var addDomain = function() {
-		// TODO make sure this is all necessary
-		var p = new domainRecord({
+		domainGrid.stopEditing();
+		domainStore.insert(0, new domainRecord({
 			domain_id: 0,
 			domain: ''
-		});
-		domainGrid.stopEditing();
-		domainStore.insert(0, p);
-		p.dirty = true;
-		p.modified = {domain_id: 0, domain: ''};
-		domainStore.afterEdit(p);
-		domainGrid.startEditing(0, 0);
+		}));
+		domainGrid.startEditing(0, 1);
 	}
 
 	var removeSelectedDomains = function() {
@@ -305,7 +300,7 @@ RubixConsulting.user = function() {
 			width: 450,
 			msg: '<table><tr><td>Do you really want to remove these domains?</td></tr>'+
 			     '<tr><td>All associated email address, aliases and forwarders will be deleted.</td></tr>'+
-			     '<tr><td>Your changes will not be saved until you click Save Changes.</td></tr></table>',
+			     '<tr><td>All other domain changes will be saved as well.</td></tr></table>',
 			fn: function(btn) {
 				if(btn == 'yes') {
 					doRemoveSelectedDomains();
@@ -323,22 +318,48 @@ RubixConsulting.user = function() {
 				continue;
 			}
 			removed++;
+			if(selected[i].get('domain_id') != 0) {
+				removedDomains.push(selected[i].get('domain_id'));
+			}
+			selected[i].commit();
 			domainStore.remove(selected[i]);
-			removedDomains.push(selected[i].get('domain_id'));
 		}
 		if(removed > 0) {
-			removeDomainBtn.disable();
-			saveDomainBtn.enable();
-			revertDomainBtn.enable();
+			saveDomains();
 		}
 	}
 
 	var saveDomains = function() {
-		console.log('save domains');
-		console.log(removedDomains);
-		// domains with id 0 are new
-		// don't remove domains in removedDomains with id 0
+		var addedDomains = new Array();
+		var modifiedDomains = new Array();
+		var modified = domainStore.getModifiedRecords();
+		for(var i = 0; i < modified.length; i++) {
+			if(modified[i].get('domain_id') == 0) {
+				addedDomains.push(modified[i].getChanges().domain);
+			} else {
+				modifiedDomains.push(modified[i].get('domain_id') + ':' + modified[i].getChanges().domain);
+			}
+		}
+		domainMask = new Ext.LoadMask(domainGrid.getEl(), {msg: 'Saving...'});
+		domainMask.show();
+		Ext.Ajax.request({
+			url: 'data/domains.php',
+			success: completeSaveDomains,
+			failure: ajaxFailure,
+			params: {
+				mode: 'save',
+				add: addedDomains.join(','),
+				update: modifiedDomains.join(','),
+				remove: removedDomains.join(',')
+			}
+		});
+	}
+
+	var completeSaveDomains = function() {
+		domainMask.hide();
+		domainStore.commitChanges();
 		removedDomains = new Array();
+		revertDomains();
 	}
 
 	var revertDomains = function() {
@@ -381,7 +402,7 @@ RubixConsulting.user = function() {
 	var loadDomains = function() {
 		domainStore.removeAll();
 		domainsLoaded = false;
-		domainGrid.getStore().load({
+		domainStore.load({
 			params: {
 				mode: 'load'
 			},

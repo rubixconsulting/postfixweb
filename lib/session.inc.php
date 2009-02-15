@@ -11,10 +11,18 @@ function requireLogin() {
 	}
 }
 
-function requireAdmin() {
+function requireSuperAdmin() {
 	requireLogin();
-	if(!isAdmin()) {
-		header('HTTP/1.1 403 Forbidden: Not an administrator');
+	if(!isSuperAdmin()) {
+		header('HTTP/1.1 403 Forbidden: Not a super administrator');
+		exit;
+	}
+}
+
+function requireDomainAdmin() {
+	requireLogin();
+	if(!isDomainAdmin()) {
+		header('HTTP/1.1 403 Forbidden: Not a domain administrator');
 		exit;
 	}
 }

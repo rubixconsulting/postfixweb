@@ -33,12 +33,15 @@ $tree = array(
 	)
 );
 
-if(isAdmin()) {
+if(isSuperAdmin()) {
 	$tree[] = array(
 		'text' => 'Manage Domains',
 		'id'   => 'manage-domains',
 		'leaf' => TRUE
 	);
+}
+
+if(isDomainAdmin()) {
 	$tree[] = array(
 		'text' => 'Manage Users',
 		'id'   => 'manage-users',

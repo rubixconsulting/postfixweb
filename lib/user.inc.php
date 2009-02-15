@@ -2,7 +2,11 @@
 
 include_once('db.inc.php');
 
-function authenticate_user($user, $pass) {
+function authenticateUser($user, $pass) {
+	if(!$user || !$pass) {
+		return FALSE;
+	}
+
 	$sql = 'SELECT '.
 	       '  user_id,'.
 	       '  username AS user,'.
@@ -21,6 +25,26 @@ function authenticate_user($user, $pass) {
 	return db_getrow($sql, array($user, $pass));
 }
 
+function loadUser($userId) {
+	if(!$userId) {
+		return FALSE;
+	}
+	$sql = 'SELECT '.
+	       '  user_id,'.
+	       '  username AS user,'.
+	       '  domain,'.
+	       '  role,'.
+	       '  role_id,'.
+	       '  roles.description AS longrole,'.
+	       '  virtual_users.description AS name,'.
+	       '  (username || \'@\' || domain) AS email'.
+	       '  FROM virtual_users'.
+	       '  JOIN virtual_domains USING(domain_id)'.
+	       '  JOIN roles USING(role_id)'.
+	       '  WHERE user_id = ?';
+	return db_getrow($sql, array($userId));
+}
+
 function isLoggedIn() {
 	if(!$_SESSION['user']) {
 		return FALSE;
@@ -32,21 +56,50 @@ function isLoggedIn() {
 	return FALSE;
 }
 
-function isAdmin() {
-	if(!isLoggedIn()) {
-		return FALSE;
+function isSuperAdmin($userId = FALSE) {
+	if(!$userId) {
+		$userId = $_SESSION['user']{'user_id'};
 	}
-	$user = $_SESSION['user'];
-	if($user{'role'} == 'admin') {
+	$tmpUser = loadUser($userId);
+	if($tmpUser{'role'} == 'superadmin') {
 		return TRUE;
 	}
 	return FALSE;
 }
 
+function isDomainAdmin($userId = FALSE) {
+	if(!$userId) {
+		$userId = $_SESSION['user']{'user_id'};
+	}
+	$tmpUser = loadUser($userId);
+	if(($tmpUser{'role'} == 'domainadmin') || ($tmpUser{'role'} == 'superadmin')) {
+		return TRUE;
+	}
+	return FALSE;
+}
+
+function getAdminDomains($userId = FALSE) {
+	if(!$userId) {
+		$userId = $_SESSION['user']{'user_id'};
+	}
+	if(!isDomainAdmin($userId)) {
+		return FALSE;
+	}
+	$sql = 'SELECT domain'.
+		'  FROM domain_administrators'.
+		'  JOIN virtual_domains'.
+		'  USING(domain_id)'.
+		'  WHERE user_id = ?';
+	return db_getarray($sql, array($userId));
+}
+
+// TODO add an admin password change
+// function adminChangePassword($userId, $new) {
+
 function changePassword($old, $new, $rep) {
 	$user = $_SESSION['user'];
 	$userId = $user{'user_id'};
-	$testauth = authenticate_user($user{'email'}, $old);
+	$testauth = authenticateUser($user{'email'}, $old);
 	if(!$testauth) {
 		print json_encode(array('success' => false, 'errors' => array('oldpass' => 'Incorrect password')))."\n";
 		return;

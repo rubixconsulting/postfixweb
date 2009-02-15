@@ -26,6 +26,18 @@ function db_connect() {
 	}
 }
 
+function db_getvalue($sql, $params = FALSE) {
+	global $DB;
+	db_connect();
+	return $DB->GetOne($sql, $params);
+}
+
+function db_getarray($sql, $params = FALSE) {
+	global $DB;
+	db_connect();
+	return $DB->GetCol($sql, $params);
+}
+
 function db_getrows($sql, $params = FALSE) {
 	global $DB;
 	db_connect();
