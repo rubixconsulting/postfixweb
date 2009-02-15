@@ -4,7 +4,7 @@ include_once('../lib/session.inc.php');
 include_once('../lib/user.inc.php');
 include_once('../lib/domains.inc.php');
 
-requireSuperAdmin();
+requireSiteAdmin();
 
 $mode = $_POST['mode'];
 

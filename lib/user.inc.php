@@ -2,6 +2,15 @@
 
 include_once('db.inc.php');
 
+function getUserId($email) {
+	$sql = 'SELECT '.
+		'  user_id'.
+		'  FROM virtual_users'.
+		'  JOIN virtual_domains USING(domain_id)'.
+		'  WHERE (username || \'@\' || domain) = ?';
+	return db_getval($sql, array($email));
+}
+
 function authenticateUser($user, $pass) {
 	if(!$user || !$pass) {
 		return FALSE;
@@ -20,9 +29,29 @@ function authenticateUser($user, $pass) {
 	       '  JOIN virtual_domains USING(domain_id)'.
 	       '  JOIN roles USING(role_id)'.
 	       '  WHERE active=\'t\' AND'.
-	       '  (username || \'@\' || domain)=?'.
+	       '  (username || \'@\' || domain) = ?'.
 	       '  AND password=CRYPT(?, password)';
-	return db_getrow($sql, array($user, $pass));
+	$userObj = db_getrow($sql, array($user, $pass));
+	if(!$userObj) {
+		return FALSE;
+	}
+	$adminDomains = getAdminDomains($userObj['user_id']);
+	$userObj['domain_admin'] = FALSE;
+	if(count($adminDomains) > 0) {
+		$userObj['domain_admin'] = TRUE;
+		$userObj['admin_domains'] = $adminDomains;
+	}
+	return $userObj;
+}
+
+function getAdminDomains($userId) {
+	$sql = 'SELECT'.
+		'  domain'.
+		'  FROM domain_administrators'.
+		'  JOIN virtual_domains USING(domain_id)'.
+		'  WHERE user_id = ?'.
+		'  ORDER BY domain';
+	return db_getcol($sql, array($userId));
 }
 
 function loadUser($userId) {
@@ -42,7 +71,17 @@ function loadUser($userId) {
 	       '  JOIN virtual_domains USING(domain_id)'.
 	       '  JOIN roles USING(role_id)'.
 	       '  WHERE user_id = ?';
-	return db_getrow($sql, array($userId));
+	$userObj = db_getrow($sql, array($userId));
+	if(!$userObj) {
+		return FALSE;
+	}
+	$adminDomains = getAdminDomains($userObj['user_id']);
+	$userObj['domain_admin'] = FALSE;
+	if(count($adminDomains) > 0) {
+		$userObj['domain_admin'] = TRUE;
+		$userObj['admin_domains'] = $adminDomains;
+	}
+	return $userObj;
 }
 
 function isLoggedIn() {
@@ -50,18 +89,18 @@ function isLoggedIn() {
 		return FALSE;
 	}
 	$user = $_SESSION['user'];
-	if($user{'user_id'} && $user{'role_id'} && ($user{'role_id'} > 1)) {
+	if($user['user_id'] && $user['role_id'] && ($user['role_id'] > 1)) {
 		return TRUE;
 	}
 	return FALSE;
 }
 
-function isSuperAdmin($userId = FALSE) {
+function isSiteAdmin($userId = FALSE) {
 	if(!$userId) {
-		$userId = $_SESSION['user']{'user_id'};
+		$userId = $_SESSION['user']['user_id'];
 	}
 	$tmpUser = loadUser($userId);
-	if($tmpUser{'role'} == 'superadmin') {
+	if($tmpUser['role'] == 'admin') {
 		return TRUE;
 	}
 	return FALSE;
@@ -69,28 +108,19 @@ function isSuperAdmin($userId = FALSE) {
 
 function isDomainAdmin($userId = FALSE) {
 	if(!$userId) {
-		$userId = $_SESSION['user']{'user_id'};
+		$userId = $_SESSION['user']['user_id'];
 	}
-	$tmpUser = loadUser($userId);
-	if(($tmpUser{'role'} == 'domainadmin') || ($tmpUser{'role'} == 'superadmin')) {
+	if(isSiteAdmin($userId)) {
+		return TRUE;
+	}
+	$sql = 'SELECT count(*)'.
+		'  FROM domain_administrators'.
+		'  WHERE user_id = ?';
+	$numDomains = db_getval($sql, array($userId));
+	if($numDomains > 0) {
 		return TRUE;
 	}
 	return FALSE;
-}
-
-function getAdminDomains($userId = FALSE) {
-	if(!$userId) {
-		$userId = $_SESSION['user']{'user_id'};
-	}
-	if(!isDomainAdmin($userId)) {
-		return FALSE;
-	}
-	$sql = 'SELECT domain'.
-		'  FROM domain_administrators'.
-		'  JOIN virtual_domains'.
-		'  USING(domain_id)'.
-		'  WHERE user_id = ?';
-	return db_getarray($sql, array($userId));
 }
 
 // TODO add an admin password change
@@ -98,8 +128,8 @@ function getAdminDomains($userId = FALSE) {
 
 function changePassword($old, $new, $rep) {
 	$user = $_SESSION['user'];
-	$userId = $user{'user_id'};
-	$testauth = authenticateUser($user{'email'}, $old);
+	$userId = $user['user_id'];
+	$testauth = authenticateUser($user['email'], $old);
 	if(!$testauth) {
 		print json_encode(array('success' => false, 'errors' => array('oldpass' => 'Incorrect password')))."\n";
 		return;

@@ -33,7 +33,7 @@ $tree = array(
 	)
 );
 
-if(isSuperAdmin()) {
+if(isSiteAdmin()) {
 	$tree[] = array(
 		'text' => 'Manage Domains',
 		'id'   => 'manage-domains',
@@ -43,7 +43,7 @@ if(isSuperAdmin()) {
 
 if(isDomainAdmin()) {
 	$tree[] = array(
-		'text' => 'Catch All Addresses',
+		'text' => 'Manage Catch All Addresses',
 		'id'   => 'catchall-addresses',
 		'leaf' => TRUE
 	);
@@ -52,6 +52,17 @@ if(isDomainAdmin()) {
 		'id'   => 'manage-users',
 		'leaf' => TRUE
 	);
+}
+
+if(isSiteAdmin()) {
+	$tree[] = array(
+		'text' => 'Manage User Permissions',
+		'id'   => 'manage-user-permissions',
+		'leaf' => TRUE
+	);
+}
+
+if(isDomainAdmin()) {
 	$tree[] = array(
 		'text' => 'Manage Aliases',
 		'id'   => 'manage-aliases',

@@ -1,6 +1,7 @@
 <?php
 
 include_once('db.inc.php');
+include_once('roles.inc.php');
 
 function addDomain($domain) {
 	if(!$domain) {
@@ -19,7 +20,7 @@ function addDomain($domain) {
 		'username'    => '',
 		'domain_id'   => $domain_id,
 		'password'    => '!',
-		'role_id'     => 4,
+		'role_id'     => getRoleId('catchall'),
 		'description' => $domain.' catch all',
 		'active'      => 'f'
 	);

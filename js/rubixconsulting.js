@@ -2,7 +2,7 @@ Ext.namespace('RubixConsulting');
 
 RubixConsulting.user = function() {
 	// private variables
-	var loginWindow, user, viewport, west, center;
+	var loginWindow, user, viewport, west, center, infoPanel;
 	var domainGrid, removeDomainBtn, saveDomainBtn, revertDomainBtn, domainMask;
 
 	var domainSm = new Ext.grid.CheckboxSelectionModel();
@@ -59,7 +59,7 @@ RubixConsulting.user = function() {
 					region: 'west',
 					rootVisible: false,
 					split: true,
-					width: 150,
+					width: 185,
 					minSize: 75,
 					maxSize: 300,
 					collapsible: true,
@@ -88,7 +88,7 @@ RubixConsulting.user = function() {
 					//	id: 'statusbar'
 					//}),
 					items: [
-						new Ext.Panel({
+						infoPanel = new Ext.Panel({
 							id: 'user-info-panel',
 							layout: 'table',
 							defaults: {
@@ -118,11 +118,9 @@ RubixConsulting.user = function() {
 									border: false
 								},{
 									html: '<b>Role</b>',
-									style: 'padding-bottom:15px',
 									border: false
 								},{
 									html: user.longrole,
-									style: 'padding-bottom:15px',
 									border: false
 								}
 							]
@@ -242,6 +240,17 @@ RubixConsulting.user = function() {
 				})
 			]
 		});
+		if(user.domain_admin) {
+			infoPanel.add({
+				html: '<b>You Administer</b>',
+				border: false
+			});
+			infoPanel.add({
+				html: user.admin_domains.join(', '),
+				border: false
+			});
+		}
+		infoPanel.doLayout();
 		west.on('load', function(treeloader, node) {
 			new Ext.util.DelayedTask(function() {
 				west.getNodeById('user-info').select();
@@ -573,6 +582,7 @@ RubixConsulting.user = function() {
 	}
 
 	var doLogout = function() {
+		disablePage('Logging out...');
 		Ext.Ajax.request({
 			url: 'data/logout.php',
 			success: completeLogout,
@@ -599,6 +609,26 @@ RubixConsulting.user = function() {
 		// public methods
 		init: function() {
 			Ext.QuickTips.init();
+			Ext.override(Ext.layout.TableLayout, {
+				onLayout: function(ct, target) {
+					var cs = ct.items.items, len = cs.length, c, i;
+					if(!this.table) {
+						target.addClass('x-table-layout-ct');
+						this.table = target.createChild({
+								tag: 'table',
+								cls: 'x-table-layout',
+								cellspacing: 0,
+								cn: {
+									tag: 'tbody'
+								}
+							},
+							null,
+							true
+						);
+					}
+					this.renderAll(ct, target);
+				}
+			});
 			getUserInfo();
 		}
 	};

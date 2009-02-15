@@ -11,10 +11,10 @@ function requireLogin() {
 	}
 }
 
-function requireSuperAdmin() {
+function requireSiteAdmin() {
 	requireLogin();
-	if(!isSuperAdmin()) {
-		header('HTTP/1.1 403 Forbidden: Not a super administrator');
+	if(!isSiteAdmin()) {
+		header('HTTP/1.1 403 Forbidden: Not a site administrator');
 		exit;
 	}
 }
