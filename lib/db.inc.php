@@ -116,3 +116,21 @@ function db_delete($table, $conditions) {
 			join(' = ? AND ', array_keys($conditions)).' = ?';
 	return $DB->Execute($sql, array_values($conditions));
 }
+
+function beginTransaction() {
+	global $DB;
+	db_connect();
+	return $DB->Execute("BEGIN");
+}
+
+function endTransaction() {
+	global $DB;
+	db_connect();
+	return $DB->Execute("COMMIT");
+}
+
+function cancelTransaction() {
+	global $DB;
+	db_connect();
+	return $DB->Execute("ROLLBACK");
+}

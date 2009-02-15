@@ -43,6 +43,11 @@ if(isSuperAdmin()) {
 
 if(isDomainAdmin()) {
 	$tree[] = array(
+		'text' => 'Catch All Addresses',
+		'id'   => 'catchall-addresses',
+		'leaf' => TRUE
+	);
+	$tree[] = array(
 		'text' => 'Manage Users',
 		'id'   => 'manage-users',
 		'leaf' => TRUE

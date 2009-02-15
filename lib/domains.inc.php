@@ -3,10 +3,33 @@
 include_once('db.inc.php');
 
 function addDomain($domain) {
+	if(!$domain) {
+		return FALSE;
+	}
+	beginTransaction();
 	$add = array(
 		'domain' => $domain
 	);
-	return db_insert('virtual_domains', $add, 'domain_id');
+	$domain_id = db_insert('virtual_domains', $add, 'domain_id');
+	if(!$domain_id) {
+		cancelTransaction();
+		return FALSE;
+	}
+	$catchall = array(
+		'username'    => '',
+		'domain_id'   => $domain_id,
+		'password'    => '!',
+		'role_id'     => 4,
+		'description' => $domain.' catch all',
+		'active'      => 'f'
+	);
+	$catchall_id = db_insert('virtual_users', $catchall, 'user_id');
+	if(!$catchall_id) {
+		cancelTransaction();
+		return FALSE;
+	}
+	endTransaction();
+	return $domain_id;
 }
 
 function updateDomain($domainId, $domain) {
