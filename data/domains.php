@@ -4,19 +4,44 @@ include_once('../lib/session.inc.php');
 include_once('../lib/user.inc.php');
 include_once('../lib/domains.inc.php');
 
-requireSiteAdmin();
+requireDomainAdmin();
 
+$query = $_POST['query'];
 $mode = $_POST['mode'];
 
-if($mode == 'load') {
-	$sql = 'SELECT domain_id, domain FROM virtual_domains ORDER BY domain';
+if($query && !$mode && ($query != 'all')) {
+	$sql = 'SELECT'.
+		'  domain_id,'.
+		'  domain'.
+		'  FROM virtual_domains'.
+		'  WHERE domain LIKE ?'.
+		'  AND domain IN ('.
+			'\''.join('\', \'', getAdminDomains()).'\''.
+		'  )'.
+		' ORDER BY domain';
+	$rows = db_getrows($sql, array('%'.strtolower($query).'%'));
+	$domains = array(
+		'success' => true,
+		'domains' => $rows
+	);
+	print json_encode($domains);
+} else if(($mode == 'load') || ($query == 'all')) {
+	$sql = 'SELECT'.
+		'  domain_id,'.
+		'  domain'.
+		'  FROM virtual_domains'.
+		'  WHERE domain IN ('.
+			'\''.join('\', \'', getAdminDomains()).'\''.
+		'  )'.
+		'  ORDER BY domain';
 	$rows = db_getrows($sql);
 	$domains = array(
 		'success' => true,
 		'domains' => $rows
 	);
-	print json_encode($domains)."\n";
+	print json_encode($domains);
 } else if($mode == 'save') {
+	requireSiteAdmin();
 	$add    = $_POST['add'];
 	$update = $_POST['update'];
 	$remove = $_POST['remove'];

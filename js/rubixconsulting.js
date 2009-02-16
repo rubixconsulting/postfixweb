@@ -3,15 +3,32 @@ Ext.namespace('RubixConsulting');
 RubixConsulting.user = function() {
 	// private variables
 	var loginWindow, user, viewport, west, center, infoPanel;
-	var domainGrid, removeDomainBtn, saveDomainBtn, revertDomainBtn, domainMask;
+	var domainGrid, domainMask, addUserWindow;
+	var removeDomainBtn, saveDomainBtn, revertDomainBtn;
+	var addUserBtn, removeUserBtn, saveUserBtn, revertUserBtn, resetPassBtn;
+	var addUserUsername, addUserDomain;
 
-	var domainSm = new Ext.grid.CheckboxSelectionModel();
-	var domainsLoaded = false;
+	var domainSm       = new Ext.grid.CheckboxSelectionModel();
+	var userSm         = new Ext.grid.CheckboxSelectionModel();
+	var domainsLoaded  = false;
+	var usersLoaded    = false;
 	var removedDomains = new Array();
+	var removedUsers   = new Array();
 
 	var domainRecord = Ext.data.Record.create([
 		{name: 'domain_id', type: 'int'},
 		{name: 'domain',    type: 'string'}
+	]);
+
+	var userRecord = Ext.data.Record.create([
+		{name: 'user_id',  type: 'int'},
+		{name: 'username', type: 'string'},
+		{name: 'domain',   type: 'string'},
+		{name: 'email',    type: 'string'},
+		{name: 'name',     type: 'string'},
+		{name: 'role_id',  type: 'int'},
+		{name: 'name',     type: 'string'},
+		{name: 'active',   type: 'boolean'}
 	]);
 
 	var domainStore = new Ext.data.JsonStore({
@@ -20,7 +37,51 @@ RubixConsulting.user = function() {
 		fields: domainRecord
 	});
 
+	var domainListStore = new Ext.data.JsonStore({
+		url: 'data/domains.php',
+		root: 'domains',
+		fields: domainRecord
+	});
+
+	var userStore = new Ext.data.JsonStore({
+		url: 'data/users.php',
+		root: 'users',
+		fields: userRecord
+	});
+
 	// private functions
+	function boolEditor(label, name, width) {
+		return new Ext.form.ComboBox({
+			store: new Ext.data.SimpleStore({
+				fields: ['value', 'display'],
+				data: [
+					[false, 'No'],
+					[true, 'Yes']
+				]
+			}),
+			fieldLabel: label,
+			hiddenName: name,
+			width: width,
+			displayField: 'display',
+			valueField: 'value',
+			mode: 'local',
+			forceSelection: true,
+			typeAhead: true,
+			triggerAction: 'all',
+			allowBlank: false,
+			selectOnFocus: true,
+			lazyRender: true,
+			value: false
+		});
+	}
+
+	var boolRenderer = function(value, meta, record, row, col, store) {
+		if(value) {
+			return 'Yes';
+		}
+		return 'No';
+	}
+
 	var getUserInfo = function() {
 		Ext.Ajax.request({
 			url: 'data/userInfo.php',
@@ -102,25 +163,33 @@ RubixConsulting.user = function() {
 							items: [
 								{
 									html: '<div style="text-align: center;"><img src="/images/rubix_consulting_medium.png" /></div>',
+									cellCls: 'alignTop',
 									border: false,
 									colspan: 2
 								},{
 									html: '<b>Email Address</b>',
-									border: false
+									cellCls: 'alignTop',
+									border: false,
+									width: 120
 								},{
 									html: user.email,
+									cellCls: 'alignTop',
 									border: false
 								},{
 									html: '<b>Name</b>',
+									cellCls: 'alignTop',
 									border: false
 								},{
 									html: user.name,
+									cellCls: 'alignTop',
 									border: false
 								},{
 									html: '<b>Role</b>',
+									cellCls: 'alignTop',
 									border: false
 								},{
 									html: user.longrole,
+									cellCls: 'alignTop',
 									border: false
 								}
 							]
@@ -235,6 +304,81 @@ RubixConsulting.user = function() {
 									border: false
 								}
 							]
+						}),
+						new Ext.Panel({
+							id: 'manage-users-panel',
+							layout: 'anchor',
+							autoScroll: true,
+							items: [
+								userGrid = new Ext.grid.EditorGridPanel({
+									width: 420,
+									title: 'Email Users',
+									border: true,
+									id: 'user-grid',
+									autoHeight: true,
+									loadMask: true,
+									autoExpandColumn: 'email',
+									clicksToEdit: 1,
+									style: 'padding-bottom:15px',
+									tbar: [
+										addUserBtn = new Ext.Toolbar.Button({
+											text: 'Add New',
+											handler: showAddUserWindow
+										}),
+										resetPassBtn = new Ext.Toolbar.Button({
+											text: 'Reset Password',
+											handler: resetPassword,
+											disabled: true
+										}),
+										removeUserBtn = new Ext.Toolbar.Button({
+											text: 'Remove Selected',
+											handler: removeSelectedUsers,
+											disabled: true
+										}),
+										revertUserBtn = new Ext.Toolbar.Button({
+											text: 'Revert Changes',
+											handler: revertUsers,
+											disabled: true
+										}),
+										saveUserBtn = new Ext.Toolbar.Button({
+											text: 'Save Changes',
+											handler: saveUsers,
+											disabled: true
+										})
+									],
+									store: userStore,
+									sm: userSm,
+									cm: new Ext.grid.ColumnModel([
+										userSm, {
+											header: 'Email',
+											sortable: true,
+											dataIndex: 'email',
+											id: 'email',
+											editor: false
+										},{
+											header: 'Name',
+											sortable: true,
+											dataIndex: 'name',
+											id: 'name',
+											editor: new Ext.form.TextField({
+												allowBlank: false
+											})
+										},{
+											header: 'Active',
+											sortable: true,
+											dataIndex: 'active',
+											id: 'active',
+											width: 50,
+											editor: boolEditor(),
+											renderer: boolRenderer
+										}
+									]),
+									iconCls: 'icon-grid'
+								}), {
+									html: '<small><b>Note:</b> you will not be able to select, edit or delete your own user, '+user.email+'</small>',
+									border: false
+								}
+							]
 						})
 					]
 				})
@@ -243,10 +387,12 @@ RubixConsulting.user = function() {
 		if(user.domain_admin) {
 			infoPanel.add({
 				html: '<b>You Administer</b>',
+				cellCls: 'alignTop',
 				border: false
 			});
 			infoPanel.add({
-				html: user.admin_domains.join(', '),
+				html: user.admin_domains.join('<br />'),
+				cellCls: 'alignTop',
 				border: false
 			});
 		}
@@ -261,9 +407,20 @@ RubixConsulting.user = function() {
 			saveDomainBtn.enable();
 			revertDomainBtn.enable();
 		}, this);
+		userStore.on('update', function(store, record, operation) {
+			saveUserBtn.enable();
+			revertUserBtn.enable();
+		}, this);
 		domainStore.on('loadexception', loadException, this);
+		userStore.on('loadexception', loadException, this);
 		domainSm.on('beforerowselect', function(selectionmodel, row, keep, record) {
 			if(record.get('domain') == user.domain) {
+				return false;
+			}
+			return true;
+		}, this);
+		userSm.on('beforerowselect', function(selectionmodel, row, keep, record) {
+			if(record.get('email') == user.email) {
 				return false;
 			}
 			return true;
@@ -275,8 +432,23 @@ RubixConsulting.user = function() {
 				removeDomainBtn.disable();
 			}
 		}, this);
+		userSm.on('selectionchange', function(selectionmodel) {
+			if(userSm.getCount() > 0) {
+				removeUserBtn.enable();
+				resetPassBtn.enable();
+			} else {
+				removeUserBtn.disable();
+				resetPassBtn.disable();
+			}
+		}, this);
 		domainGrid.on('beforeedit', function(e) {
 			if(e.record.get('domain') == user.domain) {
+				return false;
+			}
+			return true;
+		}, this);
+		userGrid.on('beforeedit', function(e) {
+			if(e.record.get('email') == user.email) {
 				return false;
 			}
 			return true;
@@ -300,6 +472,134 @@ RubixConsulting.user = function() {
 		domainGrid.startEditing(0, 1);
 	}
 
+	var showAddUserWindow = function() {
+		if(!addUserWindow) {
+			addUserWindow = new Ext.Window({
+				resizable: false,
+				layout: 'fit',
+				width: 355,
+				height: 295,
+				constrain: true,
+				constrainHeader: true,
+				minimizable: false,
+				closable: false,
+				plain: false,
+				title: 'Add a new user...',
+				modal: true,
+				items: [{
+					id: 'add-user-form',
+					layout: 'form',
+					url: 'data/users.php',
+					frame: true,
+					monitorValid: true,
+					xtype: 'form',
+					bodyStyle: 'padding: 15px',
+					defaults: {
+						msgTarget: 'side'
+					},
+					baseParams: {
+						mode: 'add'
+					},
+					buttons: [{
+						text: 'Cancel',
+						handler: hideAddUserWindow
+					},{
+						text: 'Add',
+						formBind: true,
+						handler: addNewUser
+					}],
+					layoutConfig: {
+						labelSeparator: ''
+					},
+					items: [
+						addUserUsername = new Ext.form.TextField({
+							fieldLabel: 'Username',
+							allowBlank: false,
+							width: 175,
+							name: 'username'
+						}),
+						addUserDomain = new Ext.form.ComboBox({
+							store: domainListStore,
+							fieldLabel: 'Domain',
+							displayField: 'domain',
+							valueField: 'domain_id',
+							forceSelection: true,
+							typeAhead: true,
+							minChars: 1,
+							editable: true,
+							allowBlank: false,
+							width: 175,
+							hiddenName: 'domain',
+							triggerAction: 'all',
+							queryParam: 'query',
+							allQuery: 'all'
+						}),
+						new Ext.form.Label({
+							html: '<label class="x-form-item-label" style="width: 103px">Email Address</label><div style="padding-top: 4px;" id="add-email-address>username@domain</div>',
+							cls: 'x-form-item'
+						}),
+						new Ext.ux.PasswordMeter({
+							fieldLabel: 'Password',
+							name: 'password',
+							id: 'add-user-password',
+							allowBlank: false,
+							width: 175,
+							inputType: 'password',
+							validator: validNewPass,
+							invalidText: 'Password does not meet requirements',
+							minLength: 8
+						}),
+						new Ext.form.TextField({
+							fieldLabel: 'Repeat Password',
+							name: 'reppassword',
+							allowBlank: false,
+							width: 175,
+							inputType: 'password',
+							validator: validAddRepPass,
+							invalidText: 'Passwords do not match'
+						}),
+						new Ext.form.TextField({
+							fieldLabel: 'Full Name',
+							name: 'name',
+							width: 175
+						}),
+						boolEditor('Active', 'active', 175)
+					]
+				}]
+			});
+			addUserUsername.on('change', updateAddUserEmail, this);
+			addUserDomain.on('change', updateAddUserEmail, this);
+		}
+		addUserWindow.show(addUserBtn.getEl());
+		new Ext.util.DelayedTask(function() {
+			addUserUsername.focus();
+		}, this).delay(500);
+	}
+
+	var updateAddUserEmail = function(field, newval, oldval) {
+		Ext.get('add-email-address').update(addUserUsername.getValue()+'@'+addUserDomain.getEl().getValue());
+	}
+
+	var hideAddUserWindow = function() {
+		Ext.getCmp('add-user-form').getForm().reset();
+		Ext.get('add-email-address').update('username@domain');
+		addUserWindow.hide(addUserBtn.getEl());
+	}
+
+	var addNewUser = function() {
+		disablePage('Adding user...', 'Please wait');
+		Ext.getCmp('add-user-form').getForm().submit({
+			success: addUserSuccess,
+			failure: formFailure
+		});
+	}
+
+	var addUserSuccess = function(form, action) {
+		hideAddUserWindow();
+		revertUsers();
+		showInfo('User added', 'User added successfully');
+	}
+
 	var removeSelectedDomains = function() {
 		Ext.MessageBox.show({
 			closable: false,
@@ -316,6 +616,14 @@ RubixConsulting.user = function() {
 				}
 			}
 		});
+	}
+
+	var removeSelectedUsers = function() {
+		// TODO
+	}
+
+	var resetPassword = function() {
+		// TODO
 	}
 
 	var doRemoveSelectedDomains = function() {
@@ -364,6 +672,10 @@ RubixConsulting.user = function() {
 		});
 	}
 
+	var saveUsers = function() {
+		// TODO
+	}
+
 	var completeSaveDomains = function() {
 		domainMask.hide();
 		domainStore.commitChanges();
@@ -375,6 +687,12 @@ RubixConsulting.user = function() {
 		saveDomainBtn.disable();
 		revertDomainBtn.disable();
 		loadDomains();
+	}
+
+	var revertUsers = function() {
+		saveUserBtn.disable();
+		revertUserBtn.disable();
+		loadUsers();
 	}
 
 	var validPass = function(pass) {
@@ -389,8 +707,24 @@ RubixConsulting.user = function() {
 		return true;
 	}
 
+	var validNewPass = function(pass) {
+		// TODO: do some better validation here
+		return true;
+	}
+
 	var validRepPass = function(reppass) {
 		var newpass = Ext.get('newpass');
+		if(newpass) {
+			newval = newpass.getValue();
+			if(newval == reppass) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	var validAddRepPass = function(reppass) {
+		var newpass = Ext.get('add-user-password');
 		if(newpass) {
 			newval = newpass.getValue();
 			if(newval == reppass) {
@@ -405,6 +739,8 @@ RubixConsulting.user = function() {
 		center.doLayout();
 		if((node.id == 'manage-domains') && (!domainsLoaded)) {
 			loadDomains();
+		} else if((node.id == 'manage-users') && (!usersLoaded)) {
+			loadUsers();
 		}
 	}
 
@@ -424,6 +760,22 @@ RubixConsulting.user = function() {
 		});
 	}
 
+	var loadUsers = function() {
+		userStore.removeAll();
+		usersLoaded = false;
+		userStore.load({
+			params: {
+				mode: 'load'
+			},
+			callback: function(r, options, success) {
+				if(success) {
+					usersLoaded = true;
+				}
+			},
+			scope: this
+		});
+	}
+
 	var parseUserInfo = function(response, options) {
 		var data = Ext.util.JSON.decode(response.responseText);
 		if(!data.success) {
@@ -433,8 +785,7 @@ RubixConsulting.user = function() {
 			user = data.user;
 			if(loginWindow) {
 				loginWindow.hide();
-				Ext.getCmp('loginUser').reset();
-				Ext.getCmp('loginPass').reset();
+				Ext.getCmp('loginForm').getForm().reset()
 				enablePage();
 			}
 			showPortal();
@@ -528,9 +879,7 @@ RubixConsulting.user = function() {
 	}
 
 	var changePasswordSuccess = function(form, action) {
-		Ext.getCmp('oldpass').reset();
-		Ext.getCmp('newpass').reset();
-		Ext.getCmp('repnewpass').reset();
+		Ext.getCmp('change-password-form').getForm().reset();
 		showInfo('Password changed', 'Password changed successfully');
 	}
 
@@ -593,8 +942,11 @@ RubixConsulting.user = function() {
 	var completeLogout = function() {
 		viewport.destroy();
 		user = null;
+		// TODO clear all necessary variables here
 		domainStore.removeAll();
 		domainsLoaded = false;
+		userStore.removeAll();
+		usersLoaded = false;
 		getUserInfo();
 	}
 
@@ -608,6 +960,7 @@ RubixConsulting.user = function() {
 
 		// public methods
 		init: function() {
+			Ext.BLANK_IMAGE_URL = '/js/ext/resources/images/default/s.gif';
 			Ext.QuickTips.init();
 			Ext.override(Ext.layout.TableLayout, {
 				onLayout: function(ct, target) {

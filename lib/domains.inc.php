@@ -49,3 +49,11 @@ function removeDomain($domainId) {
 	);
 	db_delete('virtual_domains', $condition);
 }
+
+function getDomain($domainId) {
+	if(!$domainId) {
+		return FALSE;
+	}
+	$sql = 'SELECT domain FROM virtual_domains WHERE domain_id = ?';
+	return db_getval($sql, array($domainId));
+}

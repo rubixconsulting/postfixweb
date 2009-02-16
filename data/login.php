@@ -6,9 +6,9 @@ include_once('../lib/user.inc.php');
 $user = $_POST['user'];
 $pass = $_POST['pass'];
 
-$user = authenticateUser($user, $pass);
-if($user) {
-	$_SESSION['user'] = $user;
+$userId = authenticateUser($user, $pass);
+if($userId) {
+	$_SESSION['user'] = loadUser($userId);
 	print json_encode(array('success' => true))."\n";
 } else {
 	print json_encode(array('success' => false))."\n";
