@@ -29,27 +29,28 @@ if($mode == 'load') {
 		'active'   => $_POST['active']
 	);
 	addUser($newUser);
+} else if($mode == 'resetPassword') {
+	$user    = $_POST['user'];
+	$pass    = $_POST['password'];
+	$reppass = $_POST['password'];
+	resetPassword($user, $pass, $reppass);
 } else if($mode == 'save') {
 	$update = $_POST['update'];
 	$remove = $_POST['remove'];
-	if($add) {
-#		$domains = split(',', $add);
-#		foreach($domains as $domain) {
-#			$domain_id = addDomain($domain);
-#		}
-	}
 	if($update) {
-#		$domains = split(',', $update);
-#		foreach($domains as $domain) {
-#			$values = split(':', $domain);
-#			updateDomain($values[0], $values[1]);
-#		}
+		$updates = json_decode($update);
+		foreach($updates as $tmpUser) {
+			$userId = $tmpUser->user_id;
+			$description = $tmpUser->name;
+			$active = $tmpUser->active;
+			modifyUser($userId, $description, $active);
+		}
 	}
 	if($remove) {
-#		$domainIds = split(',', $remove);
-#		foreach($domainIds as $domainId) {
-#			removeDomain($domainId);
-#		}
+		$userIds = split(',', $remove);
+		foreach($userIds as $userId) {
+			removeUser($userId);
+		}
 	}
 	print json_encode(array('success' => TRUE));
 }

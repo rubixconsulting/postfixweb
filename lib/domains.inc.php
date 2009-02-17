@@ -40,14 +40,17 @@ function updateDomain($domainId, $domain) {
 	$condition = array(
 		'domain_id' => $domainId
 	);
-	db_update('virtual_domains', $update, $condition);
+	return db_update('virtual_domains', $update, $condition);
 }
 
 function removeDomain($domainId) {
+	if(!$domainId) {
+		return FALSE;
+	}
 	$condition = array(
 		'domain_id' => $domainId
 	);
-	db_delete('virtual_domains', $condition);
+	return db_delete('virtual_domains', $condition);
 }
 
 function getDomain($domainId) {

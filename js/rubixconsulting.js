@@ -3,10 +3,11 @@ Ext.namespace('RubixConsulting');
 RubixConsulting.user = function() {
 	// private variables
 	var loginWindow, user, viewport, west, center, infoPanel;
-	var domainGrid, domainMask, addUserWindow;
+	var domainGrid, domainMask, addUserWindow, resetPasswordWindow;
 	var removeDomainBtn, saveDomainBtn, revertDomainBtn;
 	var addUserBtn, removeUserBtn, saveUserBtn, revertUserBtn, resetPassBtn;
 	var addUserUsername, addUserDomain;
+	var resetPassPassword, userMask;
 
 	var domainSm       = new Ext.grid.CheckboxSelectionModel();
 	var userSm         = new Ext.grid.CheckboxSelectionModel();
@@ -140,11 +141,11 @@ RubixConsulting.user = function() {
 					region: 'center',
 					layout: 'card',
 					margins: '5 0 0 0',
-					autoScroll: true,
+//					autoScroll: true,
 					id: 'center-panel',
-					defaults: {
-						bodyStyle: 'padding:15px'
-					},
+//					defaults: {
+//						bodyStyle: 'padding:15px'
+//					},
 					//bbar: new Ext.StatusBar({
 					//	id: 'statusbar'
 					//}),
@@ -155,6 +156,7 @@ RubixConsulting.user = function() {
 							defaults: {
 								bodyStyle: 'padding-bottom:5px;padding-right:10px'
 							},
+								bodyStyle: 'padding:15px',
 							layoutConfig: {
 								columns: 2
 							},
@@ -194,20 +196,21 @@ RubixConsulting.user = function() {
 								}
 							]
 						}),
-						new Ext.Panel({
-							frame: false,
-							id: 'change-password-panel',
-							layout: 'anchor',
-							autoScroll: true,
-							items: [
+//						new Ext.Panel({
+//							frame: false,
+//							id: 'change-password-panel',
+//							layout: 'anchor',
+//							autoScroll: true,
+//							items: [
 								new Ext.form.FormPanel({
-									title: 'Change Your Password',
+//									title: 'Change Your Password',
 									url: 'data/changePass.php',
 									monitorValid: true,
-									autoHeight: true,
+									autoScroll: true,
+//									autoHeight: true,
 									labelWidth: 125,
 									width: 318,
-									id: 'change-password-form',
+									id: 'change-password-panel',
 									layoutConfig: {
 										labelSeparator: ''
 									},
@@ -241,29 +244,35 @@ RubixConsulting.user = function() {
 										validator: validRepPass,
 										invalidText: 'Passwords do not match'
 									}],
-									buttons: [{
-										text: 'Change Password',
-										formBind: true,
-										handler: changePassword
-									}]
-								})
-							]
-						}),
-						new Ext.Panel({
-							id: 'manage-domains-panel',
-							layout: 'anchor',
-							autoScroll: true,
-							items: [
+									buttons: [
+										{
+											text: 'Reset Form',
+											handler: resetChangePassword
+										},{
+											text: 'Change Password',
+											formBind: true,
+											handler: changePassword
+										}
+									]
+								}),
+//							]
+//						}),
+//						new Ext.Panel({
+//							id: 'manage-domains-panel',
+//							layout: 'anchor',
+//							autoScroll: true,
+//							items: [
 								domainGrid = new Ext.grid.EditorGridPanel({
-									width: 450,
-									title: 'Email Domains',
+//									width: 450,
+//									title: 'Email Domains',
 									border: true,
-									id: 'domain-grid',
-									autoHeight: true,
+									id: 'manage-domains-panel',
+									autoScroll: true,
+//									autoHeight: true,
 									loadMask: true,
 									autoExpandColumn: 'domain',
 									clicksToEdit: 1,
-									style: 'padding-bottom:15px',
+//									style: 'padding-bottom:15px',
 									tbar: [
 										new Ext.Toolbar.Button({
 											text: 'Add New',
@@ -299,27 +308,29 @@ RubixConsulting.user = function() {
 										}
 									]),
 									iconCls: 'icon-grid'
-								}), {
-									html: '<small><b>Note:</b> you will not be able to select, edit or delete your own domain, '+user.domain+'</small>',
-									border: false
-								}
-							]
-						}),
-						new Ext.Panel({
-							id: 'manage-users-panel',
-							layout: 'anchor',
-							autoScroll: true,
-							items: [
+								}),
+//								{
+//									html: '<small><b>Note:</b> you will not be able to select, edit or delete your own domain, '+user.domain+'</small>',
+//									border: false
+//								}
+//							]
+//						}),
+//						new Ext.Panel({
+//							id: 'manage-users-panel',
+//							layout: 'anchor',
+//							autoScroll: true,
+//							items: [
 								userGrid = new Ext.grid.EditorGridPanel({
 									width: 570,
-									title: 'Email Users',
+//									title: 'Email Users',
 									border: true,
-									id: 'user-grid',
-									autoHeight: true,
+									id: 'manage-users-panel',
+//									autoHeight: true,
+									autoScroll: true,
 									loadMask: true,
 									autoExpandColumn: 'email',
 									clicksToEdit: 1,
-									style: 'padding-bottom:15px',
+//									style: 'padding-bottom:15px',
 									tbar: [
 										addUserBtn = new Ext.Toolbar.Button({
 											text: 'Add New',
@@ -374,12 +385,13 @@ RubixConsulting.user = function() {
 										}
 									]),
 									iconCls: 'icon-grid'
-								}), {
-									html: '<small><b>Note:</b> you will not be able to select, edit or delete your own user, '+user.email+'</small>',
-									border: false
-								}
-							]
-						})
+								}),
+//								{
+//									html: '<small><b>Note:</b> you will not be able to select, edit or delete your own user, '+user.email+'</small>',
+//									border: false
+//								}
+//							]
+//						})
 					]
 				})
 			]
@@ -475,6 +487,84 @@ RubixConsulting.user = function() {
 		domainGrid.startEditing(0, 1);
 	}
 
+	var showResetPasswordWindow = function() {
+		if(!resetPasswordWindow) {
+			resetPasswordWindow = new Ext.Window({
+				resizable: false,
+				layout: 'fit',
+				width: 355,
+				height: 200,
+				constrain: true,
+				constrainHeader: true,
+				minimizable: false,
+				closable: false,
+				plain: false,
+				title: 'Reset password...',
+				modal: true,
+				items: [{
+					id: 'reset-password-form',
+					layout: 'form',
+					url: 'data/users.php',
+					frame: true,
+					monitorValid: true,
+					xtype: 'form',
+					bodyStyle: 'padding: 15px',
+					defaults: {
+						msgTarget: 'side'
+					},
+					baseParams: {
+						mode: 'resetPassword'
+					},
+					buttons: [{
+						text: 'Cancel',
+						handler: hideResetPasswordWindow
+					},{
+						text: 'Reset Password',
+						formBind: true,
+						handler: doResetPassword
+					}],
+					layoutConfig: {
+						labelSeparator: ''
+					},
+					items: [
+						{
+							html: '<label class="x-form-item-label" style="width: 103px">Email Address</label><div style="padding-top: 4px;" id="reset-password-email-address">username@domain</div>',
+							cls: 'x-form-item'
+						},
+						resetPassPassword = new Ext.ux.PasswordMeter({
+							fieldLabel: 'New Password',
+							name: 'password',
+							id: 'reset-password-password',
+							allowBlank: false,
+							width: 175,
+							inputType: 'password',
+							validator: validResetPass,
+							invalidText: 'Password does not meet requirements',
+							minLength: 8
+						}),
+						new Ext.form.TextField({
+							fieldLabel: 'Repeat Password',
+							name: 'reppassword',
+							allowBlank: false,
+							width: 175,
+							inputType: 'password',
+							validator: validResetRepPass,
+							invalidText: 'Passwords do not match'
+						})
+					]
+				}]
+			});
+		}
+		//resetPasswordWindow.show(resetPassBtn.getEl(), function() {
+		//	resetPassPassword.focus();
+		//}, this);
+		resetPasswordWindow.show(resetPassBtn.getEl());
+		new Ext.util.DelayedTask(function() {
+			resetPassPassword.focus();
+		}, this).delay(700);
+		Ext.get('reset-password-email-address').update(userSm.getSelections()[0].get('email'));
+	}
+
 	var showAddUserWindow = function() {
 		if(!addUserWindow) {
 			addUserWindow = new Ext.Window({
@@ -548,7 +638,7 @@ RubixConsulting.user = function() {
 							allowBlank: false,
 							width: 175,
 							inputType: 'password',
-							validator: validNewPass,
+							validator: validAddPass,
 							invalidText: 'Password does not meet requirements',
 							minLength: 8
 						}),
@@ -586,10 +676,27 @@ RubixConsulting.user = function() {
 		Ext.get('add-email-address').update(addUserUsername.getValue()+'@'+addUserDomain.getEl().getValue());
 	}
 
+	var hideResetPasswordWindow = function() {
+		Ext.getCmp('reset-password-form').getForm().reset();
+		Ext.get('reset-password-email-address').update('username@domain');
+		resetPasswordWindow.hide(resetPassBtn.getEl());
+	}
+
 	var hideAddUserWindow = function() {
 		Ext.getCmp('add-user-form').getForm().reset();
 		Ext.get('add-email-address').update('username@domain');
 		addUserWindow.hide(addUserBtn.getEl());
+	}
+
+	var doResetPassword = function() {
+		disablePage('Resetting password...', 'Please wait');
+		Ext.getCmp('reset-password-form').getForm().submit({
+			success: resetPasswordSuccess,
+			failure: formFailure,
+			params: {
+				user: userSm.getSelections()[0].get('email')
+			}
+		});
 	}
 
 	var addNewUser = function() {
@@ -598,6 +705,11 @@ RubixConsulting.user = function() {
 			success: addUserSuccess,
 			failure: formFailure
 		});
+	}
+
+	var resetPasswordSuccess = function(form, action) {
+		hideResetPasswordWindow();
+		showInfo('Password reset', 'Password was reset successfully');
 	}
 
 	var addUserSuccess = function(form, action) {
@@ -611,10 +723,10 @@ RubixConsulting.user = function() {
 			closable: false,
 			buttons: Ext.MessageBox.YESNO,
 			icon: Ext.MessageBox.QUESTION,
-			title: 'Removing Domains',
+			title: 'Remove Domains?',
 			width: 450,
 			msg: '<table><tr><td>Do you really want to remove these domains?</td></tr>'+
-			     '<tr><td>All associated email address, aliases and forwarders will be deleted.</td></tr>'+
+			     '<tr><td>All associated email address, aliases and forwarders will also be deleted.</td></tr>'+
 			     '<tr><td>All other domain changes will be saved as well.</td></tr></table>',
 			fn: function(btn) {
 				if(btn == 'yes') {
@@ -625,15 +737,54 @@ RubixConsulting.user = function() {
 	}
 
 	var removeSelectedUsers = function() {
-		// TODO
+		Ext.MessageBox.show({
+			closable: false,
+			buttons: Ext.MessageBox.YESNO,
+			icon: Ext.MessageBox.QUESTION,
+			title: 'Remove Users?',
+			width: 450,
+			msg: '<table><tr><td>Do you really want to remove these users?</td></tr>'+
+			     '<tr><td>All associated aliases and forwarders will also be deleted.</td></tr>'+
+			     '<tr><td>All other user changes will be saved as well.</td></tr></table>',
+			fn: function(btn) {
+				if(btn == 'yes') {
+					doRemoveSelectedUsers();
+				}
+			}
+		});
 	}
 
 	var resetPassword = function() {
-		// TODO
+		var selected = userSm.getSelections();
+		if(selected.length == 0) {
+			showError('No user selected');
+		} else if(selected.length > 1) {
+			showError('Please select only one user before attempting to reset password');
+		} else if(selected.length == 1) {
+			showResetPasswordWindow();
+		}
+	}
+
+	var doRemoveSelectedUsers = function() {
+		var selected = userSm.getSelections();
+		var removed = 0;
+		for(var i = 0; i < selected.length; i++) {
+			if(user.email == selected[i].get('email')) {
+				showError('Can not delete email:<br />'+user.email+'<br />It will delete your account');
+				continue;
+			}
+			removed++;
+			removedUsers.push(selected[i].get('user_id'));
+			selected[i].commit();
+			userStore.remove(selected[i]);
+		}
+		if(removed > 0) {
+			saveUsers();
+		}
 	}
 
 	var doRemoveSelectedDomains = function() {
-		selected = domainSm.getSelections();
+		var selected = domainSm.getSelections();
 		var removed = 0;
 		for(var i = 0; i < selected.length; i++) {
 			if(user.domain == selected[i].get('domain')) {
@@ -679,7 +830,34 @@ RubixConsulting.user = function() {
 	}
 
 	var saveUsers = function() {
-		// TODO
+		var modifiedUsers = new Array();
+		var modified = userStore.getModifiedRecords();
+		for(var i = 0; i < modified.length; i++) {
+			var tmpUser = new Object();
+			tmpUser.user_id = modified[i].get('user_id');
+			tmpUser.name    = modified[i].get('name');
+			tmpUser.active  = modified[i].get('active');
+			modifiedUsers.push(tmpUser);
+		}
+		userMask = new Ext.LoadMask(userGrid.getEl(), {msg: 'Saving...'});
+		userMask.show();
+		Ext.Ajax.request({
+			url: 'data/users.php',
+			success: completeSaveUsers,
+			failure: ajaxFailure,
+			params: {
+				mode: 'save',
+				update: Ext.util.JSON.encode(modifiedUsers),
+				remove: removedUsers.join(',')
+			}
+		});
+	}
+
+	var completeSaveUsers = function() {
+		userMask.hide();
+		userStore.commitChanges();
+		removedUsers = new Array();
+		revertUsers();
 	}
 
 	var completeSaveDomains = function() {
@@ -713,13 +891,29 @@ RubixConsulting.user = function() {
 		return true;
 	}
 
-	var validNewPass = function(pass) {
+	var validAddPass = function(pass) {
+		// TODO: do some better validation here
+		return true;
+	}
+
+	var validResetPass = function(pass) {
 		// TODO: do some better validation here
 		return true;
 	}
 
 	var validRepPass = function(reppass) {
 		var newpass = Ext.get('newpass');
+		if(newpass) {
+			newval = newpass.getValue();
+			if(newval == reppass) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	var validResetRepPass = function(reppass) {
+		var newpass = Ext.get('reset-password-password');
 		if(newpass) {
 			newval = newpass.getValue();
 			if(newval == reppass) {
@@ -881,14 +1075,18 @@ RubixConsulting.user = function() {
 
 	var changePassword = function() {
 		disablePage('Changing password...', 'Please wait');
-		Ext.getCmp('change-password-form').getForm().submit({
+		Ext.getCmp('change-password-panel').getForm().submit({
 			success: changePasswordSuccess,
 			failure: formFailure
 		});
 	}
 
+	var resetChangePassword = function() {
+		Ext.getCmp('change-password-panel').getForm().reset();
+	}
+
 	var changePasswordSuccess = function(form, action) {
-		Ext.getCmp('change-password-form').getForm().reset();
+		Ext.getCmp('change-password-panel').getForm().reset();
 		showInfo('Password changed', 'Password changed successfully');
 	}
 

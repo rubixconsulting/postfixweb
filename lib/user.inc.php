@@ -180,23 +180,43 @@ function isDomainAdmin($userId = FALSE) {
 	return FALSE;
 }
 
-// TODO add an admin password change
-// function adminChangePassword($userId, $new) {
-
-function changePassword($old, $new, $rep) {
-	$user = $_SESSION['user'];
-	$userId = $user['user_id'];
-	$testauth = authenticateUser($user['email'], $old);
-	if(!$testauth) {
-		print json_encode(array('success' => false, 'errors' => array('oldpass' => 'Incorrect password')))."\n";
+function resetPassword($user, $new, $rep) {
+	$foundError = FALSE;
+	$errors = array();
+	if(!$user) {
+		$foundError = TRUE;
+		$errors['user'] = 'This field is required';
+	}
+	if(!$new) {
+		$foundError = TRUE;
+		$errors['password'] = 'This field is required';
+	}
+	if(!$rep) {
+		$foundError = TRUE;
+		$errors['reppassword'] = 'This field is required';
+	}
+	if($foundError) {
+		print json_encode(array('success' => false, 'errors' => $errors));
+		return;
+	}
+	if(!userExists($user)) {
+		print json_encode(array('success' => false, 'errors' => array('user' => 'Invalid user')));
+		return;
+	}
+	$userId = getUserId($user);
+	$userObj = loadUser($userId);
+	$adminDomains = getAdminDomains();
+	$domain = $userObj['domain'];
+	if(!in_array($domain, $adminDomains)) {
+		print json_encode(array('success' => false, 'errors' => array('user' => 'Permission denied for domain: '.$domain)));
 		return;
 	}
 	if($new != $rep) {
-		print json_encode(array('success' => false, 'errors' => array('repnewpass' => 'Passwords do not match')))."\n";
+		print json_encode(array('success' => false, 'errors' => array('reppassword' => 'Passwords do not match')));
 		return;
 	}
 	if(strlen($new) < 8) {
-		print json_encode(array('success' => false, 'errors' => array('newpass' => 'Password must be at least 8 characters long')))."\n";
+		print json_encode(array('success' => false, 'errors' => array('password' => 'Password must be at least 8 characters long')));
 		return;
 	}
 	// TODO add password complexity requirements here
@@ -205,7 +225,50 @@ function changePassword($old, $new, $rep) {
 		print json_encode(array('success' => true));
 		return;
 	}
-	print json_encode(array('success' => false, 'errors' => array('newpass' => 'Unknown Error')))."\n";
+	print json_encode(array('success' => false, 'errors' => array('newpass' => 'Unknown Error')));
+}
+
+function changePassword($old, $new, $rep) {
+	$foundError = FALSE;
+	$errors = array();
+	if(!$old) {
+		$foundError = TRUE;
+		$errors['oldpass'] = 'This field is required';
+	}
+	if(!$new) {
+		$foundError = TRUE;
+		$errors['newpass'] = 'This field is required';
+	}
+	if(!$rep) {
+		$foundError = TRUE;
+		$errors['repnewpass'] = 'This field is required';
+	}
+	if($foundError) {
+		print json_encode(array('success' => false, 'errors' => $errors));
+		return;
+	}
+	$user = $_SESSION['user'];
+	$userId = $user['user_id'];
+	$testauth = authenticateUser($user['email'], $old);
+	if(!$testauth) {
+		print json_encode(array('success' => false, 'errors' => array('oldpass' => 'Incorrect password')));
+		return;
+	}
+	if($new != $rep) {
+		print json_encode(array('success' => false, 'errors' => array('repnewpass' => 'Passwords do not match')));
+		return;
+	}
+	if(strlen($new) < 8) {
+		print json_encode(array('success' => false, 'errors' => array('newpass' => 'Password must be at least 8 characters long')));
+		return;
+	}
+	// TODO add password complexity requirements here
+	$rs = db_do('UPDATE virtual_users SET password = CRYPT(?, GEN_SALT(\'bf\', 8)) WHERE user_id = ?', array($new, $userId));
+	if($rs) {
+		print json_encode(array('success' => true));
+		return;
+	}
+	print json_encode(array('success' => false, 'errors' => array('newpass' => 'Unknown Error')));
 }
 
 function addUser($newUser) {
@@ -293,7 +356,7 @@ function addUser($newUser) {
 	);
 	$rs = db_do($sql, $params);
 	if(!$rs) {
-		print json_encode(array('success' => false, 'errors' => array('username' => 'Unknown Error')))."\n";
+		print json_encode(array('success' => false, 'errors' => array('username' => 'Unknown Error')));
 		return;
 	}
 	$userId = getUserId($email);
@@ -301,5 +364,48 @@ function addUser($newUser) {
 		print json_encode(array('success' => true));
 		return;
 	}
-	print json_encode(array('success' => false, 'errors' => array('username' => 'Unknown Error')))."\n";
+	print json_encode(array('success' => false, 'errors' => array('username' => 'Unknown Error')));
+}
+
+function removeUser($userId) {
+	if(!$userId) {
+		return FALSE;
+	}
+	$userObj = loadUser($userId);
+	$adminDomains = getAdminDomains();
+	$domain = $userObj['domain'];
+	if(!in_array($domain, $adminDomains)) {
+		return FALSE;
+	}
+	$condition = array(
+		'user_id' => $userId
+	);
+	return db_delete('virtual_users', $condition);
+}
+
+function modifyUser($userId, $description, $active) {
+	if(!$active) {
+		$active = 'f';
+	} else {
+		$active = 't';
+	}
+	if(!$userId || !$description || !$active) {
+		print "invalid args\n";
+		return FALSE;
+	}
+	$userObj = loadUser($userId);
+	$adminDomains = getAdminDomains();
+	$domain = $userObj['domain'];
+	if(!in_array($domain, $adminDomains)) {
+		print "permission denied\n";
+		return FALSE;
+	}
+	$updates = array(
+		'description' => $description,
+		'active' => $active
+	);
+	$conditions = array(
+		'user_id' => $userId
+	);
+	return db_update('virtual_users', $updates, $conditions);
 }
