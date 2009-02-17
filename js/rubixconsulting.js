@@ -715,7 +715,7 @@ RubixConsulting.user = function() {
 	var addUserSuccess = function(form, action) {
 		hideAddUserWindow();
 		revertUsers();
-		showInfo('User added', 'User added successfully');
+		enablePage();
 	}
 
 	var removeSelectedDomains = function() {

@@ -204,6 +204,10 @@ function resetPassword($user, $new, $rep) {
 		return;
 	}
 	$userId = getUserId($user);
+	if(!isSiteAdmin() && isSiteAdmin($userId)) {
+		print json_encode(array('success' => false, 'errors' => array('user' => 'User is a site administrator')));
+		return;
+	}
 	$userObj = loadUser($userId);
 	$adminDomains = getAdminDomains();
 	$domain = $userObj['domain'];
@@ -371,7 +375,13 @@ function removeUser($userId) {
 	if(!$userId) {
 		return FALSE;
 	}
+	if(!isSiteAdmin() && isSiteAdmin($userId)) {
+		return FALSE;
+	}
 	$userObj = loadUser($userId);
+	if(!$userObj) {
+		return FALSE;
+	}
 	$adminDomains = getAdminDomains();
 	$domain = $userObj['domain'];
 	if(!in_array($domain, $adminDomains)) {
@@ -392,7 +402,13 @@ function modifyUser($userId, $description, $active) {
 	if(!$userId || !$description || !$active) {
 		return FALSE;
 	}
+	if(!isSiteAdmin() && isSiteAdmin($userId)) {
+		return FALSE;
+	}
 	$userObj = loadUser($userId);
+	if(!$userObj) {
+		return FALSE;
+	}
 	$adminDomains = getAdminDomains();
 	$domain = $userObj['domain'];
 	if(!in_array($domain, $adminDomains)) {
