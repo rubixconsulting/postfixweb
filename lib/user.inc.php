@@ -390,14 +390,12 @@ function modifyUser($userId, $description, $active) {
 		$active = 't';
 	}
 	if(!$userId || !$description || !$active) {
-		print "invalid args\n";
 		return FALSE;
 	}
 	$userObj = loadUser($userId);
 	$adminDomains = getAdminDomains();
 	$domain = $userObj['domain'];
 	if(!in_array($domain, $adminDomains)) {
-		print "permission denied\n";
 		return FALSE;
 	}
 	$updates = array(
