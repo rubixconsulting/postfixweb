@@ -102,6 +102,7 @@ RubixConsulting.user = function() {
 	var ajaxFailure = function(response, options) {
 		if(options && options.url == 'data/userInfo.php') {
 			showLogin();
+			enablePage();
 		} else {
 			var msg = 'Unknown Error';
 			if(response && response.statusText) {
@@ -141,14 +142,7 @@ RubixConsulting.user = function() {
 					region: 'center',
 					layout: 'card',
 					margins: '5 0 0 0',
-//					autoScroll: true,
 					id: 'center-panel',
-//					defaults: {
-//						bodyStyle: 'padding:15px'
-//					},
-					//bbar: new Ext.StatusBar({
-					//	id: 'statusbar'
-					//}),
 					items: [
 						infoPanel = new Ext.Panel({
 							id: 'user-info-panel',
@@ -158,7 +152,7 @@ RubixConsulting.user = function() {
 							},
 								bodyStyle: 'padding:15px',
 							layoutConfig: {
-								columns: 2
+								columns: 4
 							},
 							autoScroll: true,
 							border: false,
@@ -167,7 +161,7 @@ RubixConsulting.user = function() {
 									html: '<div style="text-align: center;"><img src="/images/rubix_consulting_medium.png" /></div>',
 									cellCls: 'alignTop',
 									border: false,
-									colspan: 2
+									colspan: 4
 								},{
 									html: '<b>Name</b>',
 									cellCls: 'alignTop',
@@ -193,205 +187,182 @@ RubixConsulting.user = function() {
 									html: user.longrole,
 									cellCls: 'alignTop',
 									border: false
+								},{
+									html: '<b>Forwards</b>',
+									cellCls: 'alignTop',
+									border: false
+								},{
+									cellCls: 'alignTop',
+									id: 'forwards',
+									border: false
+								},{
+									html: '<b>Aliases</b>',
+									cellCls: 'alignTop',
+									border: false
+								},{
+									cellCls: 'alignTop',
+									id: 'aliases',
+									border: false
 								}
 							]
 						}),
-//						new Ext.Panel({
-//							frame: false,
-//							id: 'change-password-panel',
-//							layout: 'anchor',
-//							autoScroll: true,
-//							items: [
-								new Ext.form.FormPanel({
-//									title: 'Change Your Password',
-									url: 'data/changePass.php',
-									monitorValid: true,
-									autoScroll: true,
-//									autoHeight: true,
-									labelWidth: 125,
-									width: 318,
-									id: 'change-password-panel',
-									layoutConfig: {
-										labelSeparator: ''
-									},
-									defaultType: 'textfield',
-									bodyStyle: 'padding:15px',
-									defaults: {
-										width: 150,
-										msgTarget: 'side'
-									},
-									items: [{
-										fieldLabel: 'Old Password',
-										name: 'oldpass',
-										id: 'oldpass',
-										allowBlank: false,
-										inputType: 'password'
-									}, new Ext.ux.PasswordMeter({
-										fieldLabel: 'New Password',
-										name: 'newpass',
-										id: 'newpass',
-										allowBlank: false,
-										inputType: 'password',
-										validator: validPass,
-										invalidText: 'Password does not meet requirements',
-										minLength: 8
-									}),{
-										fieldLabel: 'Repeat New Password',
-										name: 'repnewpass',
-										id: 'repnewpass',
-										allowBlank: false,
-										inputType: 'password',
-										validator: validRepPass,
-										invalidText: 'Passwords do not match'
-									}],
-									buttons: [
-										{
-											text: 'Reset Form',
-											handler: resetChangePassword
-										},{
-											text: 'Change Password',
-											formBind: true,
-											handler: changePassword
-										}
-									]
+						new Ext.form.FormPanel({
+							url: 'data/changePass.php',
+							monitorValid: true,
+							autoScroll: true,
+							labelWidth: 125,
+							width: 318,
+							id: 'change-password-panel',
+							layoutConfig: {
+								labelSeparator: ''
+							},
+							defaultType: 'textfield',
+							bodyStyle: 'padding:15px',
+							defaults: {
+								width: 150,
+								msgTarget: 'side'
+							},
+							items: [{
+								fieldLabel: 'Old Password',
+								name: 'oldpass',
+								id: 'oldpass',
+								allowBlank: false,
+								inputType: 'password'
+							}, new Ext.ux.PasswordMeter({
+								fieldLabel: 'New Password',
+								name: 'newpass',
+								id: 'newpass',
+								allowBlank: false,
+								inputType: 'password',
+								validator: validPass,
+								invalidText: 'Password does not meet requirements',
+								minLength: 8
+							}),{
+								fieldLabel: 'Repeat New Password',
+								name: 'repnewpass',
+								id: 'repnewpass',
+								allowBlank: false,
+								inputType: 'password',
+								validator: validRepPass,
+								invalidText: 'Passwords do not match'
+							}],
+							buttons: [
+								{
+									text: 'Reset Form',
+									handler: resetChangePassword
+								},{
+									text: 'Change Password',
+									formBind: true,
+									handler: changePassword
+								}
+							]
+						}),
+						domainGrid = new Ext.grid.EditorGridPanel({
+							border: true,
+							id: 'manage-domains-panel',
+							autoScroll: true,
+							loadMask: true,
+							autoExpandColumn: 'domain',
+							clicksToEdit: 1,
+							tbar: [
+								new Ext.Toolbar.Button({
+									text: 'Add New',
+									handler: addDomain
 								}),
-//							]
-//						}),
-//						new Ext.Panel({
-//							id: 'manage-domains-panel',
-//							layout: 'anchor',
-//							autoScroll: true,
-//							items: [
-								domainGrid = new Ext.grid.EditorGridPanel({
-//									width: 450,
-//									title: 'Email Domains',
-									border: true,
-									id: 'manage-domains-panel',
-									autoScroll: true,
-//									autoHeight: true,
-									loadMask: true,
-									autoExpandColumn: 'domain',
-									clicksToEdit: 1,
-//									style: 'padding-bottom:15px',
-									tbar: [
-										new Ext.Toolbar.Button({
-											text: 'Add New',
-											handler: addDomain
-										}),
-										removeDomainBtn = new Ext.Toolbar.Button({
-											text: 'Remove Selected',
-											handler: removeSelectedDomains,
-											disabled: true
-										}),
-										revertDomainBtn = new Ext.Toolbar.Button({
-											text: 'Revert Changes',
-											handler: revertDomains,
-											disabled: true
-										}),
-										saveDomainBtn = new Ext.Toolbar.Button({
-											text: 'Save Changes',
-											handler: saveDomains,
-											disabled: true
-										})
-									],
-									store: domainStore,
-									sm: domainSm,
-									cm: new Ext.grid.ColumnModel([
-										domainSm, {
-											header: 'Domain',
-											sortable: true,
-											dataIndex: 'domain',
-											id: 'domain',
-											editor: new Ext.form.TextField({
-												allowBlank: false
-											})
-										}
-									]),
-									iconCls: 'icon-grid'
+								removeDomainBtn = new Ext.Toolbar.Button({
+									text: 'Remove Selected',
+									handler: removeSelectedDomains,
+									disabled: true
 								}),
-//								{
-//									html: '<small><b>Note:</b> you will not be able to select, edit or delete your own domain, '+user.domain+'</small>',
-//									border: false
-//								}
-//							]
-//						}),
-//						new Ext.Panel({
-//							id: 'manage-users-panel',
-//							layout: 'anchor',
-//							autoScroll: true,
-//							items: [
-								userGrid = new Ext.grid.EditorGridPanel({
-									width: 570,
-//									title: 'Email Users',
-									border: true,
-									id: 'manage-users-panel',
-//									autoHeight: true,
-									autoScroll: true,
-									loadMask: true,
-									autoExpandColumn: 'email',
-									clicksToEdit: 1,
-//									style: 'padding-bottom:15px',
-									tbar: [
-										addUserBtn = new Ext.Toolbar.Button({
-											text: 'Add New',
-											handler: showAddUserWindow
-										}),
-										resetPassBtn = new Ext.Toolbar.Button({
-											text: 'Reset Password',
-											handler: resetPassword,
-											disabled: true
-										}),
-										removeUserBtn = new Ext.Toolbar.Button({
-											text: 'Remove Selected',
-											handler: removeSelectedUsers,
-											disabled: true
-										}),
-										revertUserBtn = new Ext.Toolbar.Button({
-											text: 'Revert Changes',
-											handler: revertUsers,
-											disabled: true
-										}),
-										saveUserBtn = new Ext.Toolbar.Button({
-											text: 'Save Changes',
-											handler: saveUsers,
-											disabled: true
-										})
-									],
-									store: userStore,
-									sm: userSm,
-									cm: new Ext.grid.ColumnModel([
-										userSm, {
-											header: 'Email',
-											sortable: true,
-											dataIndex: 'email',
-											id: 'email',
-											editor: false
-										},{
-											header: 'Name',
-											sortable: true,
-											dataIndex: 'name',
-											id: 'name',
-											editor: new Ext.form.TextField({
-												allowBlank: false
-											})
-										},{
-											header: 'Active',
-											sortable: true,
-											dataIndex: 'active',
-											id: 'active',
-											width: 50,
-											editor: boolEditor(),
-											renderer: boolRenderer
-										}
-									]),
-									iconCls: 'icon-grid'
+								revertDomainBtn = new Ext.Toolbar.Button({
+									text: 'Revert Changes',
+									handler: revertDomains,
+									disabled: true
 								}),
-//								{
-//									html: '<small><b>Note:</b> you will not be able to select, edit or delete your own user, '+user.email+'</small>',
-//									border: false
-//								}
-//							]
-//						})
+								saveDomainBtn = new Ext.Toolbar.Button({
+									text: 'Save Changes',
+									handler: saveDomains,
+									disabled: true
+								})
+							],
+							store: domainStore,
+							sm: domainSm,
+							cm: new Ext.grid.ColumnModel([
+								domainSm, {
+									header: 'Domain',
+									sortable: true,
+									dataIndex: 'domain',
+									id: 'domain',
+									editor: new Ext.form.TextField({
+										allowBlank: false
+									})
+								}
+							]),
+							iconCls: 'icon-grid'
+						}),
+						userGrid = new Ext.grid.EditorGridPanel({
+							width: 570,
+							border: true,
+							id: 'manage-users-panel',
+							autoScroll: true,
+							loadMask: true,
+							autoExpandColumn: 'email',
+							clicksToEdit: 1,
+							tbar: [
+								addUserBtn = new Ext.Toolbar.Button({
+									text: 'Add New',
+									handler: showAddUserWindow
+								}),
+								resetPassBtn = new Ext.Toolbar.Button({
+									text: 'Reset Password',
+									handler: resetPassword,
+									disabled: true
+								}),
+								removeUserBtn = new Ext.Toolbar.Button({
+									text: 'Remove Selected',
+									handler: removeSelectedUsers,
+									disabled: true
+								}),
+								revertUserBtn = new Ext.Toolbar.Button({
+									text: 'Revert Changes',
+									handler: revertUsers,
+									disabled: true
+								}),
+								saveUserBtn = new Ext.Toolbar.Button({
+									text: 'Save Changes',
+									handler: saveUsers,
+									disabled: true
+								})
+							],
+							store: userStore,
+							sm: userSm,
+							cm: new Ext.grid.ColumnModel([
+								userSm, {
+									header: 'Email',
+									sortable: true,
+									dataIndex: 'email',
+									id: 'email',
+									editor: false
+								},{
+									header: 'Name',
+									sortable: true,
+									dataIndex: 'name',
+									id: 'name',
+									editor: new Ext.form.TextField({
+										allowBlank: false
+									})
+								},{
+									header: 'Active',
+									sortable: true,
+									dataIndex: 'active',
+									id: 'active',
+									width: 50,
+									editor: boolEditor(),
+									renderer: boolRenderer
+								}
+							]),
+							iconCls: 'icon-grid'
+						})
 					]
 				})
 			]
@@ -403,12 +374,13 @@ RubixConsulting.user = function() {
 				border: false
 			});
 			infoPanel.add({
-				html: user.admin_domains.join('<br />'),
+				id: 'you-administer',
 				cellCls: 'alignTop',
 				border: false
 			});
 		}
 		infoPanel.doLayout();
+		updateUserInfoPage();
 		west.on('load', function(treeloader, node) {
 			new Ext.util.DelayedTask(function() {
 				west.getNodeById('user-info').select();
@@ -468,6 +440,7 @@ RubixConsulting.user = function() {
 			}
 			return true;
 		}, this);
+		enablePage();
 	}
 
 	var loadException = function(item, options, response, error) {
@@ -865,6 +838,7 @@ RubixConsulting.user = function() {
 		domainStore.commitChanges();
 		removedDomains = new Array();
 		revertDomains();
+		getUserInfo();
 	}
 
 	var revertDomains = function() {
@@ -980,15 +954,43 @@ RubixConsulting.user = function() {
 		var data = Ext.util.JSON.decode(response.responseText);
 		if(!data.success) {
 			showLogin();
-			return;
+			enablePage();
 		} else {
 			user = data.user;
 			if(loginWindow) {
 				loginWindow.hide();
 				Ext.getCmp('loginForm').getForm().reset()
-				enablePage();
 			}
-			showPortal();
+			if(!viewport) {
+				showPortal();
+			} else {
+				updateUserInfoPage();
+			}
+		}
+	}
+
+	var updateUserInfoPage = function() {
+		if(user.domain_admin) {
+			var youAdminDiv = Ext.get('you-administer');
+			if(youAdminDiv) {
+				youAdminDiv.update(user.admin_domains.join('<br />'));
+			}
+		}
+		var forwards = 'None';
+		if(user.forwards.length > 0) {
+			forwards = user.forwards.join('<br />');
+		}
+		var aliases = 'None';
+		if(user.aliases.length > 0) {
+			aliases = user.aliases.join('<br />');
+		}
+		forwardsDiv = Ext.get('forwards');
+		if(forwardsDiv) {
+			forwardsDiv.update(forwards);
+		}
+		aliasesDiv = Ext.get('aliases');
+		if(aliasesDiv) {
+			aliasesDiv.update(aliases);
 		}
 	}
 
@@ -1148,6 +1150,7 @@ RubixConsulting.user = function() {
 
 	var completeLogout = function() {
 		viewport.destroy();
+		viewport = null;
 		user = null;
 		// TODO clear all necessary variables here
 		domainStore.removeAll();

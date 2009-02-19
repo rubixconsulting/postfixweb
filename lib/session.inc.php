@@ -5,24 +5,28 @@ session_set_cookie_params(0, '/mailuser/', 'rubixconsulting.com', TRUE, TRUE);
 session_start();
 
 function requireLogin() {
-	if(!isLoggedIn()) {
+	$userId = isLoggedIn();
+	if(!$userId) {
 		header('HTTP/1.1 403 Forbidden: Not logged in');
 		exit;
 	}
+	return $userId;
 }
 
 function requireSiteAdmin() {
-	requireLogin();
+	$userId = requireLogin();
 	if(!isSiteAdmin()) {
 		header('HTTP/1.1 403 Forbidden: Not a site administrator');
 		exit;
 	}
+	return $userId;
 }
 
 function requireDomainAdmin() {
-	requireLogin();
+	$userId = requireLogin();
 	if(!isDomainAdmin()) {
 		header('HTTP/1.1 403 Forbidden: Not a domain administrator');
 		exit;
 	}
+	return $userId;
 }

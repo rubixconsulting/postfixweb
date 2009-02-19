@@ -17,19 +17,15 @@ $tree = array(
 		'leaf' => TRUE
 	),
 	array(
-		'text' => 'Aliases',
-		'id'   => 'aliases',
+		'text' => 'Forwards',
+		'id'   => 'forwards',
 		'leaf' => TRUE
-	),
-	array(
-		'text' => 'Forwarders',
-		'id'   => 'forwarders',
-		'leaf' => TRUE
-	),
-	array(
-		'text' => 'Auto Replies',
-		'id'   => 'auto-replies',
-		'leaf' => TRUE
+#	),
+## TODO investigate how to do auto replies
+#	array(
+#		'text' => 'Auto Replies',
+#		'id'   => 'auto-replies',
+#		'leaf' => TRUE
 	)
 );
 
@@ -52,6 +48,11 @@ if(isDomainAdmin()) {
 		'id'   => 'manage-users',
 		'leaf' => TRUE
 	);
+	$tree[] = array(
+		'text' => 'Manage User Forwards',
+		'id'   => 'manage-forwards',
+		'leaf' => TRUE
+	);
 }
 
 if(isSiteAdmin()) {
@@ -66,6 +67,14 @@ if(isDomainAdmin()) {
 	$tree[] = array(
 		'text' => 'Manage Aliases',
 		'id'   => 'manage-aliases',
+		'leaf' => TRUE
+	);
+}
+
+if(isSiteAdmin()) {
+	$tree[] = array(
+		'text' => 'Manage Local Aliases',
+		'id'   => 'manage-local-aliases',
 		'leaf' => TRUE
 	);
 }

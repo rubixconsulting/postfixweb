@@ -79,7 +79,7 @@ function getAdminUsers($userId = FALSE) {
 		'  FROM virtual_users'.
 		'  JOIN virtual_domains USING(domain_id)'.
 		'  WHERE role_id != ?'.
-		'  AND domain in ('.
+		'  AND domain IN ('.
 			'\''.join('\', \'', getAdminDomains($userId)).'\''.
 		'  )'.
 		' ORDER BY domain, username';
@@ -133,6 +133,8 @@ function loadUser($userId) {
 	if(!$userObj) {
 		return FALSE;
 	}
+	$userObj['aliases'] = getUserAliases($userObj['email']);
+	$userObj['forwards'] = getUserForwards($userObj['email']);
 	$userObj['domain_admin'] = FALSE;
 	$adminDomains = getAdminDomains($userId);
 	if(is_array($adminDomains) && (count($adminDomains) > 0)) {
@@ -142,13 +144,43 @@ function loadUser($userId) {
 	return $userObj;
 }
 
+function getUserAliases($email) {
+	if(!$email) {
+		return FALSE;
+	}
+	$sql = 'SELECT'.
+		'  (username || \'@\' || domain) AS email'.
+		'  FROM virtual_aliases'.
+		'  JOIN virtual_domains USING(domain_id)'.
+		'  WHERE destination = ?'.
+		'    AND active = \'t\''.
+		'    AND (username || \'@\' || domain) != ?'.
+		'  ORDER BY domain, username';
+	return db_getcol($sql, array($email, $email));
+}
+
+function getUserForwards($email) {
+	if(!$email) {
+		return FALSE;
+	}
+	$sql = 'SELECT'.
+		'  destination'.
+		'  FROM virtual_aliases'.
+		'  JOIN virtual_domains USING(domain_id)'.
+		'  WHERE active = \'t\''.
+		'    AND (username || \'@\' || domain) = ?'.
+		'    AND destination != ?';
+		'  ORDER BY destination';
+	return db_getcol($sql, array($email, $email));
+}
+
 function isLoggedIn() {
 	if(!$_SESSION['user']) {
 		return FALSE;
 	}
 	$user = $_SESSION['user'];
 	if($user['user_id'] && $user['role_id'] && ($user['role_id'] > 1)) {
-		return TRUE;
+		return $user['user_id'];
 	}
 	return FALSE;
 }
@@ -275,6 +307,27 @@ function changePassword($old, $new, $rep) {
 	print json_encode(array('success' => false, 'errors' => array('newpass' => 'Unknown Error')));
 }
 
+function validUserName($username) {
+	$usernameLen = strlen($username);
+	if(($usernameLen < 1) || ($usernameLen > 64)) {
+		## too short or too long
+		return FALSE;
+	} else if(preg_match('/[\\.\\/|]/', substr($username, 0, 1))) {
+		## begins with '.', '/' or '|'
+		return FALSE;
+	} else if(preg_match('/[\\.]/', substr($username, -1))) {
+		## ends with '.'
+		return FALSE;
+	} else if(preg_match('/\\.\\./', $username)) {
+		## has '..'
+		return FALSE;
+	} else if(!preg_match('/^(\\\\.|[A-Za-z0-9!#%&`_=\\/$\'*+?^{}|~.-])+$/', str_replace("\\\\", "", $username))) {
+		## has invalid chars
+		return FALSE;
+	}
+	return TRUE;
+}
+
 function addUser($newUser) {
 	$username = $newUser['username'];
 	$domainId = $newUser['domainId'];
@@ -306,6 +359,10 @@ function addUser($newUser) {
 	}
 	if($foundError) {
 		print json_encode(array('success' => false, 'errors' => $errors));
+		return;
+	}
+	if(!validUserName($username)) {
+		print json_encode(array('success' => false, 'errors' => array('username' => 'Invalid username')));
 		return;
 	}
 	$domain = getDomain($domainId);
