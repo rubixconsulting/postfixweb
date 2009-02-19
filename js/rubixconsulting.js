@@ -4,16 +4,15 @@ RubixConsulting.user = function() {
 	// private variables
 	var loginWindow, user, viewport, west, center, infoPanel;
 	var domainGrid, domainMask, addUserWindow, resetPasswordWindow;
-	var removeDomainBtn, saveDomainBtn, revertDomainBtn;
+	var removeDomainBtn;
 	var addUserBtn, removeUserBtn, saveUserBtn, revertUserBtn, resetPassBtn;
-	var addUserUsername, addUserDomain;
-	var resetPassPassword, userMask;
+	var addUserUsername, addUserDomain, addDomainBtn, addDomainDomain;
+	var resetPassPassword, userMask, addDomainWindow;
 
 	var domainSm       = new Ext.grid.CheckboxSelectionModel();
 	var userSm         = new Ext.grid.CheckboxSelectionModel();
 	var domainsLoaded  = false;
 	var usersLoaded    = false;
-	var removedDomains = new Array();
 	var removedUsers   = new Array();
 
 	var domainRecord = Ext.data.Record.create([
@@ -257,7 +256,7 @@ RubixConsulting.user = function() {
 								}
 							]
 						}),
-						domainGrid = new Ext.grid.EditorGridPanel({
+						domainGrid = new Ext.grid.GridPanel({
 							border: true,
 							id: 'manage-domains-panel',
 							autoScroll: true,
@@ -265,23 +264,13 @@ RubixConsulting.user = function() {
 							autoExpandColumn: 'domain',
 							clicksToEdit: 1,
 							tbar: [
-								new Ext.Toolbar.Button({
+								addDomainBtn = new Ext.Toolbar.Button({
 									text: 'Add New',
 									handler: addDomain
 								}),
 								removeDomainBtn = new Ext.Toolbar.Button({
 									text: 'Remove Selected',
 									handler: removeSelectedDomains,
-									disabled: true
-								}),
-								revertDomainBtn = new Ext.Toolbar.Button({
-									text: 'Revert Changes',
-									handler: revertDomains,
-									disabled: true
-								}),
-								saveDomainBtn = new Ext.Toolbar.Button({
-									text: 'Save Changes',
-									handler: saveDomains,
 									disabled: true
 								})
 							],
@@ -387,10 +376,6 @@ RubixConsulting.user = function() {
 			}, this).delay(0);
 		}, this);
 		west.getSelectionModel().on('selectionchange', clickTree, this);
-		domainStore.on('update', function(store, record, operation) {
-			saveDomainBtn.enable();
-			revertDomainBtn.enable();
-		}, this);
 		userStore.on('update', function(store, record, operation) {
 			saveUserBtn.enable();
 			revertUserBtn.enable();
@@ -452,12 +437,67 @@ RubixConsulting.user = function() {
 	}
 
 	var addDomain = function() {
-		domainGrid.stopEditing();
-		domainStore.insert(0, new domainRecord({
-			domain_id: 0,
-			domain: ''
-		}));
-		domainGrid.startEditing(0, 1);
+		if(!addDomainWindow) {
+			addDomainWindow = new Ext.Window({
+				resizable: false,
+				layout: 'fit',
+				width: 355,
+				height: 120,
+				constrain: true,
+				constrainHeader: true,
+				minimizable: false,
+				closable: false,
+				plain: false,
+				title: 'Add a new domain...',
+				modal: true,
+				items: [{
+					id: 'add-domain-form',
+					layout: 'form',
+					url: 'data/domains.php',
+					frame: true,
+					monitorValid: true,
+					xtype: 'form',
+					bodyStyle: 'padding: 15px',
+					defaults: {
+						msgTarget: 'side'
+					},
+					baseParams: {
+						mode: 'add'
+					},
+					buttons: [{
+						text: 'Cancel',
+						handler: hideAddDomainWindow
+					},{
+						text: 'Add Domain',
+						formBind: true,
+						handler: doAddDomain
+					}],
+					layoutConfig: {
+						labelSeparator: ''
+					},
+					items: [
+						addDomainDomain = new Ext.form.TextField({
+							fieldLabel: 'Domain Name',
+							name: 'domain',
+							allowBlank: false,
+							width: 175
+						})
+					]
+				}]
+			});
+		}
+		addDomainWindow.show(addDomainBtn.getEl());
+		new Ext.util.DelayedTask(function() {
+			addDomainDomain.focus();
+		}, this).delay(700);
+	}
+
+	var doAddDomain = function(domain) {
+		disablePage('Adding new domain...', 'Please wait');
+		Ext.getCmp('add-domain-form').getForm().submit({
+			success: addDomainSuccess,
+			failure: formFailure
+		});
 	}
 
 	var showResetPasswordWindow = function() {
@@ -528,9 +568,6 @@ RubixConsulting.user = function() {
 				}]
 			});
 		}
-		//resetPasswordWindow.show(resetPassBtn.getEl(), function() {
-		//	resetPassPassword.focus();
-		//}, this);
 		resetPasswordWindow.show(resetPassBtn.getEl());
 		new Ext.util.DelayedTask(function() {
 			resetPassPassword.focus();
@@ -636,9 +673,6 @@ RubixConsulting.user = function() {
 			addUserUsername.on('change', updateAddUserEmail, this);
 			addUserDomain.on('change', updateAddUserEmail, this);
 		}
-		//addUserWindow.show(addUserBtn.getEl(), function() {
-		//	addUserUsername.focus();
-		//}, this);
 		addUserWindow.show(addUserBtn.getEl());
 		new Ext.util.DelayedTask(function() {
 			addUserUsername.focus();
@@ -647,6 +681,11 @@ RubixConsulting.user = function() {
 
 	var updateAddUserEmail = function(field, newval, oldval) {
 		Ext.get('add-email-address').update(addUserUsername.getValue()+'@'+addUserDomain.getEl().getValue());
+	}
+
+	var hideAddDomainWindow = function() {
+		Ext.getCmp('add-domain-form').getForm().reset();
+		addDomainWindow.hide(addDomainBtn.getEl());
 	}
 
 	var hideResetPasswordWindow = function() {
@@ -678,6 +717,17 @@ RubixConsulting.user = function() {
 			success: addUserSuccess,
 			failure: formFailure
 		});
+	}
+
+	var removeDomainsSuccess = function(form, action) {
+		loadDomains();
+		getUserInfo();
+	}
+
+	var addDomainSuccess = function(form, action) {
+		hideAddDomainWindow();
+		loadDomains();
+		getUserInfo();
 	}
 
 	var resetPasswordSuccess = function(form, action) {
@@ -758,46 +808,21 @@ RubixConsulting.user = function() {
 
 	var doRemoveSelectedDomains = function() {
 		var selected = domainSm.getSelections();
-		var removed = 0;
+		var removeDomains = new Array();
 		for(var i = 0; i < selected.length; i++) {
-			if(user.domain == selected[i].get('domain')) {
-				showError('Can not delete domain:<br />'+user.domain+'<br />It will delete your account');
-				continue;
-			}
-			removed++;
-			if(selected[i].get('domain_id') != 0) {
-				removedDomains.push(selected[i].get('domain_id'));
-			}
-			selected[i].commit();
-			domainStore.remove(selected[i]);
+			removeDomains.push(selected[i].get('domain_id'));
 		}
-		if(removed > 0) {
-			saveDomains();
+		if(removeDomains.length == 0) {
+			return;
 		}
-	}
-
-	var saveDomains = function() {
-		var addedDomains = new Array();
-		var modifiedDomains = new Array();
-		var modified = domainStore.getModifiedRecords();
-		for(var i = 0; i < modified.length; i++) {
-			if(modified[i].get('domain_id') == 0) {
-				addedDomains.push(modified[i].getChanges().domain);
-			} else {
-				modifiedDomains.push(modified[i].get('domain_id') + ':' + modified[i].getChanges().domain);
-			}
-		}
-		domainMask = new Ext.LoadMask(domainGrid.getEl(), {msg: 'Saving...'});
-		domainMask.show();
+		disablePage('Removing...', 'Please wait');
 		Ext.Ajax.request({
 			url: 'data/domains.php',
-			success: completeSaveDomains,
+			success: removeDomainsSuccess,
 			failure: ajaxFailure,
 			params: {
-				mode: 'save',
-				add: addedDomains.join(','),
-				update: modifiedDomains.join(','),
-				remove: removedDomains.join(',')
+				mode: 'remove',
+				domains: removeDomains.join(',')
 			}
 		});
 	}
@@ -831,20 +856,6 @@ RubixConsulting.user = function() {
 		userStore.commitChanges();
 		removedUsers = new Array();
 		revertUsers();
-	}
-
-	var completeSaveDomains = function() {
-		domainMask.hide();
-		domainStore.commitChanges();
-		removedDomains = new Array();
-		revertDomains();
-		getUserInfo();
-	}
-
-	var revertDomains = function() {
-		saveDomainBtn.disable();
-		revertDomainBtn.disable();
-		loadDomains();
 	}
 
 	var revertUsers = function() {
@@ -927,6 +938,7 @@ RubixConsulting.user = function() {
 			},
 			callback: function(r, options, success) {
 				if(success) {
+					enablePage();
 					domainsLoaded = true;
 				}
 			},
@@ -1058,9 +1070,6 @@ RubixConsulting.user = function() {
 				}]
 			}]
 		});
-		//loginWindow.show(null, function() {
-		//	Ext.getCmp('loginUser').focus();
-		//}, this);
 		loginWindow.show();
 		new Ext.util.DelayedTask(function() {
 			Ext.getCmp('loginUser').focus();

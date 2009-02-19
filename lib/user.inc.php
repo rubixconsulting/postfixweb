@@ -435,6 +435,10 @@ function removeUser($userId) {
 	if(!isSiteAdmin() && isSiteAdmin($userId)) {
 		return FALSE;
 	}
+	$user = $_SESSION['user'];
+	if($userId == $user['user_id']) {
+		return FALSE;
+	}
 	$userObj = loadUser($userId);
 	if(!$userObj) {
 		return FALSE;

@@ -4,8 +4,26 @@ include_once('db.inc.php');
 include_once('roles.inc.php');
 
 function addDomain($domain) {
-	if(!isSiteAdmin() || !$domain || !validDomain($domain)) {
-		return FALSE;
+	if(!isSiteAdmin()) {
+		print json_encode(array('success' => FALSE, 'errors' => array('domain' => 'Permission denied')));
+		return;
+	}
+	if(!$domain) {
+		print json_encode(array('success' => FALSE, 'errors' => array('domain' => 'This field is required')));
+		return;
+	}
+	if(!validDomain($domain)) {
+		print json_encode(array('success' => FALSE, 'errors' => array('domain' => 'Invalid domain')));
+		return;
+	}
+	if(domainExists($domain)) {
+		print json_encode(array('success' => FALSE, 'errors' => array('domain' => 'Domain already exists')));
+		return;
+	}
+	$user = $_SESSION['user'];
+	if($domain == $user['domain']) {
+		print json_encode(array('success' => FALSE, 'errors' => array('domain' => 'Can not delete your own domain')));
+		return;
 	}
 	beginTransaction();
 	$add = array(
@@ -14,15 +32,25 @@ function addDomain($domain) {
 	$domain_id = db_insert('virtual_domains', $add, 'domain_id');
 	if(!$domain_id) {
 		cancelTransaction();
-		return FALSE;
+		print json_encode(array('success' => FALSE, 'errors' => array('domain' => 'Unknown error')));
+		return;
 	}
 	$catchall_id = addCatchAll($domain);
 	if(!$catchall_id) {
 		cancelTransaction();
-		return FALSE;
+		print json_encode(array('success' => FALSE, 'errors' => array('domain' => 'Unknown error')));
+		return;
 	}
 	endTransaction();
-	return $domain_id;
+	print json_encode(array('success' => true));
+}
+
+function domainExists($domain) {
+	$domainId = getDomainId($domain);
+	if($domainId) {
+		return TRUE;
+	}
+	return FALSE;
 }
 
 function addCatchAll($domain, $active = FALSE) {

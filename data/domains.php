@@ -40,29 +40,15 @@ if($query && !$mode && ($query != 'all')) {
 		'domains' => $rows
 	);
 	print json_encode($domains);
-} else if($mode == 'save') {
+} else if($mode == 'add') {
 	requireSiteAdmin();
-	$add    = $_POST['add'];
-	$update = $_POST['update'];
-	$remove = $_POST['remove'];
-	if($add) {
-		$domains = split(',', $add);
-		foreach($domains as $domain) {
-			$domain_id = addDomain($domain);
-		}
-	}
-	if($update) {
-		$domains = split(',', $update);
-		foreach($domains as $domain) {
-			$values = split(':', $domain);
-			updateDomain($values[0], $values[1]);
-		}
-	}
-	if($remove) {
-		$domainIds = split(',', $remove);
-		foreach($domainIds as $domainId) {
-			removeDomain($domainId);
-		}
+	addDomain($_POST['domain']);
+} else if($mode == 'remove') {
+	requireSiteAdmin();
+	$remove = $_POST['domains'];
+	$domainIds = split(',', $remove);
+	foreach($domainIds as $domainId) {
+		removeDomain($domainId);
 	}
 	print json_encode(array('success' => TRUE));
 }
