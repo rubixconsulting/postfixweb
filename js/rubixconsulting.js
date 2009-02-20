@@ -8,12 +8,14 @@ RubixConsulting.user = function() {
 	var addUserBtn, removeUserBtn, saveUserBtn, revertUserBtn, resetPassBtn;
 	var addUserUsername, addUserDomain, addDomainBtn, addDomainDomain;
 	var resetPassPassword, userMask, addDomainWindow;
+	var domainPermCombo, saveDomainPermBtn;
 
-	var domainSm       = new Ext.grid.CheckboxSelectionModel();
-	var userSm         = new Ext.grid.CheckboxSelectionModel();
-	var domainsLoaded  = false;
-	var usersLoaded    = false;
-	var removedUsers   = new Array();
+	var domainSm          = new Ext.grid.CheckboxSelectionModel();
+	var userSm            = new Ext.grid.CheckboxSelectionModel();
+	var domainsLoaded     = false;
+	var usersLoaded       = false;
+	var domainPermsLoaded = false;
+	var removedUsers      = new Array();
 
 	var domainRecord = Ext.data.Record.create([
 		{name: 'domain_id', type: 'int'},
@@ -30,6 +32,18 @@ RubixConsulting.user = function() {
 		{name: 'name',     type: 'string'},
 		{name: 'active',   type: 'boolean'}
 	]);
+
+	var domainPermRecord = Ext.data.Record.create([
+		{name: 'user_id', type: 'int'},
+		{name: 'email',   type: 'string'},
+		{name: 'admin',   type: 'boolean'}
+	]);
+
+	var domainPermStore = new Ext.data.JsonStore({
+		url: 'data/domainPerms.php',
+		root: 'domains',
+		fields: domainPermRecord
+	});
 
 	var domainStore = new Ext.data.JsonStore({
 		url: 'data/domains.php',
@@ -261,7 +275,6 @@ RubixConsulting.user = function() {
 							id: 'manage-domains-panel',
 							autoScroll: true,
 							loadMask: true,
-							autoExpandColumn: 'domain',
 							clicksToEdit: 1,
 							tbar: [
 								addDomainBtn = new Ext.Toolbar.Button({
@@ -282,6 +295,7 @@ RubixConsulting.user = function() {
 									sortable: true,
 									dataIndex: 'domain',
 									id: 'domain',
+									width: 150,
 									editor: new Ext.form.TextField({
 										allowBlank: false
 									})
@@ -290,12 +304,10 @@ RubixConsulting.user = function() {
 							iconCls: 'icon-grid'
 						}),
 						userGrid = new Ext.grid.EditorGridPanel({
-							width: 570,
 							border: true,
 							id: 'manage-users-panel',
 							autoScroll: true,
 							loadMask: true,
-							autoExpandColumn: 'email',
 							clicksToEdit: 1,
 							tbar: [
 								addUserBtn = new Ext.Toolbar.Button({
@@ -330,6 +342,7 @@ RubixConsulting.user = function() {
 									header: 'Email',
 									sortable: true,
 									dataIndex: 'email',
+									width: 200,
 									id: 'email',
 									editor: false
 								},{
@@ -351,7 +364,59 @@ RubixConsulting.user = function() {
 								}
 							]),
 							iconCls: 'icon-grid'
+						}),
+						domainPermGrid = new Ext.grid.EditorGridPanel({
+							border: true,
+							id: 'manage-domain-permissions-panel',
+							autoScroll: true,
+							loadMask: true,
+							clicksToEdit: 1,
+							tbar: [
+								{xtype: 'tbtext', text: 'Domain'},
+								domainPermCombo = new Ext.form.ComboBox({
+									store: domainStore,
+									displayField: 'domain',
+									valueField: 'domain_id',
+									forceSelection: true,
+									typeAhead: true,
+									minChars: 1,
+									editable: true,
+									allowBlank: false,
+									width: 175,
+									hiddenName: 'user_id',
+									triggerAction: 'all',
+									queryParam: 'query',
+									allQuery: 'all',
+									emptyText: 'Choose a domain'
+								}),
+								saveDomainPermBtn = new Ext.Toolbar.Button({
+									text: 'Save Changes',
+									handler: saveDomainPerms,
+									disabled: true
+								})
+							],
+							store: domainPermStore,
+							cm: new Ext.grid.ColumnModel([
+								{
+									header: 'User',
+									sortable: true,
+									dataIndex: 'email',
+									id: 'domain',
+									width: 150,
+									editor: false
+								},{
+									header: 'Administrator',
+									sortable: true,
+									dataIndex: 'admin',
+									id: 'admin',
+									width: 80,
+									editor: boolEditor(),
+									renderer: boolRenderer
+								}
+							]),
+							iconCls: 'icon-grid'
 						})
+
 					]
 				})
 			]
@@ -380,8 +445,12 @@ RubixConsulting.user = function() {
 			saveUserBtn.enable();
 			revertUserBtn.enable();
 		}, this);
+		domainPermStore.on('update', function(store, record, operation) {
+			saveDomainPermBtn.enable();
+		}, this);
 		domainStore.on('loadexception', loadException, this);
 		userStore.on('loadexception', loadException, this);
+		domainPermStore.on('loadexception', loadException, this);
 		domainSm.on('beforerowselect', function(selectionmodel, row, keep, record) {
 			if(record.get('domain') == user.domain) {
 				return false;
@@ -425,6 +494,7 @@ RubixConsulting.user = function() {
 			}
 			return true;
 		}, this);
+		domainPermCombo.on('select', loadDomainPerms, this);
 		enablePage();
 	}
 
@@ -827,6 +897,11 @@ RubixConsulting.user = function() {
 		});
 	}
 
+	var saveDomainPerms = function() {
+		// TODO
+		console.log('save user perms');
+	}
+
 	var saveUsers = function() {
 		var modifiedUsers = new Array();
 		var modified = userStore.getModifiedRecords();
@@ -956,6 +1031,24 @@ RubixConsulting.user = function() {
 			callback: function(r, options, success) {
 				if(success) {
 					usersLoaded = true;
+				}
+			},
+			scope: this
+		});
+	}
+
+	var loadDomainPerms = function() {
+		domainPermStore.removeAll();
+		domainPermsLoaded = false;
+		domainPermStore.load({
+			params: {
+				mode: 'load',
+				domain: domainPermCombo.getValue()
+			},
+			callback: function(r, options, success) {
+				if(success) {
+					domainPermsLoaded = true;
+					saveDomainPermBtn.disable();
 				}
 			},
 			scope: this
@@ -1162,6 +1255,8 @@ RubixConsulting.user = function() {
 		viewport = null;
 		user = null;
 		// TODO clear all necessary variables here
+		domainPermStore.removeAll();
+		domainPermsLoaded = false;
 		domainStore.removeAll();
 		domainsLoaded = false;
 		userStore.removeAll();

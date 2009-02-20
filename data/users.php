@@ -6,9 +6,21 @@ include_once('../lib/domains.inc.php');
 
 requireDomainAdmin();
 
+$query = $_POST['query'];
 $mode = $_POST['mode'];
 
-if($mode == 'load') {
+if($query && !$mode && ($query != 'all')) {
+	$userRows = getAdminUsers($query);
+	if($userRows) {
+		$users = array(
+			'success' => TRUE,
+			'users' => $userRows
+		);
+		print json_encode($users);
+	} else {
+		print json_encode(array('success' => FALSE));
+	}
+} else if(($mode == 'load') || ($query == 'all')) {
 	$userRows = getAdminUsers();
 	if($userRows) {
 		$users = array(

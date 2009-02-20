@@ -57,8 +57,13 @@ if(isDomainAdmin()) {
 
 if(isSiteAdmin()) {
 	$tree[] = array(
-		'text' => 'Manage User Permissions',
-		'id'   => 'manage-user-permissions',
+		'text' => 'Manage Domain Permissions',
+		'id'   => 'manage-domain-permissions',
+		'leaf' => TRUE
+	);
+	$tree[] = array(
+		'text' => 'Manage Site Administrators',
+		'id'   => 'manage-site-administrators',
 		'leaf' => TRUE
 	);
 }

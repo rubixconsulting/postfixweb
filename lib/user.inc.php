@@ -36,6 +36,55 @@ function authenticateUser($email, $pass) {
 	return db_getval($sql, array($email, $pass));
 }
 
+function getAllUsersByRole($role) {
+	if(!$role) {
+		return FALSE;
+	}
+	$sql = 'SELECT'.
+		'  user_id,'.
+		'  (username || \'@\' || domain) AS email'.
+		'  FROM virtual_users'.
+		'  JOIN virtual_domains USING(domain_id)'.
+		'  JOIN roles USING(role_id)'.
+		'  WHERE role = ?'.
+		'  ORDER BY domain, username';
+	return db_getrows($sql, array($role));
+}
+
+function getDomainAdminsById($domainId) {
+	if(!$domainId) {
+		return FALSE;
+	}
+	$sql = 'SELECT'.
+		'  domain_administrators.user_id,'.
+		'  (username || \'@\' || domain) AS email'.
+		'  FROM domain_administrators'.
+		'  JOIN virtual_users   ON domain_administrators.user_id   = virtual_users.user_id'.
+		'  JOIN virtual_domains ON domain_administrators.domain_id = virtual_domains.domain_id'.
+		'  WHERE domain_administrators.domain_id = ?';
+	return db_getrows($sql, array($domainId));
+}
+
+function getDomainPermissions($domainId = FALSE) {
+	if(!$domainId || !isSiteAdmin()) {
+		return FALSE;
+	}
+	$allUsers = getAllUsersByRole('user');
+	$domainAdmins = getDomainAdminsById($domainId);
+	$i = 0;
+	foreach($allUsers as $user) {
+		$userId = $user['user_id'];
+		$allUsers[$i]['admin'] = FALSE;
+		foreach($domainAdmins as $admin) {
+			if($admin['user_id'] == $userId) {
+				$allUsers[$i]['admin'] = TRUE;
+			}
+		}
+		$i++;
+	}
+	return $allUsers;
+}
+
 function getAdminDomains($userId = FALSE) {
 	if(!$userId) {
 		$userId = $_SESSION['user']['user_id'];
@@ -61,7 +110,7 @@ function getAdminDomains($userId = FALSE) {
 	return FALSE;
 }
 
-function getAdminUsers($userId = FALSE) {
+function getAdminUsers($like = FALSE, $userId = FALSE) {
 	if(!$userId) {
 		$userId = $_SESSION['user']['user_id'];
 	}
@@ -81,9 +130,16 @@ function getAdminUsers($userId = FALSE) {
 		'  WHERE role_id != ?'.
 		'  AND domain IN ('.
 			'\''.join('\', \'', getAdminDomains($userId)).'\''.
-		'  )'.
-		' ORDER BY domain, username';
-	$params = array(getRoleId('catchall'));
+		'  )';
+	if($like) {
+		$sql .= '  AND (username || \'@\' || domain) LIKE ?';
+	}
+	$sql .= ' ORDER BY domain, username';
+	if($like) {
+		$params = array(getRoleId('catchall'), '%'.$like.'%');
+	} else {
+		$params = array(getRoleId('catchall'));
+	}
 	$users = db_getrows($sql, $params);
 	$i = 0;
 	foreach($users as $tmpUser) {

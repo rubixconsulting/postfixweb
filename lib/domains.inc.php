@@ -133,3 +133,8 @@ function getDomainId($domain) {
 	$sql = 'SELECT domain_id FROM virtual_domains WHERE domain = ?';
 	return db_getval($sql, array($domain));
 }
+
+function getAllDomains() {
+	$sql = 'SELECT domain_id, domain FROM virtual_domains';
+	return db_getrows($sql);
+}
