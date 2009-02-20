@@ -351,7 +351,7 @@ RubixConsulting.user = function() {
 									dataIndex: 'name',
 									id: 'name',
 									editor: new Ext.form.TextField({
-										allowBlank: false
+										allowBlank: true
 									})
 								},{
 									header: 'Active',
@@ -484,6 +484,12 @@ RubixConsulting.user = function() {
 		}, this);
 		domainGrid.on('beforeedit', function(e) {
 			if(e.record.get('domain') == user.domain) {
+				return false;
+			}
+			return true;
+		}, this);
+		domainPermGrid.on('beforeedit', function(e) {
+			if(e.record.get('email') == user.email) {
 				return false;
 			}
 			return true;

@@ -36,8 +36,8 @@ function authenticateUser($email, $pass) {
 	return db_getval($sql, array($email, $pass));
 }
 
-function getAllUsersByRole($role) {
-	if(!$role) {
+function getAllActiveUsersByRole($role) {
+	if(!$role || !isDomainAdmin()) {
 		return FALSE;
 	}
 	$sql = 'SELECT'.
@@ -47,12 +47,16 @@ function getAllUsersByRole($role) {
 		'  JOIN virtual_domains USING(domain_id)'.
 		'  JOIN roles USING(role_id)'.
 		'  WHERE role = ?'.
+		'    AND active = \'y\''.
+		'    AND domain IN ('.
+			'\''.join('\', \'', getAdminDomains()).'\''.
+		'    )'.
 		'  ORDER BY domain, username';
 	return db_getrows($sql, array($role));
 }
 
 function getDomainAdminsById($domainId) {
-	if(!$domainId) {
+	if(!$domainId || !isDomainAdmin()) {
 		return FALSE;
 	}
 	$sql = 'SELECT'.
@@ -66,10 +70,10 @@ function getDomainAdminsById($domainId) {
 }
 
 function getDomainPermissions($domainId = FALSE) {
-	if(!$domainId || !isSiteAdmin()) {
+	if(!$domainId || !isDomainAdmin()) {
 		return FALSE;
 	}
-	$allUsers = getAllUsersByRole('user');
+	$allUsers = getAllActiveUsersByRole('user');
 	$domainAdmins = getDomainAdminsById($domainId);
 	$i = 0;
 	foreach($allUsers as $user) {
@@ -516,7 +520,7 @@ function modifyUser($userId, $description, $active) {
 	} else {
 		$active = 't';
 	}
-	if(!$userId || !$description || !$active) {
+	if(!$userId || !$active) {
 		return FALSE;
 	}
 	if(!isSiteAdmin() && isSiteAdmin($userId)) {
