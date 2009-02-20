@@ -134,3 +134,19 @@ function cancelTransaction() {
 	db_connect();
 	return $DB->Execute("ROLLBACK");
 }
+
+function db_quote($string) {
+	global $DB;
+	db_connect();
+	return $DB->qstr($string, get_magic_quotes_gpc());
+}
+
+function db_quotearray($array) {
+	global $DB;
+	db_connect();
+	$return = array();
+	foreach($array as $item) {
+		$return[] = $DB->qstr($item, get_magic_quotes_gpc());
+	}
+	return $return;
+}

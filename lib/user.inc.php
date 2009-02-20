@@ -49,7 +49,7 @@ function getAllActiveUsersByRole($role) {
 		'  WHERE role = ?'.
 		'    AND active = \'y\''.
 		'    AND domain IN ('.
-			'\''.join('\', \'', getAdminDomains()).'\''.
+			quotedAdminDomainString().
 		'    )'.
 		'  ORDER BY domain, username';
 	return db_getrows($sql, array($role));
@@ -133,7 +133,7 @@ function getAdminUsers($like = FALSE, $userId = FALSE) {
 		'  JOIN virtual_domains USING(domain_id)'.
 		'  WHERE role_id != ?'.
 		'  AND domain IN ('.
-			'\''.join('\', \'', getAdminDomains($userId)).'\''.
+			quotedAdminDomainString().
 		'  )';
 	if($like) {
 		$sql .= '  AND (username || \'@\' || domain) LIKE ?';
@@ -145,6 +145,9 @@ function getAdminUsers($like = FALSE, $userId = FALSE) {
 		$params = array(getRoleId('catchall'));
 	}
 	$users = db_getrows($sql, $params);
+	if(!$users) {
+		return FALSE;
+	}
 	$i = 0;
 	foreach($users as $tmpUser) {
 		$users[$i]['active'] = FALSE;

@@ -16,7 +16,7 @@ if($query && !$mode && ($query != 'all')) {
 		'  FROM virtual_domains'.
 		'  WHERE domain LIKE ?'.
 		'  AND domain IN ('.
-			'\''.join('\', \'', getAdminDomains()).'\''.
+			quotedAdminDomainString().
 		'  )'.
 		' ORDER BY domain';
 	$rows = db_getrows($sql, array('%'.strtolower($query).'%'));
@@ -31,7 +31,7 @@ if($query && !$mode && ($query != 'all')) {
 		'  domain'.
 		'  FROM virtual_domains'.
 		'  WHERE domain IN ('.
-			'\''.join('\', \'', getAdminDomains()).'\''.
+			quotedAdminDomainString().
 		'  )'.
 		'  ORDER BY domain';
 	$rows = db_getrows($sql);

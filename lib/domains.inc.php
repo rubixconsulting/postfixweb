@@ -138,3 +138,7 @@ function getAllDomains() {
 	$sql = 'SELECT domain_id, domain FROM virtual_domains';
 	return db_getrows($sql);
 }
+
+function quotedAdminDomainString() {
+	return join(',', db_quotearray(getAdminDomains()));
+}
