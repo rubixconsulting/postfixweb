@@ -3,8 +3,8 @@ Ext.namespace('RubixConsulting');
 RubixConsulting.user = function() {
 	// private variables
 	var loginWindow, user, viewport, west, center, infoPanel;
-	var domainGrid, domainMask, addUserWindow, resetPasswordWindow;
-	var removeDomainBtn;
+	var domainGrid, addUserWindow, resetPasswordWindow;
+	var removeDomainBtn, domainPermMask;
 	var addUserBtn, removeUserBtn, saveUserBtn, revertUserBtn, resetPassBtn;
 	var addUserUsername, addUserDomain, addDomainBtn, addDomainDomain;
 	var resetPassPassword, userMask, addDomainWindow;
@@ -381,7 +381,6 @@ RubixConsulting.user = function() {
 									typeAhead: true,
 									minChars: 1,
 									editable: true,
-									allowBlank: false,
 									width: 175,
 									hiddenName: 'user_id',
 									triggerAction: 'all',
@@ -844,6 +843,7 @@ RubixConsulting.user = function() {
 			width: 450,
 			msg: '<table><tr><td>Do you really want to remove these users?</td></tr>'+
 			     '<tr><td>All associated aliases and forwarders will also be deleted.</td></tr>'+
+			     '<tr><td>All stored email will also be deleted.</td></tr>'+
 			     '<tr><td>All other user changes will be saved as well.</td></tr></table>',
 			fn: function(btn) {
 				if(btn == 'yes') {
@@ -904,8 +904,26 @@ RubixConsulting.user = function() {
 	}
 
 	var saveDomainPerms = function() {
-		// TODO
-		console.log('save user perms');
+		var modifiedDomains = new Array();
+		var modified = domainPermStore.getModifiedRecords();
+		for(var i = 0; i < modified.length; i++) {
+			var tmpDomain = new Object();
+			tmpDomain.user_id   = modified[i].get('user_id');
+			tmpDomain.admin     = modified[i].get('admin');
+			modifiedDomains.push(tmpDomain);
+		}
+		domainPermMask = new Ext.LoadMask(domainPermGrid.getEl(), {msg: 'Saving...'});
+		domainPermMask.show();
+		Ext.Ajax.request({
+			url: 'data/domainPerms.php',
+			success: completeSaveDomainPerms,
+			failure: ajaxFailure,
+			params: {
+				mode: 'save',
+				update: Ext.util.JSON.encode(modifiedDomains),
+				domain: domainPermCombo.getValue()
+			}
+		});
 	}
 
 	var saveUsers = function() {
@@ -930,6 +948,12 @@ RubixConsulting.user = function() {
 				remove: removedUsers.join(',')
 			}
 		});
+	}
+
+	var completeSaveDomainPerms = function() {
+		domainPermMask.hide();
+		domainPermStore.commitChanges();
+		saveDomainPermBtn.disable();
 	}
 
 	var completeSaveUsers = function() {

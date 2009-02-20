@@ -12,6 +12,27 @@ function getUserId($email) {
 	return db_getval($sql, array($email));
 }
 
+function getUserEmail($userId) {
+	$sql = 'SELECT '.
+		'  (username || \'@\' || domain) AS email'.
+		'  FROM virtual_users'.
+		'  JOIN virtual_domains USING(domain_id)'.
+		'  WHERE user_id = ?';
+	return db_getval($sql, array($userId));
+}
+
+function userIsActive($userId) {
+	$sql = 'SELECT'.
+		'  active'.
+		'  FROM virtual_users'.
+		'  WHERE user_id = ?';
+	$active = db_getval($sql, array($userId));
+	if($active == 't') {
+		return TRUE;
+	}
+	return FALSE;
+}
+
 function getUserRole($userId) {
 	$sql = 'SELECT '.
 		'  role'.
@@ -252,6 +273,9 @@ function isSiteAdmin($userId = FALSE) {
 	if(!$userId) {
 		$userId = $_SESSION['user']['user_id'];
 	}
+	if(!userIsActive($userId)) {
+		return FALSE;
+	}
 	if(getUserRole($userId) == 'admin') {
 		return TRUE;
 	}
@@ -261,6 +285,9 @@ function isSiteAdmin($userId = FALSE) {
 function isDomainAdmin($userId = FALSE) {
 	if(!$userId) {
 		$userId = $_SESSION['user']['user_id'];
+	}
+	if(!userIsActive($userId)) {
+		return FALSE;
 	}
 	if(isSiteAdmin($userId)) {
 		return TRUE;
@@ -514,6 +541,7 @@ function removeUser($userId) {
 	$condition = array(
 		'user_id' => $userId
 	);
+	## TODO remove the virtual home directory
 	return db_delete('virtual_users', $condition);
 }
 
@@ -546,4 +574,37 @@ function modifyUser($userId, $description, $active) {
 		'user_id' => $userId
 	);
 	return db_update('virtual_users', $updates, $conditions);
+}
+
+function modifyDomainPerm($domainId, $userId, $admin) {
+	if(!$domainId || !$userId) {
+		return FALSE;
+	}
+	if(!isDomainAdmin()) {
+		return FALSE;
+	}
+	if(!userIsActive($userId)) {
+		return FALSE;
+	}
+	$user = getUserEmail($userId);
+	if(!$user) {
+		return FALSE;
+	}
+	$domain = getDomain($domainId);
+	if(!$domain) {
+		return FALSE;
+	}
+	$adminDomains = getAdminDomains();
+	if(!in_array($domain, $adminDomains)) {
+		return FALSE;
+	}
+	$params = array(
+		'user_id' => $userId,
+		'domain_id' => $domainId
+	);
+	if($admin) {
+		return db_insert('domain_administrators', $params, 'admin_id');
+	} else {
+		return db_delete('domain_administrators', $params);
+	}
 }
