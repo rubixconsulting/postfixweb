@@ -1140,10 +1140,10 @@ RubixConsulting.user = function() {
 					xtype: 'fieldset',
 					autoHeight: true,
 					title: 'User Information',
-					labelWidth: 125,
+					labelWidth: 70,
 					defaultType: 'textfield',
 					defaults: {
-						width: 150,
+						width: 205,
 						msgTarget: 'side'
 					},
 					layoutConfig: {
