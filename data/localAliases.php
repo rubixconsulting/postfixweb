@@ -57,8 +57,8 @@ if($mode == 'load') {
 			continue;
 		}
 		$aliasParts = split(':', $line);
-		$name        = trim($aliasParts[0]);
-		$destination = trim($aliasParts[1]);
+		$name        = trim(array_shift($aliasParts));
+		$destination = join(':', $aliasParts);
 		addLocalAlias($name, $destination, TRUE, TRUE);
 	}
 	print json_encode(array('success' => TRUE));
