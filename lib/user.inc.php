@@ -110,6 +110,40 @@ function getDomainPermissions($domainId = FALSE) {
 	return $allUsers;
 }
 
+function getSiteAdminUsers() {
+	if(!isSiteAdmin()) {
+		return FALSE;
+	}
+	$userRoleId  = getRoleId('user');
+	$adminRoleId = getRoleId('admin');
+	$roleIdArray = array(
+		$userRoleId,
+		$adminRoleId
+	);
+	$sql = 'SELECT'.
+		'  user_id,'.
+		'  (username || \'@\' || domain) AS email,'.
+		'  role_id'.
+		'  FROM virtual_users'.
+		'  JOIN virtual_domains USING(domain_id)'.
+		'  WHERE role_id IN ('.
+			join(',', db_quotearray($roleIdArray)).
+		'  )'.
+		'  AND active = \'t\''.
+		'  ORDER BY email';
+	$userRows = db_getrows($sql);
+	$i = 0;
+	foreach($userRows as $row) {
+		if($row['role_id'] == $adminRoleId) {
+			$userRows[$i]['site_admin'] = TRUE;
+		} else {
+			$userRows[$i]['site_admin'] = FALSE;
+		}
+		$i++;
+	}
+	return $userRows;
+}
+
 function getAdminDomains($userId = FALSE) {
 	if(!$userId) {
 		$userId = $_SESSION['user']['user_id'];
@@ -576,11 +610,46 @@ function modifyUser($userId, $description, $active) {
 	return db_update('virtual_users', $updates, $conditions);
 }
 
+function modifySiteAdminUser($userId, $siteAdmin) {
+	if(!isSiteAdmin()) {
+		return FALSE;
+	}
+	if($userId == $_SESSION['user']['user_id']) {
+		return FALSE;
+	}
+	$userObj = loadUser($userId);
+	if(!$userObj) {
+		return FALSE;
+	}
+	if(!userIsActive($userId)) {
+		return FALSE;
+	}
+	$userRoleId  = getRoleId('user');
+	$adminRoleId = getRoleId('admin');
+	if(($userObj['role_id'] != $userRoleId) && ($userObj['role_id'] != $adminRoleId)) {
+		return FALSE;
+	}
+	$newRoleId = $userRoleId;
+	if($siteAdmin) {
+		$newRoleId = $adminRoleId;
+	}
+	$updates = array(
+		'role_id' => $newRoleId
+	);
+	$conditions = array(
+		'user_id' => $userId
+	);
+	return db_update('virtual_users', $updates, $conditions);
+}
+
 function modifyDomainPerm($domainId, $userId, $admin) {
 	if(!$domainId || !$userId) {
 		return FALSE;
 	}
 	if(!isDomainAdmin()) {
+		return FALSE;
+	}
+	if($userId == $_SESSION['user']['user_id']) {
 		return FALSE;
 	}
 	if(!userIsActive($userId)) {

@@ -1,5 +1,7 @@
 <?php
 
+include_once('user.inc.php');
+
 ini_set('session.name', 'RubixConsultingMailUser');
 session_set_cookie_params(0, '/mailuser/', 'rubixconsulting.com', TRUE, TRUE);
 session_start();

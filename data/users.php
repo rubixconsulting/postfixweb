@@ -53,7 +53,7 @@ if($query && !$mode && ($query != 'all')) {
 		$updates = json_decode($update);
 		foreach($updates as $tmpUser) {
 			$userId = $tmpUser->user_id;
-			$description = $tmpUser->name;
+			$description = trim($tmpUser->name);
 			$active = $tmpUser->active;
 			modifyUser($userId, $description, $active);
 		}

@@ -4,18 +4,29 @@ RubixConsulting.user = function() {
 	// private variables
 	var loginWindow, user, viewport, west, center, infoPanel;
 	var domainGrid, addUserWindow, resetPasswordWindow;
-	var removeDomainBtn, domainPermMask;
+	var removeDomainBtn, domainPermMask, userGrid, siteAdminGrid;
 	var addUserBtn, removeUserBtn, saveUserBtn, revertUserBtn, resetPassBtn;
 	var addUserUsername, addUserDomain, addDomainBtn, addDomainDomain;
-	var resetPassPassword, userMask, addDomainWindow;
-	var domainPermCombo, saveDomainPermBtn;
+	var resetPassPassword, userMask, addDomainWindow, saveSiteAdminBtn;
+	var domainPermCombo, saveDomainPermBtn, domainPermGrid;
+	var localAliasGrid, addLocalAliasBtn, removeLocalAliasBtn;
+	var revertLocalAliasesBtn, saveLocalAliasesBtn, addLocalAliasWindow;
+	var addLocalAliasName, addLocalAliasDestination, bulkAddLocalAliasBtn;
+	var bulkAddLocalAliasWindow, localAliasMask;
 
-	var domainSm          = new Ext.grid.CheckboxSelectionModel();
-	var userSm            = new Ext.grid.CheckboxSelectionModel();
-	var domainsLoaded     = false;
-	var usersLoaded       = false;
-	var domainPermsLoaded = false;
-	var removedUsers      = new Array();
+	var domainSm     = new Ext.grid.CheckboxSelectionModel();
+	var userSm       = new Ext.grid.CheckboxSelectionModel();
+	var siteAdminSm  = new Ext.grid.CheckboxSelectionModel();
+	var localAliasSm = new Ext.grid.CheckboxSelectionModel();
+
+	var domainsLoaded      = false;
+	var usersLoaded        = false;
+	var domainPermsLoaded  = false;
+	var siteAdminLoaded    = false;
+	var localAliasesLoaded = false;
+
+	var removedUsers        = new Array();
+	var removedLocalAliases = new Array();
 
 	var domainRecord = Ext.data.Record.create([
 		{name: 'domain_id', type: 'int'},
@@ -39,16 +50,29 @@ RubixConsulting.user = function() {
 		{name: 'admin',   type: 'boolean'}
 	]);
 
+	var siteAdminRecord = Ext.data.Record.create([
+		{name: 'user_id',    type: 'int'},
+		{name: 'email',      type: 'string'},
+		{name: 'site_admin', type: 'boolean'}
+	]);
+
+	var localAliasRecord = Ext.data.Record.create([
+		{name: 'alias_id',    type: 'int'},
+		{name: 'name',        type: 'string'},
+		{name: 'destination', type: 'string'},
+		{name: 'active',      type: 'boolean'}
+	]);
+
+	var siteAdminStore = new Ext.data.JsonStore({
+		url: 'data/siteAdmins.php',
+		root: 'admins',
+		fields: siteAdminRecord
+	});
+
 	var domainPermStore = new Ext.data.JsonStore({
 		url: 'data/domainPerms.php',
 		root: 'domains',
 		fields: domainPermRecord
-	});
-
-	var domainStore = new Ext.data.JsonStore({
-		url: 'data/domains.php',
-		root: 'domains',
-		fields: domainRecord
 	});
 
 	var domainListStore = new Ext.data.JsonStore({
@@ -61,6 +85,12 @@ RubixConsulting.user = function() {
 		url: 'data/users.php',
 		root: 'users',
 		fields: userRecord
+	});
+
+	var localAliasStore = new Ext.data.JsonStore({
+		url: 'data/localAliases.php',
+		root: 'aliases',
+		fields: localAliasRecord
 	});
 
 	// private functions
@@ -135,14 +165,16 @@ RubixConsulting.user = function() {
 					region: 'west',
 					rootVisible: false,
 					split: true,
-					width: 185,
+					width: 200,
 					minSize: 75,
 					maxSize: 300,
 					collapsible: true,
 					id: 'west-panel',
 					lines: false,
 					buttonAlign: 'center',
-					root: new Ext.tree.AsyncTreeNode({}),
+					root: new Ext.tree.AsyncTreeNode({
+						id: 'tools-root'
+					}),
 					loader: new Ext.tree.TreeLoader({
 						url: 'data/tree.php'
 					}),
@@ -287,7 +319,7 @@ RubixConsulting.user = function() {
 									disabled: true
 								})
 							],
-							store: domainStore,
+							store: domainListStore,
 							sm: domainSm,
 							cm: new Ext.grid.ColumnModel([
 								domainSm, {
@@ -374,7 +406,7 @@ RubixConsulting.user = function() {
 							tbar: [
 								{xtype: 'tbtext', text: 'Domain'},
 								domainPermCombo = new Ext.form.ComboBox({
-									store: domainStore,
+									store: domainListStore,
 									displayField: 'domain',
 									valueField: 'domain_id',
 									forceSelection: true,
@@ -397,10 +429,10 @@ RubixConsulting.user = function() {
 							store: domainPermStore,
 							cm: new Ext.grid.ColumnModel([
 								{
-									header: 'User',
+									header: 'Email',
 									sortable: true,
 									dataIndex: 'email',
-									id: 'domain',
+									id: 'email',
 									width: 150,
 									editor: false
 								},{
@@ -414,8 +446,106 @@ RubixConsulting.user = function() {
 								}
 							]),
 							iconCls: 'icon-grid'
+						}),
+						siteAdminGrid = new Ext.grid.EditorGridPanel({
+							border: true,
+							id: 'manage-site-administrators-panel',
+							autoScroll: true,
+							loadMask: true,
+							clicksToEdit: 1,
+							tbar: [
+								saveSiteAdminBtn = new Ext.Toolbar.Button({
+									text: 'Save Changes',
+									handler: saveSiteAdmins,
+									disabled: true
+								})
+							],
+							store: siteAdminStore,
+							sm: siteAdminSm,
+							cm: new Ext.grid.ColumnModel([
+								siteAdminSm, {
+									header: 'Email',
+									sortable: true,
+									dataIndex: 'email',
+									width: 200,
+									id: 'email',
+									editor: false
+								},{
+									header: 'Site Administrator',
+									sortable: true,
+									dataIndex: 'site_admin',
+									id: 'site_admin',
+									width: 100,
+									editor: boolEditor(),
+									renderer: boolRenderer
+								}
+							]),
+							iconCls: 'icon-grid'
+						}),
+						localAliasGrid = new Ext.grid.EditorGridPanel({
+							border: true,
+							id: 'manage-local-aliases-panel',
+							autoScroll: true,
+							loadMask: true,
+							clicksToEdit: 1,
+							tbar: [
+								addLocalAliasBtn = new Ext.Toolbar.Button({
+									text: 'Add New',
+									handler: showAddLocalAliasWindow
+								}),
+								bulkAddLocalAliasBtn = new Ext.Toolbar.Button({
+									text: 'Bulk Add',
+									handler: showBulkAddLocalAliasWindow
+								}),
+								removeLocalAliasBtn = new Ext.Toolbar.Button({
+									text: 'Remove Selected',
+									handler: removeSelectedLocalAliases,
+									disabled: true
+								}),
+								revertLocalAliasesBtn = new Ext.Toolbar.Button({
+									text: 'Revert Changes',
+									handler: revertLocalAliases,
+									disabled: true
+								}),
+								saveLocalAliasesBtn = new Ext.Toolbar.Button({
+									text: 'Save Changes',
+									handler: saveLocalAliases,
+									disabled: true
+								})
+							],
+							store: localAliasStore,
+							sm: localAliasSm,
+							cm: new Ext.grid.ColumnModel([
+								localAliasSm, {
+									header: 'Name',
+									sortable: true,
+									dataIndex: 'name',
+									width: 150,
+									id: 'name',
+									editor: new Ext.form.TextField({
+										allowBlank: true
+									})
+								},{
+									header: 'Destination',
+									sortable: true,
+									dataIndex: 'destination',
+									width: 400,
+									id: 'destination',
+									editor: new Ext.form.TextField({
+										allowBlank: true
+									})
+								},{
+									header: 'Active',
+									sortable: true,
+									dataIndex: 'active',
+									id: 'active',
+									width: 50,
+									editor: boolEditor(),
+									renderer: boolRenderer
+								}
+							]),
+							iconCls: 'icon-grid'
 						})
-
 					]
 				})
 			]
@@ -434,12 +564,19 @@ RubixConsulting.user = function() {
 		}
 		infoPanel.doLayout();
 		updateUserInfoPage();
-		west.on('load', function(treeloader, node) {
+		west.on('load', function(node) {
+			if(node.id != 'tools-root') {
+				return;
+			}
 			new Ext.util.DelayedTask(function() {
 				west.getNodeById('user-info').select();
 			}, this).delay(0);
 		}, this);
 		west.getSelectionModel().on('selectionchange', clickTree, this);
+		localAliasStore.on('update', function(store, record, operation) {
+			saveLocalAliasesBtn.enable();
+			revertLocalAliasesBtn.enable();
+		}, this);
 		userStore.on('update', function(store, record, operation) {
 			saveUserBtn.enable();
 			revertUserBtn.enable();
@@ -447,9 +584,20 @@ RubixConsulting.user = function() {
 		domainPermStore.on('update', function(store, record, operation) {
 			saveDomainPermBtn.enable();
 		}, this);
-		domainStore.on('loadexception', loadException, this);
-		userStore.on('loadexception', loadException, this);
+		siteAdminStore.on('update', function(store, record, operation) {
+			saveSiteAdminBtn.enable();
+		}, this);
+		domainListStore.on('loadexception', loadException, this);
+		userStore.on(      'loadexception', loadException, this);
 		domainPermStore.on('loadexception', loadException, this);
+		siteAdminStore.on( 'loadexception', loadException, this);
+		localAliasStore.on('loadexception', loadException, this);
+		siteAdminSm.on('beforerowselect', function(selectionmodel, row, keep, record) {
+			if(record.get('email') == user.email) {
+				return false;
+			}
+			return true;
+		}, this);
 		domainSm.on('beforerowselect', function(selectionmodel, row, keep, record) {
 			if(record.get('domain') == user.domain) {
 				return false;
@@ -461,6 +609,13 @@ RubixConsulting.user = function() {
 				return false;
 			}
 			return true;
+		}, this);
+		localAliasSm.on('selectionchange', function(selectionmodel) {
+			if(localAliasSm.getCount() > 0) {
+				removeLocalAliasBtn.enable();
+			} else {
+				removeLocalAliasBtn.disable();
+			}
 		}, this);
 		domainSm.on('selectionchange', function(selectionmodel) {
 			if(domainSm.getCount() > 0) {
@@ -494,6 +649,12 @@ RubixConsulting.user = function() {
 			return true;
 		}, this);
 		userGrid.on('beforeedit', function(e) {
+			if(e.record.get('email') == user.email) {
+				return false;
+			}
+			return true;
+		}, this);
+		siteAdminGrid.on('beforeedit', function(e) {
 			if(e.record.get('email') == user.email) {
 				return false;
 			}
@@ -650,6 +811,130 @@ RubixConsulting.user = function() {
 		Ext.get('reset-password-email-address').update(userSm.getSelections()[0].get('email'));
 	}
 
+	var showBulkAddLocalAliasWindow = function() {
+		if(!bulkAddLocalAliasWindow) {
+			bulkAddLocalAliasWindow = new Ext.Window({
+				resizable: false,
+				layout: 'fit',
+				width: 620,
+				height: 300,
+				constrain: true,
+				constrainHeader: true,
+				minimizable: false,
+				closable: false,
+				plain: false,
+				title: 'Bulk add new local aliases...',
+				modal: true,
+				items: [{
+					id: 'bulk-add-local-alias-form',
+					layout: 'form',
+					url: 'data/localAliases.php',
+					frame: true,
+					monitorValid: true,
+					xtype: 'form',
+					bodyStyle: 'padding: 15px',
+					defaults: {
+						msgTarget: 'side'
+					},
+					baseParams: {
+						mode: 'bulk-add'
+					},
+					buttons: [{
+						text: 'Cancel',
+						handler: hideBulkAddLocalAliasWindow
+					},{
+						text: 'Add',
+						formBind: true,
+						handler: bulkAddLocalAlias
+					}],
+					layoutConfig: {
+						labelSeparator: ''
+					},
+					items: [
+						{
+							html: '<label class="x-form-item-label" style="width: 103px">Instructions</label><div style="padding-top: 4px;" id="add-email-address">Use standard /etc/aliases format.<br />All bulk added local aliases will be active by default.</div>',
+							cls: 'x-form-item'
+						},
+						bulkAddLocalAliasArea = new Ext.form.TextArea({
+							fieldLabel: 'Local Aliases',
+							allowBlank: false,
+							width: 450,
+							height: 150,
+							name: 'local-aliases'
+						})
+					]
+				}]
+			});
+		}
+		bulkAddLocalAliasWindow.show(bulkAddLocalAliasBtn.getEl());
+		new Ext.util.DelayedTask(function() {
+			bulkAddLocalAliasArea.focus();
+		}, this).delay(700);
+	}
+
+	var showAddLocalAliasWindow = function() {
+		if(!addLocalAliasWindow) {
+			addLocalAliasWindow = new Ext.Window({
+				resizable: false,
+				layout: 'fit',
+				width: 355,
+				height: 170,
+				constrain: true,
+				constrainHeader: true,
+				minimizable: false,
+				closable: false,
+				plain: false,
+				title: 'Add a new local alias...',
+				modal: true,
+				items: [{
+					id: 'add-local-alias-form',
+					layout: 'form',
+					url: 'data/localAliases.php',
+					frame: true,
+					monitorValid: true,
+					xtype: 'form',
+					bodyStyle: 'padding: 15px',
+					defaults: {
+						msgTarget: 'side'
+					},
+					baseParams: {
+						mode: 'add'
+					},
+					buttons: [{
+						text: 'Cancel',
+						handler: hideAddLocalAliasWindow
+					},{
+						text: 'Add',
+						formBind: true,
+						handler: addLocalAlias
+					}],
+					layoutConfig: {
+						labelSeparator: ''
+					},
+					items: [
+						addLocalAliasName = new Ext.form.TextField({
+							fieldLabel: 'Name',
+							allowBlank: false,
+							width: 175,
+							name: 'name'
+						}),
+						addLocalAliasDestination = new Ext.form.TextField({
+							fieldLabel: 'Destination',
+							allowBlank: false,
+							width: 175,
+							name: 'destination'
+						}),
+						boolEditor('Active', 'active', 175)
+					]
+				}]
+			});
+		}
+		addLocalAliasWindow.show(addLocalAliasBtn.getEl());
+		new Ext.util.DelayedTask(function() {
+			addLocalAliasName.focus();
+		}, this).delay(700);
+	}
+
 	var showAddUserWindow = function() {
 		if(!addUserWindow) {
 			addUserWindow = new Ext.Window({
@@ -758,6 +1043,20 @@ RubixConsulting.user = function() {
 		Ext.get('add-email-address').update(addUserUsername.getValue()+'@'+addUserDomain.getEl().getValue());
 	}
 
+	var hideBulkAddLocalAliasWindow = function() {
+		if(bulkAddLocalAliasWindow) {
+			Ext.getCmp('bulk-add-local-alias-form').getForm().reset();
+			bulkAddLocalAliasWindow.hide(addLocalAliasBtn.getEl());
+		}
+	}
+
+	var hideAddLocalAliasWindow = function() {
+		if(addLocalAliasWindow) {
+			Ext.getCmp('add-local-alias-form').getForm().reset();
+			addLocalAliasWindow.hide(addLocalAliasBtn.getEl());
+		}
+	}
+
 	var hideAddDomainWindow = function() {
 		Ext.getCmp('add-domain-form').getForm().reset();
 		addDomainWindow.hide(addDomainBtn.getEl());
@@ -786,6 +1085,22 @@ RubixConsulting.user = function() {
 		});
 	}
 
+	var bulkAddLocalAlias = function() {
+		disablePage('Bulk adding local aliases...', 'Please wait');
+		Ext.getCmp('bulk-add-local-alias-form').getForm().submit({
+			success: addLocalAliasSuccess,
+			failure: formFailure
+		});
+	}
+
+	var addLocalAlias = function() {
+		disablePage('Adding local alias...', 'Please wait');
+		Ext.getCmp('add-local-alias-form').getForm().submit({
+			success: addLocalAliasSuccess,
+			failure: formFailure
+		});
+	}
+
 	var addNewUser = function() {
 		disablePage('Adding user...', 'Please wait');
 		Ext.getCmp('add-user-form').getForm().submit({
@@ -810,6 +1125,13 @@ RubixConsulting.user = function() {
 		showInfo('Password reset', 'Password was reset successfully');
 	}
 
+	var addLocalAliasSuccess = function(form, action) {
+		hideAddLocalAliasWindow();
+		hideBulkAddLocalAliasWindow();
+		revertLocalAliases();
+		enablePage();
+	}
+
 	var addUserSuccess = function(form, action) {
 		hideAddUserWindow();
 		revertUsers();
@@ -829,6 +1151,22 @@ RubixConsulting.user = function() {
 			fn: function(btn) {
 				if(btn == 'yes') {
 					doRemoveSelectedDomains();
+				}
+			}
+		});
+	}
+
+	var removeSelectedLocalAliases = function() {
+		Ext.MessageBox.show({
+			closable: false,
+			buttons: Ext.MessageBox.YESNO,
+			icon: Ext.MessageBox.QUESTION,
+			title: 'Remove Local Aliases?',
+			width: 450,
+			msg: '<table><tr><td>Do you really want to remove these local aliases?</td></tr></table>',
+			fn: function(btn) {
+				if(btn == 'yes') {
+					doRemoveSelectedLocalAliases();
 				}
 			}
 		});
@@ -862,6 +1200,16 @@ RubixConsulting.user = function() {
 		} else if(selected.length == 1) {
 			showResetPasswordWindow();
 		}
+	}
+
+	var doRemoveSelectedLocalAliases = function() {
+		var selected = localAliasSm.getSelections();
+		for(var i = 0; i < selected.length; i++) {
+			removedLocalAliases.push(selected[i].get('alias_id'));
+			selected[i].commit();
+			localAliasStore.remove(selected[i]);
+		}
+		saveLocalAliases();
 	}
 
 	var doRemoveSelectedUsers = function() {
@@ -926,6 +1274,53 @@ RubixConsulting.user = function() {
 		});
 	}
 
+	var saveSiteAdmins = function() {
+		var modifiedUsers = new Array();
+		var modified = siteAdminStore.getModifiedRecords();
+		for(var i = 0; i < modified.length; i++) {
+			var tmpUser = new Object();
+			tmpUser.user_id = modified[i].get('user_id');
+			tmpUser.site_admin = modified[i].get('site_admin');
+			modifiedUsers.push(tmpUser);
+		}
+		siteAdminMask = new Ext.LoadMask(siteAdminGrid.getEl(), {msg: 'Saving...'});
+		siteAdminMask.show();
+		Ext.Ajax.request({
+			url: 'data/siteAdmins.php',
+			success: completeSaveSiteAdmins,
+			failure: ajaxFailure,
+			params: {
+				mode: 'save',
+				update: Ext.util.JSON.encode(modifiedUsers)
+			}
+		});
+	}
+
+	var saveLocalAliases = function() {
+		var modifiedLocalAliases = new Array();
+		var modified = localAliasStore.getModifiedRecords();
+		for(var i = 0; i < modified.length; i++) {
+			var tmpLocalAlias = new Object();
+			tmpLocalAlias.alias_id    = modified[i].get('alias_id');
+			tmpLocalAlias.name        = modified[i].get('name');
+			tmpLocalAlias.destination = modified[i].get('destination');
+			tmpLocalAlias.active      = modified[i].get('active');
+			modifiedLocalAliases.push(tmpLocalAlias);
+		}
+		localAliasMask = new Ext.LoadMask(localAliasGrid.getEl(), {msg: 'Saving...'});
+		localAliasMask.show();
+		Ext.Ajax.request({
+			url: 'data/localAliases.php',
+			success: completeSaveLocalAliases,
+			failure: ajaxFailure,
+			params: {
+				mode: 'save',
+				update: Ext.util.JSON.encode(modifiedLocalAliases),
+				remove: removedLocalAliases.join(',')
+			}
+		});
+	}
+
 	var saveUsers = function() {
 		var modifiedUsers = new Array();
 		var modified = userStore.getModifiedRecords();
@@ -956,6 +1351,19 @@ RubixConsulting.user = function() {
 		saveDomainPermBtn.disable();
 	}
 
+	var completeSaveSiteAdmins = function() {
+		siteAdminMask.hide();
+		siteAdminStore.commitChanges();
+		saveSiteAdminBtn.disable();
+	}
+
+	var completeSaveLocalAliases = function() {
+		localAliasMask.hide();
+		localAliasStore.commitChanges();
+		removedLocalAliases = new Array();
+		revertLocalAliases();
+	}
+
 	var completeSaveUsers = function() {
 		userMask.hide();
 		userStore.commitChanges();
@@ -963,9 +1371,17 @@ RubixConsulting.user = function() {
 		revertUsers();
 	}
 
+	var revertLocalAliases = function() {
+		saveLocalAliasesBtn.disable();
+		revertLocalAliasesBtn.disable();
+		localAliasStore.commitChanges();
+		loadLocalAliases();
+	}
+
 	var revertUsers = function() {
 		saveUserBtn.disable();
 		revertUserBtn.disable();
+		userStore.commi
 		loadUsers();
 	}
 
@@ -1025,19 +1441,31 @@ RubixConsulting.user = function() {
 	}
 
 	var clickTree = function(selectionmodel, node) {
-		center.getLayout().setActiveItem(node.id+'-panel');
+		nodeId = node.id+'-panel';
+		if(
+			(node.id == 'your-settings')		||
+			(node.id == 'domain-administration')	||
+			(node.id == 'site-administration')
+		) {
+			return;
+		}
+		center.getLayout().setActiveItem(nodeId);
 		center.doLayout();
-		if((node.id == 'manage-domains') && (!domainsLoaded)) {
+		if((nodeId == 'manage-domains-panel') && (!domainsLoaded)) {
 			loadDomains();
-		} else if((node.id == 'manage-users') && (!usersLoaded)) {
+		} else if((nodeId == 'manage-users-panel') && (!usersLoaded)) {
 			loadUsers();
+		} else if((nodeId == 'manage-site-administrators-panel') && (!siteAdminLoaded)) {
+			loadSiteAdmins();
+		} else if((nodeId == 'manage-local-aliases-panel') && (!localAliasesLoaded)) {
+			loadLocalAliases();
 		}
 	}
 
 	var loadDomains = function() {
-		domainStore.removeAll();
+		domainListStore.removeAll();
 		domainsLoaded = false;
-		domainStore.load({
+		domainListStore.load({
 			params: {
 				mode: 'load'
 			},
@@ -1045,6 +1473,22 @@ RubixConsulting.user = function() {
 				if(success) {
 					enablePage();
 					domainsLoaded = true;
+				}
+			},
+			scope: this
+		});
+	}
+
+	var loadLocalAliases = function() {
+		localAliasStore.removeAll();
+		localAliasesLoaded = false;
+		localAliasStore.load({
+			params: {
+				mode: 'load'
+			},
+			callback: function(r, options, success) {
+				if(success) {
+					localAliasesLoaded = true;
 				}
 			},
 			scope: this
@@ -1061,6 +1505,22 @@ RubixConsulting.user = function() {
 			callback: function(r, options, success) {
 				if(success) {
 					usersLoaded = true;
+				}
+			},
+			scope: this
+		});
+	}
+
+	var loadSiteAdmins = function() {
+		siteAdminStore.removeAll();
+		siteAdminLoaded = false;
+		siteAdminStore.load({
+			params: {
+				mode: 'load'
+			},
+			callback: function(r, options, success) {
+				if(success) {
+					siteAdminLoaded = true;
 				}
 			},
 			scope: this
@@ -1284,13 +1744,19 @@ RubixConsulting.user = function() {
 		viewport.destroy();
 		viewport = null;
 		user = null;
-		// TODO clear all necessary variables here
+		// TODO LOGOUT clear all necessary variables here
 		domainPermStore.removeAll();
 		domainPermsLoaded = false;
-		domainStore.removeAll();
+		domainListStore.removeAll();
 		domainsLoaded = false;
 		userStore.removeAll();
 		usersLoaded = false;
+		siteAdminStore.removeAll();
+		siteAdminLoaded = false;
+		domainPermStore.removeAll();
+		domainPermsLoaded = false;
+		localAliasStore.removeAll();
+		localAliasesLoaded = false;
 		getUserInfo();
 	}
 

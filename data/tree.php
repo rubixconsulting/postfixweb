@@ -12,75 +12,93 @@ $tree = array(
 		'leaf' => TRUE
 	),
 	array(
-		'text' => 'Change Password',
-		'id'   => 'change-password',
-		'leaf' => TRUE
-	),
-	array(
-		'text' => 'Forwards',
-		'id'   => 'forwards',
-		'leaf' => TRUE
-#	),
+		'text' => 'Your Settings',
+		'id'   => 'your-settings',
+		'children' => array(
+			array(
+				'text' => 'Password',
+				'id'   => 'change-password',
+				'leaf' => TRUE
+			),
+			array(
+				'text' => 'Forwards',
+				'id'   => 'forwards',
+				'leaf' => TRUE
+#			),
 ## TODO investigate how to do auto replies
-#	array(
-#		'text' => 'Auto Replies',
-#		'id'   => 'auto-replies',
-#		'leaf' => TRUE
+#			array(
+#				'text' => 'Auto Replies',
+#				'id'   => 'auto-replies',
+#				'leaf' => TRUE
+			)
+		)
 	)
 );
 
-if(isSiteAdmin()) {
-	$tree[] = array(
-		'text' => 'Manage Domains',
-		'id'   => 'manage-domains',
-		'leaf' => TRUE
-	);
-}
+$siteAdministration   = array();
+$domainAdministration = array();
+
+$siteAdministration[] = array(
+	'text' => 'Domains',
+	'id'   => 'manage-domains',
+	'leaf' => TRUE
+);
+
+$domainAdministration[] = array(
+	'text' => 'Users',
+	'id'   => 'manage-users',
+	'leaf' => TRUE
+);
+
+$domainAdministration[] = array(
+	'text' => 'User Forwards',
+	'id'   => 'manage-forwards',
+	'leaf' => TRUE
+);
+
+$domainAdministration[] = array(
+	'text' => 'Aliases',
+	'id'   => 'manage-aliases',
+	'leaf' => TRUE
+);
+
+$domainAdministration[] = array(
+	'text' => 'Catch All Addresses',
+	'id'   => 'catchall-addresses',
+	'leaf' => TRUE
+);
+
+$domainAdministration[] = array(
+	'text' => 'Domain Administrators',
+	'id'   => 'manage-domain-permissions',
+	'leaf' => TRUE
+);
+
+$siteAdministration[] = array(
+	'text' => 'Site Administrators',
+	'id'   => 'manage-site-administrators',
+	'leaf' => TRUE
+);
+
+$siteAdministration[] = array(
+	'text' => 'Local Aliases',
+	'id'   => 'manage-local-aliases',
+	'leaf' => TRUE
+);
 
 if(isDomainAdmin()) {
 	$tree[] = array(
-		'text' => 'Manage Catch All Addresses',
-		'id'   => 'catchall-addresses',
-		'leaf' => TRUE
-	);
-	$tree[] = array(
-		'text' => 'Manage Users',
-		'id'   => 'manage-users',
-		'leaf' => TRUE
-	);
-	$tree[] = array(
-		'text' => 'Manage User Forwards',
-		'id'   => 'manage-forwards',
-		'leaf' => TRUE
-	);
-	$tree[] = array(
-		'text' => 'Manage Domain Permissions',
-		'id'   => 'manage-domain-permissions',
-		'leaf' => TRUE
+		'text'     => 'Domain Administration',
+		'id'       => 'domain-administration',
+		'children' => $domainAdministration
 	);
 }
 
 if(isSiteAdmin()) {
 	$tree[] = array(
-		'text' => 'Manage Site Administrators',
-		'id'   => 'manage-site-administrators',
-		'leaf' => TRUE
-	);
-}
-
-if(isDomainAdmin()) {
-	$tree[] = array(
-		'text' => 'Manage Aliases',
-		'id'   => 'manage-aliases',
-		'leaf' => TRUE
-	);
-}
-
-if(isSiteAdmin()) {
-	$tree[] = array(
-		'text' => 'Manage Local Aliases',
-		'id'   => 'manage-local-aliases',
-		'leaf' => TRUE
+		'text'     => 'Site Administration',
+		'id'       => 'site-administration',
+		'children' => $siteAdministration
 	);
 }
 
