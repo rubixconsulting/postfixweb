@@ -1,6 +1,5 @@
 Ext.namespace('RubixConsulting');
 
-// TODO get rid of disable/enable pages for grid operations
 RubixConsulting.user = function() {
 	// private variables
 	var loginWindow, user, viewport, west, center, infoPanel;
@@ -14,7 +13,7 @@ RubixConsulting.user = function() {
 	var revertLocalAliasesBtn, saveLocalAliasesBtn, addLocalAliasWindow;
 	var addLocalAliasName, addLocalAliasDestination, bulkAddLocalAliasBtn;
 	var bulkAddLocalAliasWindow, localAliasMask, revertSiteAdminBtn;
-	var domainListMask;
+	var domainListMask, passwordMask;
 
 	var domainSm     = new Ext.grid.CheckboxSelectionModel();
 	var userSm       = new Ext.grid.CheckboxSelectionModel();
@@ -137,6 +136,9 @@ RubixConsulting.user = function() {
 	}
 
 	var formFailure = function(form, action) {
+		if(form.url == 'data/changePass.php') {
+			passwordMask.hide();
+		}
 		if(action && action.response && action.response.statusText && (action.response.statusText != 'OK')) {
 			showError(action.response.statusText);
 		} else {
@@ -147,7 +149,6 @@ RubixConsulting.user = function() {
 	var ajaxFailure = function(response, options) {
 		if(options && options.url == 'data/userInfo.php') {
 			showLogin();
-			enablePage();
 		} else {
 			var msg = 'Unknown Error';
 			if(response && response.statusText) {
@@ -1096,7 +1097,8 @@ RubixConsulting.user = function() {
 	}
 
 	var bulkAddLocalAlias = function() {
-		disablePage('Bulk adding local aliases...', 'Please wait');
+		localAliasMask = new Ext.LoadMask(localAliasGrid.getEl(), {msg: 'Bulk adding local aliases...'});
+		localAliasMask.show();
 		Ext.getCmp('bulk-add-local-alias-form').getForm().submit({
 			success: addLocalAliasSuccess,
 			failure: formFailure
@@ -1104,7 +1106,8 @@ RubixConsulting.user = function() {
 	}
 
 	var addLocalAlias = function() {
-		disablePage('Adding local alias...', 'Please wait');
+		localAliasMask = new Ext.LoadMask(localAliasGrid.getEl(), {msg: 'Adding local alias...'});
+		localAliasMask.show();
 		Ext.getCmp('add-local-alias-form').getForm().submit({
 			success: addLocalAliasSuccess,
 			failure: formFailure
@@ -1112,7 +1115,8 @@ RubixConsulting.user = function() {
 	}
 
 	var addNewUser = function() {
-		disablePage('Adding user...', 'Please wait');
+		userMask = new Ext.LoadMask(userGrid.getEl(), {msg: 'Adding new user...'});
+		userMask.show();
 		Ext.getCmp('add-user-form').getForm().submit({
 			success: addUserSuccess,
 			failure: formFailure
@@ -1127,9 +1131,9 @@ RubixConsulting.user = function() {
 
 	var addDomainSuccess = function(form, action) {
 		hideAddDomainWindow();
+		getUserInfo();
 		domainListMask.hide();
 		loadDomains();
-		getUserInfo();
 	}
 
 	var resetPasswordSuccess = function(form, action) {
@@ -1141,17 +1145,17 @@ RubixConsulting.user = function() {
 	var addLocalAliasSuccess = function(form, action) {
 		hideAddLocalAliasWindow();
 		hideBulkAddLocalAliasWindow();
-		loadLocalAliases();
 		saveLocalAliasesBtn.disable();
 		revertLocalAliasesBtn.disable();
-		enablePage();
+		localAliasMask.hide();
+		loadLocalAliases();
 	}
 
 	var addUserSuccess = function(form, action) {
 		hideAddUserWindow();
 		saveUserBtn.disable();
 		revertUserBtn.disable();
-		enablePage();
+		userMask.hide();
 		loadUsers();
 	}
 
@@ -1220,6 +1224,8 @@ RubixConsulting.user = function() {
 	}
 
 	var doRemoveSelectedLocalAliases = function() {
+		localAliasMask = new Ext.LoadMask(localAliasGrid.getEl(), {msg: 'Removing local aliases...'});
+		localAliasMask.show();
 		var selected = localAliasSm.getSelections();
 		for(var i = 0; i < selected.length; i++) {
 			removedLocalAliases.push(selected[i].get('alias_id'));
@@ -1258,7 +1264,7 @@ RubixConsulting.user = function() {
 		if(removeDomains.length == 0) {
 			return;
 		}
-		domainListMask = new Ext.LoadMask(domainGrid.getEl(), {msg: 'Saving...'});
+		domainListMask = new Ext.LoadMask(domainGrid.getEl(), {msg: 'Removing domains...'});
 		domainListMask.show();
 		Ext.Ajax.request({
 			url: 'data/domains.php',
@@ -1280,7 +1286,7 @@ RubixConsulting.user = function() {
 			tmpDomain.admin     = modified[i].get('admin');
 			modifiedDomains.push(tmpDomain);
 		}
-		domainPermMask = new Ext.LoadMask(domainPermGrid.getEl(), {msg: 'Saving...'});
+		domainPermMask = new Ext.LoadMask(domainPermGrid.getEl(), {msg: 'Saving domain administrators...'});
 		domainPermMask.show();
 		Ext.Ajax.request({
 			url: 'data/domainPerms.php',
@@ -1303,7 +1309,7 @@ RubixConsulting.user = function() {
 			tmpUser.site_admin = modified[i].get('site_admin');
 			modifiedUsers.push(tmpUser);
 		}
-		siteAdminMask = new Ext.LoadMask(siteAdminGrid.getEl(), {msg: 'Saving...'});
+		siteAdminMask = new Ext.LoadMask(siteAdminGrid.getEl(), {msg: 'Saving site administrators...'});
 		siteAdminMask.show();
 		Ext.Ajax.request({
 			url: 'data/siteAdmins.php',
@@ -1327,8 +1333,6 @@ RubixConsulting.user = function() {
 			tmpLocalAlias.active      = modified[i].get('active');
 			modifiedLocalAliases.push(tmpLocalAlias);
 		}
-		localAliasMask = new Ext.LoadMask(localAliasGrid.getEl(), {msg: 'Saving...'});
-		localAliasMask.show();
 		Ext.Ajax.request({
 			url: 'data/localAliases.php',
 			success: completeSaveLocalAliases,
@@ -1351,7 +1355,7 @@ RubixConsulting.user = function() {
 			tmpUser.active  = modified[i].get('active');
 			modifiedUsers.push(tmpUser);
 		}
-		userMask = new Ext.LoadMask(userGrid.getEl(), {msg: 'Saving...'});
+		userMask = new Ext.LoadMask(userGrid.getEl(), {msg: 'Saving users...'});
 		userMask.show();
 		Ext.Ajax.request({
 			url: 'data/users.php',
@@ -1366,30 +1370,30 @@ RubixConsulting.user = function() {
 	}
 
 	var completeSaveDomainPerms = function() {
-		domainPermMask.hide();
 		domainPermStore.commitChanges();
 		saveDomainPermBtn.disable();
+		domainPermMask.hide();
 	}
 
 	var completeSaveSiteAdmins = function() {
-		siteAdminMask.hide();
 		siteAdminStore.commitChanges();
 		saveSiteAdminBtn.disable();
 		revertSiteAdminBtn.disable();
+		siteAdminMask.hide();
 	}
 
 	var completeSaveLocalAliases = function() {
-		localAliasMask.hide();
 		localAliasStore.commitChanges();
 		removedLocalAliases = new Array();
 		saveLocalAliasesBtn.disable();
 		revertLocalAliasesBtn.disable();
+		localAliasMask.hide();
 	}
 
 	var completeSaveUsers = function() {
-		userMask.hide();
 		userStore.commitChanges();
 		removedUsers = new Array();
+		userMask.hide();
 	}
 
 	var revertLocalAliases = function() {
@@ -1573,7 +1577,6 @@ RubixConsulting.user = function() {
 		var data = Ext.util.JSON.decode(response.responseText);
 		if(!data.success) {
 			showLogin();
-			enablePage();
 		} else {
 			user = data.user;
 			if(loginWindow) {
@@ -1681,6 +1684,7 @@ RubixConsulting.user = function() {
 		new Ext.util.DelayedTask(function() {
 			Ext.getCmp('loginUser').focus();
 		}, this).delay(0);
+		enablePage();
 	}
 
 	var disablePage = function(msg, title) {
@@ -1692,7 +1696,8 @@ RubixConsulting.user = function() {
 	}
 
 	var changePassword = function() {
-		disablePage('Changing password...', 'Please wait');
+		passwordMask = new Ext.LoadMask(Ext.get('change-password-panel'), {msg: 'Changing password...'});
+		passwordMask.show();
 		Ext.getCmp('change-password-panel').getForm().submit({
 			success: changePasswordSuccess,
 			failure: formFailure
@@ -1705,6 +1710,7 @@ RubixConsulting.user = function() {
 
 	var changePasswordSuccess = function(form, action) {
 		Ext.getCmp('change-password-panel').getForm().reset();
+		passwordMask.hide();
 		showInfo('Password changed', 'Password changed successfully');
 	}
 
@@ -1731,7 +1737,7 @@ RubixConsulting.user = function() {
 	var doLogin = function() {
 		disablePage('Logging in...', 'Please wait');
 		Ext.getCmp('loginForm').getForm().submit({
-			success: completeLogin,
+			success: getUserInfo,
 			failure: loginFailure
 		});
 	}
@@ -1781,10 +1787,6 @@ RubixConsulting.user = function() {
 		domainPermsLoaded = false;
 		localAliasStore.removeAll();
 		localAliasesLoaded = false;
-		getUserInfo();
-	}
-
-	var completeLogin = function(form, action) {
 		getUserInfo();
 	}
 
