@@ -2,6 +2,7 @@
 
 include_once('db.inc.php');
 include_once('roles.inc.php');
+include_once('forwards.inc.php');
 
 function getUserId($email) {
 	$sql = 'SELECT '.
@@ -169,11 +170,20 @@ function getAdminDomains($userId = FALSE) {
 	return FALSE;
 }
 
+function quotedAdminUserString() {
+	$adminUsers = getAdminUsers();
+	$returnArray = array();
+	foreach($adminUsers as $user) {
+		$returnArray[] = $user['email'];
+	}
+	return join(',', db_quotearray($returnArray));
+}
+
 function getAdminUsers($like = FALSE, $userId = FALSE) {
 	if(!$userId) {
 		$userId = $_SESSION['user']['user_id'];
 	}
-	if(!isSiteAdmin($userId) && !isDomainAdmin($userId)) {
+	if(!isDomainAdmin($userId)) {
 		return FALSE;
 	}
 	$sql = 'SELECT'.
@@ -238,6 +248,7 @@ function loadUser($userId) {
 	       '  user_id,'.
 	       '  username AS user,'.
 	       '  domain,'.
+	       '  domain_id,'.
 	       '  role,'.
 	       '  role_id,'.
 	       '  roles.description AS longrole,'.
@@ -274,21 +285,6 @@ function getUserAliases($email) {
 		'    AND active = \'t\''.
 		'    AND (username || \'@\' || domain) != ?'.
 		'  ORDER BY domain, username';
-	return db_getcol($sql, array($email, $email));
-}
-
-function getUserForwards($email) {
-	if(!$email) {
-		return FALSE;
-	}
-	$sql = 'SELECT'.
-		'  destination'.
-		'  FROM virtual_aliases'.
-		'  JOIN virtual_domains USING(domain_id)'.
-		'  WHERE active = \'t\''.
-		'    AND (username || \'@\' || domain) = ?'.
-		'    AND destination != ?';
-		'  ORDER BY destination';
 	return db_getcol($sql, array($email, $email));
 }
 

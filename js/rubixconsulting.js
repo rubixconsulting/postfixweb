@@ -13,21 +13,31 @@ RubixConsulting.user = function() {
 	var revertLocalAliasesBtn, saveLocalAliasesBtn, addLocalAliasWindow;
 	var addLocalAliasName, addLocalAliasDestination, bulkAddLocalAliasBtn;
 	var bulkAddLocalAliasWindow, localAliasMask, revertSiteAdminBtn;
-	var domainListMask, passwordMask;
+	var domainListMask, passwordMask, aliasesGrid, addAliasBtn;
+	var removeAliasBtn, revertAliasesBtn, saveAliasesBtn;
+	var addManageForwardBtn, removeManageForwardBtn, revertManageForwardsBtn;
+	var saveManageForwardsBtn, addManageForwardWindow, addManageForwardEmail;
+	var manageForwardsGrid, manageForwardMask, addAliasWindow;
+	var aliasMask;
 
-	var domainSm     = new Ext.grid.CheckboxSelectionModel();
-	var userSm       = new Ext.grid.CheckboxSelectionModel();
-	var siteAdminSm  = new Ext.grid.CheckboxSelectionModel();
-	var localAliasSm = new Ext.grid.CheckboxSelectionModel();
+	var domainSm        = new Ext.grid.CheckboxSelectionModel();
+	var userSm          = new Ext.grid.CheckboxSelectionModel();
+	var siteAdminSm     = new Ext.grid.CheckboxSelectionModel();
+	var localAliasSm    = new Ext.grid.CheckboxSelectionModel();
+	var aliasSm         = new Ext.grid.CheckboxSelectionModel();
+	var manageForwardSm = new Ext.grid.CheckboxSelectionModel();
 
-	var domainsLoaded      = false;
-	var usersLoaded        = false;
-	var domainPermsLoaded  = false;
-	var siteAdminLoaded    = false;
-	var localAliasesLoaded = false;
+	var domainsLoaded        = false;
+	var usersLoaded          = false;
+	var domainPermsLoaded    = false;
+	var siteAdminLoaded      = false;
+	var localAliasesLoaded   = false;
+	var aliasesLoaded  = false;
+	var manageForwardsLoaded = false;
 
-	var removedUsers        = new Array();
-	var removedLocalAliases = new Array();
+	var removedUsers          = new Array();
+	var removedLocalAliases   = new Array();
+	var removedManageForwards = new Array();
 
 	var domainRecord = Ext.data.Record.create([
 		{name: 'domain_id', type: 'int'},
@@ -64,6 +74,20 @@ RubixConsulting.user = function() {
 		{name: 'active',      type: 'boolean'}
 	]);
 
+	var forwardRecord = Ext.data.Record.create([
+		{name: 'alias_id',    type: 'int'},
+		{name: 'email',       type: 'string'},
+		{name: 'destination', type: 'string'},
+		{name: 'active',      type: 'boolean'}
+	]);
+
+	var aliasRecord = Ext.data.Record.create([
+		{name: 'alias_id',    type: 'int'},
+		{name: 'email',       type: 'string'},
+		{name: 'destination', type: 'string'},
+		{name: 'active',      type: 'boolean'}
+	]);
+
 	var siteAdminStore = new Ext.data.JsonStore({
 		url: 'data/siteAdmins.php',
 		root: 'admins',
@@ -86,6 +110,18 @@ RubixConsulting.user = function() {
 		url: 'data/users.php',
 		root: 'users',
 		fields: userRecord
+	});
+
+	var manageForwardStore = new Ext.data.JsonStore({
+		url: 'data/manageForwards.php',
+		root: 'forwards',
+		fields: forwardRecord
+	});
+
+	var aliasStore = new Ext.data.JsonStore({
+		url: 'data/aliases.php',
+		root: 'aliases',
+		fields: aliasRecord
 	});
 
 	var localAliasStore = new Ext.data.JsonStore({
@@ -138,6 +174,13 @@ RubixConsulting.user = function() {
 	var formFailure = function(form, action) {
 		if(form.url == 'data/changePass.php') {
 			passwordMask.hide();
+		// TODO are these complete? test adding with bad values
+		} else if(form.url == 'data/users.php') {
+			userMask.hide();
+		} else if(form.url == 'data/manageForwards.php') {
+			manageForwardMask.hide();
+		} else if(form.url == 'data/aliases.php') {
+			aliasMask.hide();
 		}
 		if(action && action.response && action.response.statusText && (action.response.statusText != 'OK')) {
 			showError(action.response.statusText);
@@ -443,7 +486,7 @@ RubixConsulting.user = function() {
 									sortable: true,
 									dataIndex: 'admin',
 									id: 'admin',
-									width: 80,
+									width: 100,
 									editor: boolEditor(),
 									renderer: boolRenderer
 								}
@@ -553,6 +596,120 @@ RubixConsulting.user = function() {
 								}
 							]),
 							iconCls: 'icon-grid'
+						}),
+						aliasesGrid = new Ext.grid.EditorGridPanel({
+							border: true,
+							id: 'manage-aliases-panel',
+							autoScroll: true,
+							autoExpandColumn: 'destination',
+							loadMask: true,
+							clicksToEdit: 1,
+							tbar: [
+								addAliasBtn = new Ext.Toolbar.Button({
+									text: 'Add New',
+									handler: showAddAliasWindow
+								}),
+								removeAliasBtn = new Ext.Toolbar.Button({
+									text: 'Remove Selected',
+									handler: removeSelectedAliases,
+									disabled: true
+								}),
+								revertAliasesBtn = new Ext.Toolbar.Button({
+									text: 'Revert Changes',
+									handler: revertAliases,
+									disabled: true
+								}),
+								saveAliasesBtn = new Ext.Toolbar.Button({
+									text: 'Save Changes',
+									handler: saveAliases,
+									disabled: true
+								})
+							],
+							store: aliasStore,
+							sm: aliasSm,
+							cm: new Ext.grid.ColumnModel([
+								aliasSm, {
+									header: 'Email',
+									sortable: true,
+									dataIndex: 'email',
+									width: 200,
+									id: 'email',
+									editor: false
+								},{
+									header: 'Destination',
+									sortable: true,
+									dataIndex: 'destination',
+									id: 'destination',
+									editor: false
+								},{
+									header: 'Active',
+									sortable: true,
+									dataIndex: 'active',
+									id: 'active',
+									width: 50,
+									editor: boolEditor(),
+									renderer: boolRenderer
+								}
+							]),
+							iconCls: 'icon-grid'
+						}),
+						manageForwardsGrid = new Ext.grid.EditorGridPanel({
+							border: true,
+							id: 'manage-forwards-panel',
+							autoScroll: true,
+							autoExpandColumn: 'destination',
+							loadMask: true,
+							clicksToEdit: 1,
+							tbar: [
+								addManageForwardBtn = new Ext.Toolbar.Button({
+									text: 'Add New',
+									handler: showAddManageForwardWindow
+								}),
+								removeManageForwardBtn = new Ext.Toolbar.Button({
+									text: 'Remove Selected',
+									handler: removeSelectedManageForwards,
+									disabled: true
+								}),
+								revertManageForwardsBtn = new Ext.Toolbar.Button({
+									text: 'Revert Changes',
+									handler: revertManageForwards,
+									disabled: true
+								}),
+								saveManageForwardsBtn = new Ext.Toolbar.Button({
+									text: 'Save Changes',
+									handler: saveManageForwards,
+									disabled: true
+								})
+							],
+							store: manageForwardStore,
+							sm: manageForwardSm,
+							cm: new Ext.grid.ColumnModel([
+								manageForwardSm, {
+									header: 'Email',
+									sortable: true,
+									dataIndex: 'email',
+									width: 150,
+									id: 'email',
+									editor: false
+								},{
+									header: 'Destination',
+									sortable: true,
+									dataIndex: 'destination',
+									id: 'destination',
+									editor: new Ext.form.TextField({
+										allowBlank: true
+									})
+								},{
+									header: 'Active',
+									sortable: true,
+									dataIndex: 'active',
+									id: 'active',
+									width: 50,
+									editor: boolEditor(),
+									renderer: boolRenderer
+								}
+							]),
+							iconCls: 'icon-grid'
 						})
 					]
 				})
@@ -596,11 +753,16 @@ RubixConsulting.user = function() {
 			saveSiteAdminBtn.enable();
 			revertSiteAdminBtn.enable();
 		}, this);
-		domainListStore.on('loadexception', loadException, this);
-		userStore.on(      'loadexception', loadException, this);
-		domainPermStore.on('loadexception', loadException, this);
-		siteAdminStore.on( 'loadexception', loadException, this);
-		localAliasStore.on('loadexception', loadException, this);
+		manageForwardStore.on('update', function(store, record, operation) {
+			saveManageForwardsBtn.enable();
+			revertManageForwardsBtn.enable();
+		}, this);
+		domainListStore.on(   'loadexception', loadException, this);
+		userStore.on(         'loadexception', loadException, this);
+		domainPermStore.on(   'loadexception', loadException, this);
+		siteAdminStore.on(    'loadexception', loadException, this);
+		localAliasStore.on(   'loadexception', loadException, this);
+		manageForwardStore.on('loadexception', loadException, this);
 		siteAdminSm.on('beforerowselect', function(selectionmodel, row, keep, record) {
 			if(record.get('email') == user.email) {
 				return false;
@@ -624,6 +786,13 @@ RubixConsulting.user = function() {
 				removeLocalAliasBtn.enable();
 			} else {
 				removeLocalAliasBtn.disable();
+			}
+		}, this);
+		manageForwardSm.on('selectionchange', function(selectionmodel) {
+			if(manageForwardSm.getCount() > 0) {
+				removeManageForwardBtn.enable();
+			} else {
+				removeManageForwardBtn.disable();
 			}
 		}, this);
 		domainSm.on('selectionchange', function(selectionmodel) {
@@ -826,7 +995,7 @@ RubixConsulting.user = function() {
 			bulkAddLocalAliasWindow = new Ext.Window({
 				resizable: false,
 				layout: 'fit',
-				width: 620,
+				width: 630,
 				height: 300,
 				constrain: true,
 				constrainHeader: true,
@@ -880,6 +1049,177 @@ RubixConsulting.user = function() {
 		new Ext.util.DelayedTask(function() {
 			bulkAddLocalAliasArea.focus();
 		}, this).delay(700);
+	}
+
+	var showAddAliasWindow = function() {
+		if(!addAliasWindow) {
+			addAliasWindow = new Ext.Window({
+				resizable: false,
+				layout: 'fit',
+				width: 380,
+				height: 230,
+				constrain: true,
+				constrainHeader: true,
+				minimizable: false,
+				closable: false,
+				plain: false,
+				title: 'Add a new alias...',
+				modal: true,
+				items: [{
+					id: 'add-alias-form',
+					layout: 'form',
+					url: 'data/aliases.php',
+					frame: true,
+					monitorValid: true,
+					xtype: 'form',
+					bodyStyle: 'padding: 15px',
+					defaults: {
+						msgTarget: 'side'
+					},
+					baseParams: {
+						mode: 'add'
+					},
+					buttons: [{
+						text: 'Cancel',
+						handler: hideAddAliasWindow
+					},{
+						text: 'Add',
+						formBind: true,
+						handler: addNewAlias
+					}],
+					layoutConfig: {
+						labelSeparator: ''
+					},
+					items: [
+						addAliasUsername = new Ext.form.TextField({
+							fieldLabel: 'Username',
+							allowBlank: false,
+							width: 200,
+							name: 'username'
+						}),
+						addAliasDomain = new Ext.form.ComboBox({
+							store: domainListStore,
+							fieldLabel: 'Domain',
+							displayField: 'domain',
+							valueField: 'domain_id',
+							forceSelection: true,
+							typeAhead: true,
+							minChars: 1,
+							editable: true,
+							allowBlank: false,
+							width: 200,
+							hiddenName: 'domain',
+							triggerAction: 'all',
+							queryParam: 'query',
+							allQuery: 'all'
+						}),
+						{
+							html: '<label class="x-form-item-label" style="width: 103px">Email Address</label><div style="padding-top: 4px;" id="add-alias-address">username@domain</div>',
+							cls: 'x-form-item'
+						},
+						addAliasEmail = new Ext.form.ComboBox({
+							fieldLabel: 'Destination',
+							allowBlank: false,
+							width: 200,
+							store: userStore,
+							displayField: 'email',
+							valueField: 'user_id',
+							forceSelection: true,
+							typeAhead: true,
+							minChars: 1,
+							editable: true,
+							allowBlank: false,
+							hiddenName: 'destination',
+							triggerAction: 'all',
+							queryParam: 'query',
+							allQuery: 'all'
+						}),
+						boolEditor('Active', 'active', 200)
+					]
+				}]
+			});
+			addAliasUsername.on('change', updateAddAliasEmail, this);
+			addAliasDomain.on('change', updateAddAliasEmail, this);
+		}
+		addAliasWindow.show(addAliasBtn.getEl());
+		new Ext.util.DelayedTask(function() {
+			addAliasUsername.focus();
+		}, this).delay(700);
+	}
+
+	var showAddManageForwardWindow = function() {
+		if(!addManageForwardWindow) {
+			addManageForwardWindow = new Ext.Window({
+				resizable: false,
+				layout: 'fit',
+				width: 380,
+				height: 170,
+				constrain: true,
+				constrainHeader: true,
+				minimizable: false,
+				closable: false,
+				plain: false,
+				title: 'Add a new forward...',
+				modal: true,
+				items: [{
+					id: 'add-manage-forward-form',
+					layout: 'form',
+					url: 'data/manageForwards.php',
+					frame: true,
+					monitorValid: true,
+					xtype: 'form',
+					bodyStyle: 'padding: 15px',
+					defaults: {
+						msgTarget: 'side'
+					},
+					baseParams: {
+						mode: 'add'
+					},
+					buttons: [{
+						text: 'Cancel',
+						handler: hideAddManageForwardWindow
+					},{
+						text: 'Add',
+						formBind: true,
+						handler: addManageForward
+					}],
+					layoutConfig: {
+						labelSeparator: ''
+					},
+					items: [
+						addManageForwardEmail = new Ext.form.ComboBox({
+							fieldLabel: 'Email',
+							allowBlank: false,
+							width: 200,
+							store: userStore,
+							displayField: 'email',
+							valueField: 'user_id',
+							forceSelection: true,
+							typeAhead: true,
+							minChars: 1,
+							editable: true,
+							allowBlank: false,
+							hiddenName: 'email',
+							triggerAction: 'all',
+							queryParam: 'query',
+							allQuery: 'all'
+						}),
+						addLocalAliasDestination = new Ext.form.TextField({
+							fieldLabel: 'Destination',
+							allowBlank: false,
+							width: 200,
+							name: 'destination'
+						}),
+						boolEditor('Active', 'active', 200)
+					]
+				}]
+			});
+		}
+		addManageForwardWindow.show(addManageForwardBtn.getEl());
+		new Ext.util.DelayedTask(function() {
+			addManageForwardEmail.focus();
+		}, this).delay(700);
+
 	}
 
 	var showAddLocalAliasWindow = function() {
@@ -1049,6 +1389,10 @@ RubixConsulting.user = function() {
 		}, this).delay(700);
 	}
 
+	var updateAddAliasEmail = function(field, newval, oldval) {
+		Ext.get('add-alias-address').update(addAliasUsername.getValue()+'@'+addAliasDomain.getEl().getValue());
+	}
+
 	var updateAddUserEmail = function(field, newval, oldval) {
 		Ext.get('add-email-address').update(addUserUsername.getValue()+'@'+addUserDomain.getEl().getValue());
 	}
@@ -1058,6 +1402,11 @@ RubixConsulting.user = function() {
 			Ext.getCmp('bulk-add-local-alias-form').getForm().reset();
 			bulkAddLocalAliasWindow.hide(addLocalAliasBtn.getEl());
 		}
+	}
+
+	var hideAddManageForwardWindow = function() {
+		Ext.getCmp('add-manage-forward-form').getForm().reset();
+		addManageForwardWindow.hide(addManageForwardBtn.getEl());
 	}
 
 	var hideAddLocalAliasWindow = function() {
@@ -1076,6 +1425,12 @@ RubixConsulting.user = function() {
 		Ext.getCmp('reset-password-form').getForm().reset();
 		Ext.get('reset-password-email-address').update('username@domain');
 		resetPasswordWindow.hide(resetPassBtn.getEl());
+	}
+
+	var hideAddAliasWindow = function() {
+		Ext.getCmp('add-alias-form').getForm().reset();
+		Ext.get('add-alias-address').update('username@domain');
+		addAliasWindow.hide(addAliasBtn.getEl());
 	}
 
 	var hideAddUserWindow = function() {
@@ -1105,11 +1460,29 @@ RubixConsulting.user = function() {
 		});
 	}
 
+	var addManageForward = function() {
+		manageForwardMask = new Ext.LoadMask(manageForwardsGrid.getEl(), {msg: 'Adding forward...'});
+		manageForwardMask.show();
+		Ext.getCmp('add-manage-forward-form').getForm().submit({
+			success: addManageForwardSuccess,
+			failure: formFailure
+		});
+	}
+
 	var addLocalAlias = function() {
 		localAliasMask = new Ext.LoadMask(localAliasGrid.getEl(), {msg: 'Adding local alias...'});
 		localAliasMask.show();
 		Ext.getCmp('add-local-alias-form').getForm().submit({
 			success: addLocalAliasSuccess,
+			failure: formFailure
+		});
+	}
+
+	var addNewAlias = function() {
+		aliasMask = new Ext.LoadMask(aliasesGrid.getEl(), {msg: 'Adding new alias...'});
+		aliasMask.show();
+		Ext.getCmp('add-alias-form').getForm().submit({
+			success: addAliasSuccess,
 			failure: formFailure
 		});
 	}
@@ -1142,6 +1515,14 @@ RubixConsulting.user = function() {
 		showInfo('Password reset', 'Password was reset successfully');
 	}
 
+	var addManageForwardSuccess = function(form, action) {
+		hideAddManageForwardWindow();
+		saveManageForwardsBtn.disable();
+		revertManageForwardsBtn.disable();
+		manageForwardMask.hide();
+		loadManageForwards();
+	}
+
 	var addLocalAliasSuccess = function(form, action) {
 		hideAddLocalAliasWindow();
 		hideBulkAddLocalAliasWindow();
@@ -1149,6 +1530,14 @@ RubixConsulting.user = function() {
 		revertLocalAliasesBtn.disable();
 		localAliasMask.hide();
 		loadLocalAliases();
+	}
+
+	var addAliasSuccess = function(form, action) {
+		hideAddAliasWindow();
+		saveAliasesBtn.disable();
+		revertAliasesBtn.disable();
+		aliasMask.hide();
+		loadAliases();
 	}
 
 	var addUserSuccess = function(form, action) {
@@ -1164,7 +1553,7 @@ RubixConsulting.user = function() {
 			closable: false,
 			buttons: Ext.MessageBox.YESNO,
 			icon: Ext.MessageBox.QUESTION,
-			title: 'Remove Domains?',
+			title: 'Remove domains?',
 			width: 450,
 			msg: '<table><tr><td>Do you really want to remove these domains?</td></tr>'+
 			     '<tr><td>All associated email address, aliases and forwarders will also be deleted.</td></tr>'+
@@ -1177,14 +1566,34 @@ RubixConsulting.user = function() {
 		});
 	}
 
+	var removeSelectedAliases = function() {
+		// TODO
+	}
+
+	var removeSelectedManageForwards = function() {
+		Ext.MessageBox.show({
+			closable: false,
+			buttons: Ext.MessageBox.YESNO,
+			icon: Ext.MessageBox.QUESTION,
+			title: 'Remove forwards?',
+			width: 450,
+			msg: '<table><tr><td>Do you really want to remove the selected forwards?</td></tr></table>',
+			fn: function(btn) {
+				if(btn == 'yes') {
+					doRemoveSelectedManageForwards();
+				}
+			}
+		});
+	}
+
 	var removeSelectedLocalAliases = function() {
 		Ext.MessageBox.show({
 			closable: false,
 			buttons: Ext.MessageBox.YESNO,
 			icon: Ext.MessageBox.QUESTION,
-			title: 'Remove Local Aliases?',
+			title: 'Remove local aliases?',
 			width: 450,
-			msg: '<table><tr><td>Do you really want to remove these local aliases?</td></tr></table>',
+			msg: '<table><tr><td>Do you really want to remove the selected local aliases?</td></tr></table>',
 			fn: function(btn) {
 				if(btn == 'yes') {
 					doRemoveSelectedLocalAliases();
@@ -1221,6 +1630,18 @@ RubixConsulting.user = function() {
 		} else if(selected.length == 1) {
 			showResetPasswordWindow();
 		}
+	}
+
+	var doRemoveSelectedManageForwards = function() {
+		manageForwardMask = new Ext.LoadMask(manageForwardsGrid.getEl(), {msg: 'Removing forwards...'});
+		manageForwardMask.show();
+		var selected = manageForwardSm.getSelections();
+		for(var i = 0; i < selected.length; i++) {
+			removedManageForwards.push(selected[i].get('alias_id'));
+			selected[i].commit();
+			manageForwardStore.remove(selected[i]);
+		}
+		saveManageForwards();
 	}
 
 	var doRemoveSelectedLocalAliases = function() {
@@ -1322,6 +1743,35 @@ RubixConsulting.user = function() {
 		});
 	}
 
+	var saveAliases = function() {
+		// TODO
+	}
+
+	var saveManageForwards = function() {
+		var modifiedManageForwards = new Array();
+		var modified = manageForwardStore.getModifiedRecords();
+		for(var i = 0; i < modified.length; i++) {
+			var tmpManageForward = new Object();
+			tmpManageForward.alias_id    = modified[i].get('alias_id');
+			tmpManageForward.name        = modified[i].get('email');
+			tmpManageForward.destination = modified[i].get('destination');
+			tmpManageForward.active      = modified[i].get('active');
+			modifiedManageForwards.push(tmpManageForward);
+		}
+		manageForwardMask = new Ext.LoadMask(manageForwardsGrid.getEl(), {msg: 'Saving forwards...'});
+		manageForwardMask.show();
+		Ext.Ajax.request({
+			url: 'data/manageForwards.php',
+			success: completeSaveManageForwards,
+			failure: ajaxFailure,
+			params: {
+				mode: 'save',
+				update: Ext.util.JSON.encode(modifiedManageForwards),
+				remove: removedManageForwards.join(',')
+			}
+		});
+	}
+
 	var saveLocalAliases = function() {
 		var modifiedLocalAliases = new Array();
 		var modified = localAliasStore.getModifiedRecords();
@@ -1382,6 +1832,14 @@ RubixConsulting.user = function() {
 		siteAdminMask.hide();
 	}
 
+	var completeSaveManageForwards = function() {
+		manageForwardStore.commitChanges();
+		removedManageForwards = new Array();
+		saveManageForwardsBtn.disable();
+		revertManageForwardsBtn.disable();
+		manageForwardMask.hide();
+	}
+
 	var completeSaveLocalAliases = function() {
 		localAliasStore.commitChanges();
 		removedLocalAliases = new Array();
@@ -1394,6 +1852,16 @@ RubixConsulting.user = function() {
 		userStore.commitChanges();
 		removedUsers = new Array();
 		userMask.hide();
+	}
+
+	var revertAliases = function() {
+		// TODO
+	}
+
+	var revertManageForwards = function() {
+		saveManageForwardsBtn.disable();
+		revertManageForwardsBtn.disable();
+		manageForwardStore.rejectChanges();
 	}
 
 	var revertLocalAliases = function() {
@@ -1470,7 +1938,6 @@ RubixConsulting.user = function() {
 	}
 
 	var clickTree = function(selectionmodel, node) {
-		nodeId = node.id+'-panel';
 		if(
 			(node.id == 'your-settings')		||
 			(node.id == 'domain-administration')	||
@@ -1478,16 +1945,20 @@ RubixConsulting.user = function() {
 		) {
 			return;
 		}
-		center.getLayout().setActiveItem(nodeId);
+		center.getLayout().setActiveItem(node.id+'-panel');
 		center.doLayout();
-		if((nodeId == 'manage-domains-panel') && (!domainsLoaded)) {
+		if((node.id == 'manage-domains') && (!domainsLoaded)) {
 			loadDomains();
-		} else if((nodeId == 'manage-users-panel') && (!usersLoaded)) {
+		} else if((node.id == 'manage-users') && (!usersLoaded)) {
 			loadUsers();
-		} else if((nodeId == 'manage-site-administrators-panel') && (!siteAdminLoaded)) {
+		} else if((node.id == 'manage-site-administrators') && (!siteAdminLoaded)) {
 			loadSiteAdmins();
-		} else if((nodeId == 'manage-local-aliases-panel') && (!localAliasesLoaded)) {
+		} else if((node.id == 'manage-local-aliases') && (!localAliasesLoaded)) {
 			loadLocalAliases();
+		} else if((node.id == 'manage-forwards') && (!manageForwardsLoaded)) {
+			loadManageForwards();
+		} else if((node.id == 'manage-aliases') && (!aliasesLoaded)) {
+			loadAliases();
 		}
 	}
 
@@ -1501,6 +1972,38 @@ RubixConsulting.user = function() {
 			callback: function(r, options, success) {
 				if(success) {
 					domainsLoaded = true;
+				}
+			},
+			scope: this
+		});
+	}
+
+	var loadManageForwards = function() {
+		manageForwardStore.removeAll();
+		manageForwardsLoaded = false;
+		manageForwardStore.load({
+			params: {
+				mode: 'load'
+			},
+			callback: function(r, options, success) {
+				if(success) {
+					manageForwardsLoaded = true;
+				}
+			},
+			scope: this
+		});
+	}
+
+	var loadAliases = function() {
+		aliasStore.removeAll();
+		aliasesLoaded = false;
+		aliasStore.load({
+			params: {
+				mode: 'load'
+			},
+			callback: function(r, options, success) {
+				if(success) {
+					aliasesLoaded = true;
 				}
 			},
 			scope: this
@@ -1787,6 +2290,10 @@ RubixConsulting.user = function() {
 		domainPermsLoaded = false;
 		localAliasStore.removeAll();
 		localAliasesLoaded = false;
+		manageForwardStore.removeAll();
+		manageForwardsLoaded = false;
+		aliasStore.removeAll();
+		aliasesLoaded = false;
 		getUserInfo();
 	}
 

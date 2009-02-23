@@ -9,15 +9,11 @@ $mode = $_POST['mode'];
 
 if($mode == 'load') {
 	$localAliasRows = getLocalAliases();
-	if($localAliasRows) {
-		$localAliases = array(
-			'success' => TRUE,
-			'aliases' => $localAliasRows
-		);
-		print json_encode($localAliases);
-	} else {
-		print json_encode(array('success' => FALSE));
-	}
+	$localAliases = array(
+		'success' => TRUE,
+		'aliases' => $localAliasRows
+	);
+	print json_encode($localAliases);
 } else if($mode == 'save') {
 	$update = $_POST['update'];
 	$remove = $_POST['remove'];
@@ -58,7 +54,7 @@ if($mode == 'load') {
 		}
 		$aliasParts = split(':', $line);
 		$name        = trim(array_shift($aliasParts));
-		$destination = join(':', $aliasParts);
+		$destination = trim(join(':', $aliasParts));
 		addLocalAlias($name, $destination, TRUE, TRUE);
 	}
 	print json_encode(array('success' => TRUE));
