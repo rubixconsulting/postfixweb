@@ -38,6 +38,7 @@ RubixConsulting.user = function() {
 	var removedUsers          = new Array();
 	var removedLocalAliases   = new Array();
 	var removedManageForwards = new Array();
+	var removedAliases        = new Array();
 
 	var domainRecord = Ext.data.Record.create([
 		{name: 'domain_id', type: 'int'},
@@ -738,6 +739,10 @@ RubixConsulting.user = function() {
 			}, this).delay(0);
 		}, this);
 		west.getSelectionModel().on('selectionchange', clickTree, this);
+		aliasStore.on('update', function(store, record, operation) {
+			saveAliasesBtn.enable();
+			revertAliasesBtn.enable();
+		}, this);
 		localAliasStore.on('update', function(store, record, operation) {
 			saveLocalAliasesBtn.enable();
 			revertLocalAliasesBtn.enable();
@@ -780,6 +785,13 @@ RubixConsulting.user = function() {
 				return false;
 			}
 			return true;
+		}, this);
+		aliasSm.on('selectionchange', function(selectionmodel) {
+			if(aliasSm.getCount() > 0) {
+				removeAliasBtn.enable();
+			} else {
+				removeAliasBtn.disable();
+			}
 		}, this);
 		localAliasSm.on('selectionchange', function(selectionmodel) {
 			if(localAliasSm.getCount() > 0) {
@@ -1567,7 +1579,19 @@ RubixConsulting.user = function() {
 	}
 
 	var removeSelectedAliases = function() {
-		// TODO
+		Ext.MessageBox.show({
+			closable: false,
+			buttons: Ext.MessageBox.YESNO,
+			icon: Ext.MessageBox.QUESTION,
+			title: 'Remove aliases?',
+			width: 450,
+			msg: '<table><tr><td>Do you really want to remove the selected aliases?</td></tr></table>',
+			fn: function(btn) {
+				if(btn == 'yes') {
+					doRemoveSelectedAliases();
+				}
+			}
+		});
 	}
 
 	var removeSelectedManageForwards = function() {
@@ -1630,6 +1654,18 @@ RubixConsulting.user = function() {
 		} else if(selected.length == 1) {
 			showResetPasswordWindow();
 		}
+	}
+
+	var doRemoveSelectedAliases = function() {
+		aliasMask = new Ext.LoadMask(aliasesGrid.getEl(), {msg: 'Removing aliases...'});
+		aliasMask.show();
+		var selected = aliasSm.getSelections();
+		for(var i = 0; i < selected.length; i++) {
+			removedAliases.push(selected[i].get('alias_id'));
+			selected[i].commit();
+			aliasStore.remove(selected[i]);
+		}
+		saveAliases();
 	}
 
 	var doRemoveSelectedManageForwards = function() {
@@ -1744,7 +1780,26 @@ RubixConsulting.user = function() {
 	}
 
 	var saveAliases = function() {
-		// TODO
+		var modifiedAliases = new Array();
+		var modified = aliasStore.getModifiedRecords();
+		for(var i = 0; i < modified.length; i++) {
+			var tmpAlias = new Object();
+			tmpAlias.alias_id = modified[i].get('alias_id');
+			tmpAlias.active   = modified[i].get('active');
+			modifiedAliases.push(tmpAlias);
+		}
+		aliasMask = new Ext.LoadMask(aliasesGrid.getEl(), {msg: 'Saving aliases...'});
+		aliasMask.show();
+		Ext.Ajax.request({
+			url: 'data/aliases.php',
+			success: completeSaveAliases,
+			failure: ajaxFailure,
+			params: {
+				mode: 'save',
+				update: Ext.util.JSON.encode(modifiedAliases),
+				remove: removedAliases.join(',')
+			}
+		});
 	}
 
 	var saveManageForwards = function() {
@@ -1753,7 +1808,6 @@ RubixConsulting.user = function() {
 		for(var i = 0; i < modified.length; i++) {
 			var tmpManageForward = new Object();
 			tmpManageForward.alias_id    = modified[i].get('alias_id');
-			tmpManageForward.name        = modified[i].get('email');
 			tmpManageForward.destination = modified[i].get('destination');
 			tmpManageForward.active      = modified[i].get('active');
 			modifiedManageForwards.push(tmpManageForward);
@@ -1832,6 +1886,14 @@ RubixConsulting.user = function() {
 		siteAdminMask.hide();
 	}
 
+	var completeSaveAliases = function() {
+		aliasStore.commitChanges();
+		removedAliases = new Array();
+		saveAliasesBtn.disable();
+		revertAliasesBtn.disable();
+		aliasMask.hide();
+	}
+
 	var completeSaveManageForwards = function() {
 		manageForwardStore.commitChanges();
 		removedManageForwards = new Array();
@@ -1855,7 +1917,9 @@ RubixConsulting.user = function() {
 	}
 
 	var revertAliases = function() {
-		// TODO
+		saveAliasesBtn.disable();
+		revertAliasesBtn.disable();
+		aliasStore.rejectChanges();
 	}
 
 	var revertManageForwards = function() {

@@ -30,7 +30,6 @@ if($mode == 'load') {
 		$updates = json_decode($update);
 		foreach($updates as $tmpForward) {
 			$aliasId     = $tmpForward->alias_id;
-			$name        = trim($tmpForward->name);
 			$destination = trim($tmpForward->destination);
 			$active      = $tmpForward->active;
 			modifyForward($aliasId, $destination, $active);

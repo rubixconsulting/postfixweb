@@ -24,25 +24,23 @@ if($mode == 'load') {
 	);
 	print json_encode($aliases);
 } else if($mode == 'save') {
-#	$update = $_POST['update'];
-#	$remove = $_POST['remove'];
-#	if($update) {
-#		$updates = json_decode($update);
-#		foreach($updates as $tmpForward) {
-#			$aliasId     = $tmpForward->alias_id;
-#			$name        = trim($tmpForward->name);
-#			$destination = trim($tmpForward->destination);
-#			$active      = $tmpForward->active;
-#			modifyForward($aliasId, $destination, $active);
-#		}
-#	}
-#	if($remove) {
-#		$aliasIds = split(',', $remove);
-#		foreach($aliasIds as $aliasId) {
-#			removeForward($aliasId);
-#		}
-#	}
-#	print json_encode(array('success' => TRUE));
+	$update = $_POST['update'];
+	$remove = $_POST['remove'];
+	if($update) {
+		$updates = json_decode($update);
+		foreach($updates as $tmpAlias) {
+			$aliasId = $tmpAlias->alias_id;
+			$active  = $tmpAlias->active;
+			modifyAlias($aliasId, $active);
+		}
+	}
+	if($remove) {
+		$aliasIds = split(',', $remove);
+		foreach($aliasIds as $aliasId) {
+			removeAlias($aliasId);
+		}
+	}
+	print json_encode(array('success' => TRUE));
 } else if($mode == 'add') {
 	$username    = $_POST['username'];
 	$domain      = $_POST['domain'];

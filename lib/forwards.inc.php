@@ -118,7 +118,12 @@ function addForward($destination, $active, $userId = FALSE) {
 		'destination' => $destination,
 		'active'      => $active
 	);
-	return db_insert('virtual_aliases', $params, 'alias_id');
+	$ret = db_insert('virtual_aliases', $params, 'alias_id');
+	if($ret) {
+		print json_encode(array('success' => TRUE));
+		return;
+	}
+	print json_encode(array('success' => FALSE, 'msg' => 'Unknown error'));
 }
 
 function forwardExists($destination, $userId = FALSE) {
@@ -189,9 +194,6 @@ function modifyForward($aliasId, $destination, $active) {
 		if(!in_array($domain, $adminDomains)) {
 			return FALSE;
 		}
-	}
-	if(!forwardExistsByIdEmail($aliasId, $email)) {
-		return FALSE;
 	}
 	if(!userExists($email)) {
 		return FALSE;

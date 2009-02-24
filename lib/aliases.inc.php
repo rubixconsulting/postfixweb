@@ -111,7 +111,12 @@ function addAlias($username, $domainId, $destinationId, $active) {
 		'destination' => $destination,
 		'active'      => $active
 	);
-	return db_insert('virtual_aliases', $params, 'alias_id');
+	$ret = db_insert('virtual_aliases', $params, 'alias_id');
+	if($ret) {
+		print json_encode(array('success' => TRUE));
+		return;
+	}
+	print json_encode(array('success' => FALSE, 'msg' => 'Unknown error'));
 }
 
 function aliasExists($email, $destination) {
@@ -126,4 +131,95 @@ function aliasExists($email, $destination) {
 		return TRUE;
 	}
 	return FALSE;
+}
+
+function aliasExistsById($aliasId) {
+	if(!$aliasId) {
+		return FALSE;
+	}
+	$sql = 'SELECT'.
+		'  COUNT(alias_id)'.
+		'  FROM virtual_aliases'.
+		'  WHERE alias_id = ?';
+	$val = db_getval($sql, array($aliasId));
+	if($val > 0) {
+		return TRUE;
+	}
+	return FALSE;
+}
+
+function loadAlias($aliasId) {
+	$sql = 'SELECT'.
+		'  alias_id,'.
+		'  (username || \'@\' || domain) AS email,'.
+		'  username,'.
+		'  domain,'.
+		'  destination,'.
+		'  active'.
+		'  FROM virtual_aliases'.
+		'  JOIN virtual_domains USING(domain_id)'.
+		'  WHERE alias_id = ?';
+	return db_getrow($sql, array($aliasId));
+}
+
+function modifyAlias($aliasId, $active) {
+	if($active) {
+		$active = 't';
+	} else {
+		$active = 'f';
+	}
+	if(!$aliasId || !$active) {
+		return FALSE;
+	}
+	if(!isDomainAdmin()) {
+		return FALSE;
+	}
+	$alias = loadAlias($aliasId);
+	if(!$alias) {
+		return FALSE;
+	}
+	$domain = $alias['domain'];
+	$adminDomains = getAdminDomains();
+	if(!in_array($domain, $adminDomains)) {
+		return FALSE;
+	}
+	$destinationParts = split('@', $alias['destination']);
+	$destinationDomain = $destinationParts[1];
+	if(!in_array($destinationDomain, $adminDomains)) {
+		return FALSE;
+	}
+	$updates = array(
+		'active' => $active
+	);
+	$conditions = array(
+		'alias_id' => $aliasId
+	);
+	return db_update('virtual_aliases', $updates, $conditions);
+}
+
+function removeAlias($aliasId) {
+	if(!$aliasId) {
+		return FALSE;
+	}
+	if(!isDomainAdmin()) {
+		return FALSE;
+	}
+	$alias = loadAlias($aliasId);
+	if(!$alias) {
+		return FALSE;
+	}
+	$domain = $alias['domain'];
+	$adminDomains = getAdminDomains();
+	if(!in_array($domain, $adminDomains)) {
+		return FALSE;
+	}
+	$destinationParts = split('@', $alias['destination']);
+	$destinationDomain = $destinationParts[1];
+	if(!in_array($destinationDomain, $adminDomains)) {
+		return FALSE;
+	}
+	$conditions = array(
+		'alias_id' => $aliasId
+	);
+	return db_delete('virtual_aliases', $conditions);
 }

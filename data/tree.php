@@ -30,6 +30,12 @@ $tree = array(
 #				'text' => 'Auto Replies',
 #				'id'   => 'auto-replies',
 #				'leaf' => TRUE
+#			)
+## TODO add a way to log into webmail here
+#			array(
+#				'text' => 'Webmail',
+#				'id'   => 'webmail',
+#				'leaf' => TRUE
 			)
 		)
 	)
@@ -77,6 +83,12 @@ $domainAdministration[] = array(
 $siteAdministration[] = array(
 	'text' => 'Site Administrators',
 	'id'   => 'manage-site-administrators',
+	'leaf' => TRUE
+);
+
+$siteAdministration[] = array(
+	'text' => 'Virtual to Local Forwards',
+	'id'   => 'manage-local-forwards',
 	'leaf' => TRUE
 );
 
