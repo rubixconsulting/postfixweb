@@ -1,6 +1,7 @@
 <?php
 
 include_once('db.inc.php');
+include_once('localForwards.inc.php');
 
 function getAliasEmail($aliasId) {
 	if(!$aliasId) {
@@ -21,6 +22,7 @@ function getAliases() {
 	$sql = 'SELECT'.
 		'  alias_id,'.
 		'  (username || \'@\' || domain) AS email,'.
+		'  domain,'.
 		'  destination,'.
 		'  active'.
 		'  FROM virtual_aliases'.
@@ -73,7 +75,7 @@ function addAlias($username, $domainId, $destinationId, $active) {
 		$foundError = TRUE;
 	}
 	$email = $username . '@' . $domain;
-	if(userExists($email)) {
+	if(userExists($email) || localForwardExists($email)) {
 		$errors['username'] = 'User already exists';
 		$foundError = TRUE;
 	}

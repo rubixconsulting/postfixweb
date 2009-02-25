@@ -28,6 +28,7 @@ function getForwards() {
 	$sql = 'SELECT'.
 		'  alias_id,'.
 		'  (username || \'@\' || domain) AS email,'.
+		'  domain,'.
 		'  destination,'.
 		'  active'.
 		'  FROM virtual_aliases'.

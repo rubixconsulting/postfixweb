@@ -3,6 +3,7 @@
 include_once('db.inc.php');
 include_once('roles.inc.php');
 include_once('forwards.inc.php');
+include_once('localForwards.inc.php');
 
 function getUserId($email) {
 	$sql = 'SELECT '.
@@ -64,7 +65,8 @@ function getAllActiveUsersByRole($role) {
 	}
 	$sql = 'SELECT'.
 		'  user_id,'.
-		'  (username || \'@\' || domain) AS email'.
+		'  (username || \'@\' || domain) AS email,'.
+		'  domain'.
 		'  FROM virtual_users'.
 		'  JOIN virtual_domains USING(domain_id)'.
 		'  JOIN roles USING(role_id)'.
@@ -124,6 +126,7 @@ function getSiteAdminUsers() {
 	$sql = 'SELECT'.
 		'  user_id,'.
 		'  (username || \'@\' || domain) AS email,'.
+		'  domain,'.
 		'  role_id'.
 		'  FROM virtual_users'.
 		'  JOIN virtual_domains USING(domain_id)'.
@@ -131,7 +134,7 @@ function getSiteAdminUsers() {
 			join(',', db_quotearray($roleIdArray)).
 		'  )'.
 		'  AND active = \'t\''.
-		'  ORDER BY email';
+		'  ORDER BY domain, username, role_id';
 	$userRows = db_getrows($sql);
 	$i = 0;
 	foreach($userRows as $row) {
@@ -482,14 +485,22 @@ function addUser($newUser) {
 		return;
 	}
 	if(!validUserName($username)) {
-		print json_encode(array('success' => false, 'errors' => array('username' => 'Invalid username')));
-		return;
+		$foundError = TRUE;
+		$errors['username'] = 'Invalid username';
 	}
 	$domain = getDomain($domainId);
+	if(!$domain) {
+		$foundError = TRUE;
+		$errors['domain'] = 'Invalid domain';
+	}
+	if($foundError) {
+		print json_encode(array('success' => false, 'errors' => $errors));
+		return;
+	}
 	$email = $username.'@'.$domain;
 	$errors = array();
 	$foundError = FALSE;
-	if(userExists($email)) {
+	if(userExists($email) || localForwardExists($email)) {
 		$foundError = TRUE;
 		$errors['username'] = 'Username already exists';
 	}

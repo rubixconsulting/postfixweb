@@ -18,22 +18,26 @@ RubixConsulting.user = function() {
 	var addManageForwardBtn, removeManageForwardBtn, revertManageForwardsBtn;
 	var saveManageForwardsBtn, addManageForwardWindow, addManageForwardEmail;
 	var manageForwardsGrid, manageForwardMask, addAliasWindow;
-	var aliasMask;
+	var aliasMask, addLocalForwardWindow, addLocalForwardBtn, removeLocalForwardBtn;
+	var revertLocalForwardsBtn, saveLocalForwardsBtn, addLocalForwardUsername;
+	var addLocalForwardDomain, addLocalForwardDestination, localForwardMask;
+	var bulkAddLocalForwardBtn, bulkAddLocalForwardWindow, bulkAddLocalForwardArea;
 
 	var domainSm        = new Ext.grid.CheckboxSelectionModel();
 	var userSm          = new Ext.grid.CheckboxSelectionModel();
-	var siteAdminSm     = new Ext.grid.CheckboxSelectionModel();
 	var localAliasSm    = new Ext.grid.CheckboxSelectionModel();
 	var aliasSm         = new Ext.grid.CheckboxSelectionModel();
 	var manageForwardSm = new Ext.grid.CheckboxSelectionModel();
+	var localForwardSm  = new Ext.grid.CheckboxSelectionModel();
 
 	var domainsLoaded        = false;
 	var usersLoaded          = false;
 	var domainPermsLoaded    = false;
 	var siteAdminLoaded      = false;
 	var localAliasesLoaded   = false;
-	var aliasesLoaded  = false;
+	var aliasesLoaded        = false;
 	var manageForwardsLoaded = false;
+	var localForwardsLoaded  = false;
 
 	var removedUsers          = new Array();
 	var removedLocalAliases   = new Array();
@@ -59,12 +63,14 @@ RubixConsulting.user = function() {
 	var domainPermRecord = Ext.data.Record.create([
 		{name: 'user_id', type: 'int'},
 		{name: 'email',   type: 'string'},
+		{name: 'domain',  type: 'string'},
 		{name: 'admin',   type: 'boolean'}
 	]);
 
 	var siteAdminRecord = Ext.data.Record.create([
 		{name: 'user_id',    type: 'int'},
 		{name: 'email',      type: 'string'},
+		{name: 'domain',     type: 'string'},
 		{name: 'site_admin', type: 'boolean'}
 	]);
 
@@ -78,6 +84,7 @@ RubixConsulting.user = function() {
 	var forwardRecord = Ext.data.Record.create([
 		{name: 'alias_id',    type: 'int'},
 		{name: 'email',       type: 'string'},
+		{name: 'domain',      type: 'string'},
 		{name: 'destination', type: 'string'},
 		{name: 'active',      type: 'boolean'}
 	]);
@@ -85,6 +92,7 @@ RubixConsulting.user = function() {
 	var aliasRecord = Ext.data.Record.create([
 		{name: 'alias_id',    type: 'int'},
 		{name: 'email',       type: 'string'},
+		{name: 'domain',      type: 'string'},
 		{name: 'destination', type: 'string'},
 		{name: 'active',      type: 'boolean'}
 	]);
@@ -111,6 +119,12 @@ RubixConsulting.user = function() {
 		url: 'data/users.php',
 		root: 'users',
 		fields: userRecord
+	});
+
+	var localForwardStore = new Ext.data.JsonStore({
+		url: 'data/localForwards.php',
+		root: 'forwards',
+		fields: forwardRecord
 	});
 
 	var manageForwardStore = new Ext.data.JsonStore({
@@ -182,6 +196,8 @@ RubixConsulting.user = function() {
 			manageForwardMask.hide();
 		} else if(form.url == 'data/aliases.php') {
 			aliasMask.hide();
+		} else if(form.url == 'data/localForwards.php') {
+			localForwardMask.hide();
 		}
 		if(action && action.response && action.response.statusText && (action.response.statusText != 'OK')) {
 			showError(action.response.statusText);
@@ -266,7 +282,7 @@ RubixConsulting.user = function() {
 									html: '<b>Email Address</b>',
 									cellCls: 'alignTop',
 									border: false,
-									width: 120
+									width: 200
 								},{
 									html: user.email,
 									cellCls: 'alignTop',
@@ -374,7 +390,7 @@ RubixConsulting.user = function() {
 									sortable: true,
 									dataIndex: 'domain',
 									id: 'domain',
-									width: 150,
+									width: 200,
 									editor: new Ext.form.TextField({
 										allowBlank: false
 									})
@@ -423,6 +439,13 @@ RubixConsulting.user = function() {
 									dataIndex: 'email',
 									width: 200,
 									id: 'email',
+									editor: false
+								},{
+									header: 'Domain',
+									sortable: true,
+									dataIndex: 'domain',
+									width: 150,
+									id: 'domain',
 									editor: false
 								},{
 									header: 'Name',
@@ -480,6 +503,13 @@ RubixConsulting.user = function() {
 									sortable: true,
 									dataIndex: 'email',
 									id: 'email',
+									width: 200,
+									editor: false
+								},{
+									header: 'Domain',
+									sortable: true,
+									dataIndex: 'domain',
+									id: 'domain',
 									width: 150,
 									editor: false
 								},{
@@ -513,14 +543,20 @@ RubixConsulting.user = function() {
 								})
 							],
 							store: siteAdminStore,
-							sm: siteAdminSm,
 							cm: new Ext.grid.ColumnModel([
-								siteAdminSm, {
+								{
 									header: 'Email',
 									sortable: true,
 									dataIndex: 'email',
 									width: 200,
 									id: 'email',
+									editor: false
+								},{
+									header: 'Domain',
+									sortable: true,
+									dataIndex: 'domain',
+									width: 150,
+									id: 'domain',
 									editor: false
 								},{
 									header: 'Site Administrator',
@@ -573,7 +609,7 @@ RubixConsulting.user = function() {
 									header: 'Name',
 									sortable: true,
 									dataIndex: 'name',
-									width: 150,
+									width: 200,
 									id: 'name',
 									editor: new Ext.form.TextField({
 										allowBlank: true
@@ -637,6 +673,13 @@ RubixConsulting.user = function() {
 									id: 'email',
 									editor: false
 								},{
+									header: 'Domain',
+									sortable: true,
+									dataIndex: 'domain',
+									width: 150,
+									id: 'domain',
+									editor: false
+								},{
 									header: 'Destination',
 									sortable: true,
 									dataIndex: 'destination',
@@ -689,8 +732,84 @@ RubixConsulting.user = function() {
 									header: 'Email',
 									sortable: true,
 									dataIndex: 'email',
-									width: 150,
+									width: 200,
 									id: 'email',
+									editor: false
+								},{
+									header: 'Domain',
+									sortable: true,
+									dataIndex: 'domain',
+									width: 150,
+									id: 'domain',
+									editor: false
+								},{
+									header: 'Destination',
+									sortable: true,
+									dataIndex: 'destination',
+									id: 'destination',
+									editor: new Ext.form.TextField({
+										allowBlank: true
+									})
+								},{
+									header: 'Active',
+									sortable: true,
+									dataIndex: 'active',
+									id: 'active',
+									width: 50,
+									editor: boolEditor(),
+									renderer: boolRenderer
+								}
+							]),
+							iconCls: 'icon-grid'
+						}),
+						localForwardsGrid = new Ext.grid.EditorGridPanel({
+							border: true,
+							id: 'manage-local-forwards-panel',
+							autoScroll: true,
+							autoExpandColumn: 'destination',
+							loadMask: true,
+							clicksToEdit: 1,
+							tbar: [
+								addLocalForwardBtn = new Ext.Toolbar.Button({
+									text: 'Add New',
+									handler: showAddLocalForwardWindow
+								}),
+								bulkAddLocalForwardBtn = new Ext.Toolbar.Button({
+									text: 'Bulk Add',
+									handler: showBulkAddLocalForwardWindow
+								}),
+								removeLocalForwardBtn = new Ext.Toolbar.Button({
+									text: 'Remove Selected',
+									handler: removeSelectedLocalForwards,
+									disabled: true
+								}),
+								revertLocalForwardsBtn = new Ext.Toolbar.Button({
+									text: 'Revert Changes',
+									handler: revertLocalForwards,
+									disabled: true
+								}),
+								saveLocalForwardsBtn = new Ext.Toolbar.Button({
+									text: 'Save Changes',
+									handler: saveLocalForwards,
+									disabled: true
+								})
+							],
+							store: localForwardStore,
+							sm: localForwardSm,
+							cm: new Ext.grid.ColumnModel([
+								localForwardSm, {
+									header: 'Email',
+									sortable: true,
+									dataIndex: 'email',
+									width: 200,
+									id: 'email',
+									editor: false
+								},{
+									header: 'Domain',
+									sortable: true,
+									dataIndex: 'domain',
+									width: 150,
+									id: 'domain',
 									editor: false
 								},{
 									header: 'Destination',
@@ -768,12 +887,6 @@ RubixConsulting.user = function() {
 		siteAdminStore.on(    'loadexception', loadException, this);
 		localAliasStore.on(   'loadexception', loadException, this);
 		manageForwardStore.on('loadexception', loadException, this);
-		siteAdminSm.on('beforerowselect', function(selectionmodel, row, keep, record) {
-			if(record.get('email') == user.email) {
-				return false;
-			}
-			return true;
-		}, this);
 		domainSm.on('beforerowselect', function(selectionmodel, row, keep, record) {
 			if(record.get('domain') == user.domain) {
 				return false;
@@ -1002,6 +1115,67 @@ RubixConsulting.user = function() {
 		Ext.get('reset-password-email-address').update(userSm.getSelections()[0].get('email'));
 	}
 
+	var showBulkAddLocalForwardWindow = function() {
+		if(!bulkAddLocalForwardWindow) {
+			bulkAddLocalForwardWindow = new Ext.Window({
+				resizable: false,
+				layout: 'fit',
+				width: 630,
+				height: 300,
+				constrain: true,
+				constrainHeader: true,
+				minimizable: false,
+				closable: false,
+				plain: false,
+				title: 'Bulk add new local forwards...',
+				modal: true,
+				items: [{
+					id: 'bulk-add-local-forward-form',
+					layout: 'form',
+					url: 'data/localForwards.php',
+					frame: true,
+					monitorValid: true,
+					xtype: 'form',
+					bodyStyle: 'padding: 15px',
+					defaults: {
+						msgTarget: 'side'
+					},
+					baseParams: {
+						mode: 'bulk-add'
+					},
+					buttons: [{
+						text: 'Cancel',
+						handler: hideBulkAddLocalForwardWindow
+					},{
+						text: 'Add',
+						formBind: true,
+						handler: bulkAddLocalForward
+					}],
+					layoutConfig: {
+						labelSeparator: ''
+					},
+					items: [
+						{
+							html: '<label class="x-form-item-label" style="width: 103px">Instructions</label><div style="padding-top: 4px;" id="add-email-address">Use standard /etc/aliases format.<br />All bulk added local forwards will be active by default.</div>',
+							cls: 'x-form-item'
+						},
+						bulkAddLocalForwardArea = new Ext.form.TextArea({
+							fieldLabel: 'Local Forwards',
+							allowBlank: false,
+							width: 450,
+							height: 150,
+							name: 'local-forwards'
+						})
+					]
+				}]
+			});
+		}
+		bulkAddLocalForwardWindow.show(bulkAddLocalForwardBtn.getEl());
+		new Ext.util.DelayedTask(function() {
+			bulkAddLocalForwardArea.focus();
+		}, this).delay(700);
+	}
+
 	var showBulkAddLocalAliasWindow = function() {
 		if(!bulkAddLocalAliasWindow) {
 			bulkAddLocalAliasWindow = new Ext.Window({
@@ -1060,6 +1234,91 @@ RubixConsulting.user = function() {
 		bulkAddLocalAliasWindow.show(bulkAddLocalAliasBtn.getEl());
 		new Ext.util.DelayedTask(function() {
 			bulkAddLocalAliasArea.focus();
+		}, this).delay(700);
+	}
+
+	var showAddLocalForwardWindow = function() {
+		if(!addLocalForwardWindow) {
+			addLocalForwardWindow = new Ext.Window({
+				resizable: false,
+				layout: 'fit',
+				width: 380,
+				height: 230,
+				constrain: true,
+				constrainHeader: true,
+				minimizable: false,
+				closable: false,
+				plain: false,
+				title: 'Add a new local forward...',
+				modal: true,
+				items: [{
+					id: 'add-local-forward-form',
+					layout: 'form',
+					url: 'data/localForwards.php',
+					frame: true,
+					monitorValid: true,
+					xtype: 'form',
+					bodyStyle: 'padding: 15px',
+					defaults: {
+						msgTarget: 'side'
+					},
+					baseParams: {
+						mode: 'add'
+					},
+					buttons: [{
+						text: 'Cancel',
+						handler: hideAddLocalForwardWindow
+					},{
+						text: 'Add',
+						formBind: true,
+						handler: addNewLocalForward
+					}],
+					layoutConfig: {
+						labelSeparator: ''
+					},
+					items: [
+						addLocalForwardUsername = new Ext.form.TextField({
+							fieldLabel: 'Username',
+							allowBlank: false,
+							width: 200,
+							name: 'username'
+						}),
+						addLocalForwardDomain = new Ext.form.ComboBox({
+							store: domainListStore,
+							fieldLabel: 'Domain',
+							displayField: 'domain',
+							valueField: 'domain_id',
+							forceSelection: true,
+							typeAhead: true,
+							minChars: 1,
+							editable: true,
+							allowBlank: false,
+							width: 200,
+							hiddenName: 'domain',
+							triggerAction: 'all',
+							queryParam: 'query',
+							allQuery: 'all'
+						}),
+						{
+							html: '<label class="x-form-item-label" style="width: 103px">Email Address</label><div style="padding-top: 4px;" id="add-local-forward-address">username@domain</div>',
+							cls: 'x-form-item'
+						},
+						addLocalForwardDestination = new Ext.form.TextField({
+							fieldLabel: 'Destination',
+							allowBlank: false,
+							width: 200,
+							name: 'destination'
+						}),
+						boolEditor('Active', 'active', 200)
+					]
+				}]
+			});
+			addLocalForwardUsername.on('change', updateAddLocalForwardEmail, this);
+			addLocalForwardDomain.on('change', updateAddLocalForwardEmail, this);
+		}
+		addLocalForwardWindow.show(addLocalForwardBtn.getEl());
+		new Ext.util.DelayedTask(function() {
+			addLocalForwardUsername.focus();
 		}, this).delay(700);
 	}
 
@@ -1401,12 +1660,23 @@ RubixConsulting.user = function() {
 		}, this).delay(700);
 	}
 
+	var updateAddLocalForwardEmail = function(field, newval, oldval) {
+		Ext.get('add-local-forward-address').update(addLocalForwardUsername.getValue()+'@'+addLocalForwardDomain.getEl().getValue());
+	}
+
 	var updateAddAliasEmail = function(field, newval, oldval) {
 		Ext.get('add-alias-address').update(addAliasUsername.getValue()+'@'+addAliasDomain.getEl().getValue());
 	}
 
 	var updateAddUserEmail = function(field, newval, oldval) {
 		Ext.get('add-email-address').update(addUserUsername.getValue()+'@'+addUserDomain.getEl().getValue());
+	}
+
+	var hideBulkAddLocalForwardWindow = function() {
+		if(bulkAddLocalForwardWindow) {
+			Ext.getCmp('bulk-add-local-forward-form').getForm().reset();
+			bulkAddLocalForwardWindow.hide(addLocalForwardBtn.getEl());
+		}
 	}
 
 	var hideBulkAddLocalAliasWindow = function() {
@@ -1439,6 +1709,14 @@ RubixConsulting.user = function() {
 		resetPasswordWindow.hide(resetPassBtn.getEl());
 	}
 
+	var hideAddLocalForwardWindow = function() {
+		if(addLocalForwardWindow) {
+			Ext.getCmp('add-local-forward-form').getForm().reset();
+			Ext.get('add-local-forward-address').update('username@domain');
+			addLocalForwardWindow.hide(addLocalForwardBtn.getEl());
+		}
+	}
+
 	var hideAddAliasWindow = function() {
 		Ext.getCmp('add-alias-form').getForm().reset();
 		Ext.get('add-alias-address').update('username@domain');
@@ -1460,6 +1738,15 @@ RubixConsulting.user = function() {
 			params: {
 				user: userSm.getSelections()[0].get('email')
 			}
+		});
+	}
+
+	var bulkAddLocalForward = function() {
+		localForwardMask = new Ext.LoadMask(localForwardsGrid.getEl(), {msg: 'Bulk adding local forwards...'});
+		localForwardMask.show();
+		Ext.getCmp('bulk-add-local-forward-form').getForm().submit({
+			success: addLocalForwardSuccess,
+			failure: formFailure
 		});
 	}
 
@@ -1486,6 +1773,15 @@ RubixConsulting.user = function() {
 		localAliasMask.show();
 		Ext.getCmp('add-local-alias-form').getForm().submit({
 			success: addLocalAliasSuccess,
+			failure: formFailure
+		});
+	}
+
+	var addNewLocalForward = function() {
+		localForwardMask = new Ext.LoadMask(localForwardsGrid.getEl(), {msg: 'Adding new local forward...'});
+		localForwardMask.show();
+		Ext.getCmp('add-local-forward-form').getForm().submit({
+			success: addLocalForwardSuccess,
 			failure: formFailure
 		});
 	}
@@ -1544,6 +1840,15 @@ RubixConsulting.user = function() {
 		loadLocalAliases();
 	}
 
+	var addLocalForwardSuccess = function(form, action) {
+		hideAddLocalForwardWindow();
+		hideBulkAddLocalForwardWindow();
+		saveLocalForwardsBtn.disable();
+		revertLocalForwardsBtn.disable();
+		localForwardMask.hide();
+		loadLocalForwards();
+	}
+
 	var addAliasSuccess = function(form, action) {
 		hideAddAliasWindow();
 		saveAliasesBtn.disable();
@@ -1592,6 +1897,10 @@ RubixConsulting.user = function() {
 				}
 			}
 		});
+	}
+
+	var removeSelectedLocalForwards = function() {
+		// TODO
 	}
 
 	var removeSelectedManageForwards = function() {
@@ -1802,6 +2111,10 @@ RubixConsulting.user = function() {
 		});
 	}
 
+	var saveLocalForwards = function() {
+		// TODO
+	}
+
 	var saveManageForwards = function() {
 		var modifiedManageForwards = new Array();
 		var modified = manageForwardStore.getModifiedRecords();
@@ -1922,6 +2235,10 @@ RubixConsulting.user = function() {
 		aliasStore.rejectChanges();
 	}
 
+	var revertLocalForwards = function() {
+		// TODO
+	}
+
 	var revertManageForwards = function() {
 		saveManageForwardsBtn.disable();
 		revertManageForwardsBtn.disable();
@@ -2023,6 +2340,8 @@ RubixConsulting.user = function() {
 			loadManageForwards();
 		} else if((node.id == 'manage-aliases') && (!aliasesLoaded)) {
 			loadAliases();
+		} else if((node.id == 'manage-local-forwards') && (!localForwardsLoaded)) {
+			loadLocalForwards();
 		}
 	}
 
@@ -2068,6 +2387,22 @@ RubixConsulting.user = function() {
 			callback: function(r, options, success) {
 				if(success) {
 					aliasesLoaded = true;
+				}
+			},
+			scope: this
+		});
+	}
+
+	var loadLocalForwards = function() {
+		localForwardStore.removeAll();
+		localForwardsLoaded = false;
+		localForwardStore.load({
+			params: {
+				mode: 'load'
+			},
+			callback: function(r, options, success) {
+				if(success) {
+					localForwardsLoaded = true;
 				}
 			},
 			scope: this
@@ -2358,6 +2693,8 @@ RubixConsulting.user = function() {
 		manageForwardsLoaded = false;
 		aliasStore.removeAll();
 		aliasesLoaded = false;
+		localForwardStore.removeAll();
+		localForwardsLoaded = false;
 		getUserInfo();
 	}
 
