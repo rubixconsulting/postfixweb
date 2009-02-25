@@ -4,6 +4,8 @@ include_once('db.inc.php');
 include_once('user.inc.php');
 include_once('email.inc.php');
 include_once('domain.inc.php');
+include_once('localAliases.inc.php');
+include_once('aliases.inc.php');
 
 function getLocalForwards() {
 	$sql = 'SELECT'.
@@ -22,10 +24,63 @@ function getLocalForwards() {
 	$ret = array();
 	foreach($rows as $row) {
 		if(!validEmailAddress($row['destination']) && validUserName($row['destination'])) {
+			$row['aliases'] = getNumLocalAliasDestination($row['destination']);
 			$ret[] = $row;
 		}
 	}
 	return $ret;
+}
+
+function removeLocalForward($aliasId) {
+	if(!$aliasId) {
+		return FALSE;
+	}
+	if(!isSiteAdmin()) {
+		return FALSE;
+	}
+	if(!aliasExistsById($aliasId)) {
+		return FALSE;
+	}
+	$conditions = array(
+		'alias_id' => $aliasId
+	);
+	return db_delete('virtual_aliases', $conditions);
+}
+
+function modifyLocalForward($aliasId, $destination, $active) {
+	if($active) {
+		$active = 't';
+	} else {
+		$active = 'f';
+	}
+	if(!$aliasId || !$destination || !$active) {
+		return FALSE;
+	}
+	if(!isSiteAdmin()) {
+		return FALSE;
+	}
+	if(!aliasExistsById($aliasId)) {
+		return FALSE;
+	}
+	if(!validUserName($destination)) {
+		return FALSE;
+	}
+	$updates = array(
+		'destination' => $destination,
+		'active'      => $active
+	);
+	$conditions = array(
+		'alias_id' => $aliasId
+	);
+	return db_update('virtual_aliases', $updates, $conditions);
+}
+
+function getNumVirtualForwards($name) {
+	$sql = 'SELECT'.
+		'  COUNT(alias_id)'.
+		'  FROM virtual_aliases'.
+		'  WHERE destination = ?';
+	return db_getval($sql, array($name));
 }
 
 function localForwardExists($email) {

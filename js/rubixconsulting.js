@@ -43,6 +43,7 @@ RubixConsulting.user = function() {
 	var removedLocalAliases   = new Array();
 	var removedManageForwards = new Array();
 	var removedAliases        = new Array();
+	var removedLocalForwards  = new Array();
 
 	var domainRecord = Ext.data.Record.create([
 		{name: 'domain_id', type: 'int'},
@@ -78,6 +79,7 @@ RubixConsulting.user = function() {
 		{name: 'alias_id',    type: 'int'},
 		{name: 'name',        type: 'string'},
 		{name: 'destination', type: 'string'},
+		{name: 'forwards',    type: 'int'},
 		{name: 'active',      type: 'boolean'}
 	]);
 
@@ -86,6 +88,15 @@ RubixConsulting.user = function() {
 		{name: 'email',       type: 'string'},
 		{name: 'domain',      type: 'string'},
 		{name: 'destination', type: 'string'},
+		{name: 'active',      type: 'boolean'}
+	]);
+
+	var localForwardRecord = Ext.data.Record.create([
+		{name: 'alias_id',    type: 'int'},
+		{name: 'email',       type: 'string'},
+		{name: 'domain',      type: 'string'},
+		{name: 'destination', type: 'string'},
+		{name: 'aliases',     type: 'int'},
 		{name: 'active',      type: 'boolean'}
 	]);
 
@@ -124,7 +135,7 @@ RubixConsulting.user = function() {
 	var localForwardStore = new Ext.data.JsonStore({
 		url: 'data/localForwards.php',
 		root: 'forwards',
-		fields: forwardRecord
+		fields: localForwardRecord
 	});
 
 	var manageForwardStore = new Ext.data.JsonStore({
@@ -198,6 +209,10 @@ RubixConsulting.user = function() {
 			aliasMask.hide();
 		} else if(form.url == 'data/localForwards.php') {
 			localForwardMask.hide();
+		} else if(form.url == 'data/domains.php') {
+			domainListMask.hide();
+		} else if(form.url == 'data/localAliases.php') {
+			localAliasMask.hide();
 		}
 		if(action && action.response && action.response.statusText && (action.response.statusText != 'OK')) {
 			showError(action.response.statusText);
@@ -621,7 +636,15 @@ RubixConsulting.user = function() {
 									id: 'destination',
 									editor: new Ext.form.TextField({
 										allowBlank: true
-									})
+									}),
+								},{
+									header: 'Virtual Forwards',
+									sortable: true,
+									dataIndex: 'forwards',
+									id: 'forwards',
+									editor: false,
+									align: 'right',
+									width: 100
 								},{
 									header: 'Active',
 									sortable: true,
@@ -816,9 +839,18 @@ RubixConsulting.user = function() {
 									sortable: true,
 									dataIndex: 'destination',
 									id: 'destination',
+									width: 100,
 									editor: new Ext.form.TextField({
 										allowBlank: true
 									})
+								},{
+									header: 'Local Aliases',
+									sortable: true,
+									dataIndex: 'aliases',
+									id: 'aliases',
+									editor: false,
+									align: 'right',
+									width: 75
 								},{
 									header: 'Active',
 									sortable: true,
@@ -881,6 +913,11 @@ RubixConsulting.user = function() {
 			saveManageForwardsBtn.enable();
 			revertManageForwardsBtn.enable();
 		}, this);
+		localForwardStore.on('update', function(store, record, operation) {
+			saveLocalForwardsBtn.enable();
+			revertLocalForwardsBtn.enable();
+		}, this);
+		localForwardStore.on( 'loadexception', loadException, this);
 		domainListStore.on(   'loadexception', loadException, this);
 		userStore.on(         'loadexception', loadException, this);
 		domainPermStore.on(   'loadexception', loadException, this);
@@ -911,6 +948,13 @@ RubixConsulting.user = function() {
 				removeLocalAliasBtn.enable();
 			} else {
 				removeLocalAliasBtn.disable();
+			}
+		}, this);
+		localForwardSm.on('selectionchange', function(selectionmodel) {
+			if(localForwardSm.getCount() > 0) {
+				removeLocalForwardBtn.enable();
+			} else {
+				removeLocalForwardBtn.disable();
 			}
 		}, this);
 		manageForwardSm.on('selectionchange', function(selectionmodel) {
@@ -1900,7 +1944,19 @@ RubixConsulting.user = function() {
 	}
 
 	var removeSelectedLocalForwards = function() {
-		// TODO
+		Ext.MessageBox.show({
+			closable: false,
+			buttons: Ext.MessageBox.YESNO,
+			icon: Ext.MessageBox.QUESTION,
+			title: 'Remove forwards?',
+			width: 450,
+			msg: '<table><tr><td>Do you really want to remove the selected local forwards?</td></tr></table>',
+			fn: function(btn) {
+				if(btn == 'yes') {
+					doRemoveSelectedLocalForwards();
+				}
+			}
+		});
 	}
 
 	var removeSelectedManageForwards = function() {
@@ -1975,6 +2031,18 @@ RubixConsulting.user = function() {
 			aliasStore.remove(selected[i]);
 		}
 		saveAliases();
+	}
+
+	var doRemoveSelectedLocalForwards = function() {
+		localForwardMask = new Ext.LoadMask(localForwardsGrid.getEl(), {msg: 'Removing local forwards...'});
+		localForwardMask.show();
+		var selected = localForwardSm.getSelections();
+		for(var i = 0; i < selected.length; i++) {
+			removedLocalForwards.push(selected[i].get('alias_id'));
+			selected[i].commit();
+			localForwardStore.remove(selected[i]);
+		}
+		saveLocalForwards();
 	}
 
 	var doRemoveSelectedManageForwards = function() {
@@ -2112,7 +2180,27 @@ RubixConsulting.user = function() {
 	}
 
 	var saveLocalForwards = function() {
-		// TODO
+		var modifiedLocalForwards = new Array();
+		var modified = localForwardStore.getModifiedRecords();
+		for(var i = 0; i < modified.length; i++) {
+			var tmpLocalForward = new Object();
+			tmpLocalForward.alias_id    = modified[i].get('alias_id');
+			tmpLocalForward.destination = modified[i].get('destination');
+			tmpLocalForward.active      = modified[i].get('active');
+			modifiedLocalForwards.push(tmpLocalForward);
+		}
+		localForwardMask = new Ext.LoadMask(localForwardsGrid.getEl(), {msg: 'Saving local forwards...'});
+		localForwardMask.show();
+		Ext.Ajax.request({
+			url: 'data/localForwards.php',
+			success: completeSaveLocalForwards,
+			failure: ajaxFailure,
+			params: {
+				mode: 'save',
+				update: Ext.util.JSON.encode(modifiedLocalForwards),
+				remove: removedLocalForwards.join(',')
+			}
+		});
 	}
 
 	var saveManageForwards = function() {
@@ -2150,6 +2238,8 @@ RubixConsulting.user = function() {
 			tmpLocalAlias.active      = modified[i].get('active');
 			modifiedLocalAliases.push(tmpLocalAlias);
 		}
+		localAliasMask = new Ext.LoadMask(localAliasGrid.getEl(), {msg: 'Saving local aliases...'});
+		localAliasMask.show();
 		Ext.Ajax.request({
 			url: 'data/localAliases.php',
 			success: completeSaveLocalAliases,
@@ -2207,6 +2297,15 @@ RubixConsulting.user = function() {
 		aliasMask.hide();
 	}
 
+	var completeSaveLocalForwards = function() {
+		localForwardStore.commitChanges();
+		removedLocalForwards = new Array();
+		saveLocalForwardsBtn.disable();
+		revertLocalForwardsBtn.disable();
+		localForwardMask.hide();
+		loadLocalForwards();
+	}
+
 	var completeSaveManageForwards = function() {
 		manageForwardStore.commitChanges();
 		removedManageForwards = new Array();
@@ -2221,6 +2320,7 @@ RubixConsulting.user = function() {
 		saveLocalAliasesBtn.disable();
 		revertLocalAliasesBtn.disable();
 		localAliasMask.hide();
+		loadLocalAliases();
 	}
 
 	var completeSaveUsers = function() {
@@ -2230,37 +2330,39 @@ RubixConsulting.user = function() {
 	}
 
 	var revertAliases = function() {
+		aliasStore.rejectChanges();
 		saveAliasesBtn.disable();
 		revertAliasesBtn.disable();
-		aliasStore.rejectChanges();
 	}
 
 	var revertLocalForwards = function() {
-		// TODO
+		localForwardStore.rejectChanges();
+		saveLocalForwardsBtn.disable();
+		revertLocalForwardsBtn.disable();
 	}
 
 	var revertManageForwards = function() {
+		manageForwardStore.rejectChanges();
 		saveManageForwardsBtn.disable();
 		revertManageForwardsBtn.disable();
-		manageForwardStore.rejectChanges();
 	}
 
 	var revertLocalAliases = function() {
+		localAliasStore.rejectChanges();
 		saveLocalAliasesBtn.disable();
 		revertLocalAliasesBtn.disable();
-		localAliasStore.rejectChanges();
 	}
 
 	var revertSiteAdmins = function() {
+		siteAdminStore.rejectChanges();
 		saveSiteAdminBtn.disable();
 		revertSiteAdminBtn.disable();
-		siteAdminStore.rejectChanges();
 	}
 
 	var revertUsers = function() {
+		userStore.rejectChanges();
 		saveUserBtn.disable();
 		revertUserBtn.disable();
-		userStore.rejectChanges();
 	}
 
 	var validPass = function(pass) {

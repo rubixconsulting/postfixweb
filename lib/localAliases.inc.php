@@ -2,6 +2,15 @@
 
 include_once('db.inc.php');
 include_once('user.inc.php');
+include_once('localForwards.inc.php');
+
+function getNumLocalAliasDestination($name) {
+	if(!isSiteAdmin()) {
+		return FALSE;
+	}
+	$sql = 'SELECT COUNT(alias_id) FROM local_aliases WHERE name = ?';
+	return db_getval($sql, array($name));
+}
 
 function getLocalAliases() {
 	if(!isSiteAdmin()) {
@@ -22,6 +31,7 @@ function getLocalAliases() {
 		} else {
 			$rows[$i]['active'] = FALSE;
 		}
+		$rows[$i]['forwards'] = getNumVirtualForwards($row['name']);
 		$i++;
 	}
 	return $rows;
