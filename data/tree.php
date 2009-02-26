@@ -69,7 +69,7 @@ $domainAdministration[] = array(
 );
 
 $domainAdministration[] = array(
-	'text' => 'Catch All Addresses',
+	'text' => 'Catch All Forwards',
 	'id'   => 'catchall-addresses',
 	'leaf' => TRUE
 );

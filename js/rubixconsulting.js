@@ -23,7 +23,8 @@ RubixConsulting.user = function() {
 	var addLocalForwardDomain, addLocalForwardDestination, localForwardMask;
 	var bulkAddLocalForwardBtn, bulkAddLocalForwardWindow, bulkAddLocalForwardArea;
 	var addCatchAllBtn, removeCatchAllBtn, revertCatchAllsBtn, saveCatchAllBtn;
-	var saveCatchAllBtn;
+	var saveCatchAllBtn, addCatchAllWindow, addCatchAllDomain, addCatchAllDestination;
+	var catchAllMask;
 
 	var domainSm        = new Ext.grid.CheckboxSelectionModel();
 	var userSm          = new Ext.grid.CheckboxSelectionModel();
@@ -230,6 +231,8 @@ RubixConsulting.user = function() {
 			domainListMask.hide();
 		} else if(form.url == 'data/localAliases.php') {
 			localAliasMask.hide();
+		} else if(form.url == 'data/catchAll.php') {
+			catchAllMask.hide();
 		}
 		if(action && action.response && action.response.statusText && (action.response.statusText != 'OK')) {
 			showError(action.response.statusText);
@@ -434,6 +437,7 @@ RubixConsulting.user = function() {
 							border: true,
 							id: 'manage-users-panel',
 							autoScroll: true,
+							autoExpandColumn: 'name',
 							loadMask: true,
 							clicksToEdit: 1,
 							tbar: [
@@ -503,6 +507,7 @@ RubixConsulting.user = function() {
 							border: true,
 							id: 'manage-domain-permissions-panel',
 							autoScroll: true,
+							autoExpandColumn: null,
 							loadMask: true,
 							clicksToEdit: 1,
 							tbar: [
@@ -1443,7 +1448,76 @@ RubixConsulting.user = function() {
 	}
 
 	var showAddCatchAllWindow = function() {
-		// TODO
+		if(!addCatchAllWindow) {
+			addCatchAllWindow = new Ext.Window({
+				resizable: false,
+				layout: 'fit',
+				width: 380,
+				height: 175,
+				constrain: true,
+				constrainHeader: true,
+				minimizable: false,
+				closable: false,
+				plain: false,
+				title: 'Add a new catch all forward...',
+				modal: true,
+				items: [{
+					id: 'add-catchall-form',
+					layout: 'form',
+					url: 'data/catchAll.php',
+					frame: true,
+					monitorValid: true,
+					xtype: 'form',
+					bodyStyle: 'padding: 15px',
+					defaults: {
+						msgTarget: 'side'
+					},
+					baseParams: {
+						mode: 'add'
+					},
+					buttons: [{
+						text: 'Cancel',
+						handler: hideAddCatchAllWindow
+					},{
+						text: 'Add',
+						formBind: true,
+						handler: addNewCatchAll
+					}],
+					layoutConfig: {
+						labelSeparator: ''
+					},
+					items: [
+						addCatchAllDomain = new Ext.form.ComboBox({
+							store: domainListStore,
+							fieldLabel: 'Domain',
+							displayField: 'domain',
+							valueField: 'domain_id',
+							forceSelection: true,
+							typeAhead: true,
+							minChars: 1,
+							editable: true,
+							allowBlank: false,
+							width: 200,
+							hiddenName: 'domain',
+							triggerAction: 'all',
+							queryParam: 'query',
+							allQuery: 'all'
+						}),
+						addCatchAllDestination = new Ext.form.TextField({
+							fieldLabel: 'Destination',
+							allowBlank: false,
+							width: 200,
+							name: 'destination'
+						}),
+						boolEditor('Active', 'active', 200)
+					]
+				}]
+			});
+		}
+		addCatchAllWindow.show(addCatchAllBtn.getEl());
+		new Ext.util.DelayedTask(function() {
+			addCatchAllDomain.focus();
+		}, this).delay(700);
 	}
 
 	var showAddAliasWindow = function() {
@@ -1841,6 +1915,11 @@ RubixConsulting.user = function() {
 		}
 	}
 
+	var hideAddCatchAllWindow = function() {
+		Ext.getCmp('add-catchall-form').getForm().reset();
+		addCatchAllWindow.hide(addCatchAllBtn.getEl());
+	}
+
 	var hideAddAliasWindow = function() {
 		Ext.getCmp('add-alias-form').getForm().reset();
 		Ext.get('add-alias-address').update('username@domain');
@@ -1910,6 +1989,15 @@ RubixConsulting.user = function() {
 		});
 	}
 
+	var addNewCatchAll = function() {
+		catchAllMask =  new Ext.LoadMask(catchAllGrid.getEl(), {msg: 'Adding new catch all forward...'});
+		catchAllMask.show();
+		Ext.getCmp('add-catchall-form').getForm().submit({
+			success: addCatchAllSuccess,
+			failure: formFailure
+		});
+	}
+
 	var addNewAlias = function() {
 		aliasMask = new Ext.LoadMask(aliasesGrid.getEl(), {msg: 'Adding new alias...'});
 		aliasMask.show();
@@ -1971,6 +2059,14 @@ RubixConsulting.user = function() {
 		revertLocalForwardsBtn.disable();
 		localForwardMask.hide();
 		loadLocalForwards();
+	}
+
+	var addCatchAllSuccess = function(form, action) {
+		hideAddCatchAllWindow();
+		saveCatchAllBtn.disable();
+		revertCatchAllsBtn.disable();
+		catchAllMask.hide();
+		loadCatchAlls();
 	}
 
 	var addAliasSuccess = function(form, action) {

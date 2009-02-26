@@ -9,8 +9,18 @@ $query = $_POST['query'];
 $mode = $_POST['mode'];
 
 if($mode == 'load') {
-	$domainId = $_POST['domain'];
-	print json_encode(array('catchalls' => getCatchAlls($domainId)));
+	print json_encode(array('catchalls' => getCatchAlls()));
+} else if($mode == 'add') {
+	$domainId    = $_POST['domain'];
+	$destination = $_POST['destination'];
+	$active      = $_POST['active'];
+	if($active == 'true') {
+		$active = TRUE;
+	} else {
+		$active = FALSE;
+	}
+	$destination = trim($destination);
+	addCatchAll($domainId, $destination, $active);
 } else if($mode == 'save') {
 #	$domainId = $_POST['domain'];
 #	$updates = json_decode($_POST['update']);

@@ -127,7 +127,17 @@ function getCatchAlls() {
 			quotedAdminDomainString().
 		'    )'.
 		'  ORDER BY domain, destination';
-	return db_getrows($sql);
+	$catchAlls = db_getrows($sql);
+	$i = 0;
+	foreach($catchAlls as $catchAll) {
+		if($catchAll['active'] == 't') {
+			$catchAlls[$i]['active'] = TRUE;
+		} else {
+			$catchAlls[$i]['active'] = FALSE;
+		}
+		$i++;
+	}
+	return $catchAlls;
 }
 
 function getDomainPermissions($domainId) {

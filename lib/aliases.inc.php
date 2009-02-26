@@ -2,6 +2,7 @@
 
 include_once('db.inc.php');
 include_once('localForwards.inc.php');
+include_once('email.inc.php');
 
 function getAliasEmail($aliasId) {
 	if(!$aliasId) {
@@ -39,6 +40,88 @@ function getAliases() {
 		'    )'.
 		'  ORDER BY domain, username, destination';
 	return db_getrows($sql);
+}
+
+function addCatchAll($domainId, $destination, $active) {
+	if($active) {
+		$active = 't';
+	} else {
+		$active = 'f';
+	}
+	$foundError = FALSE;
+	$errors = array();
+	if(!$domainId) {
+		$errors['domain'] = 'This field is required';
+		$foundError = TRUE;
+	}
+	if(!$destination) {
+		$errors['destination'] = 'This field is required';
+		$foundError = TRUE;
+	}
+	if(!$active) {
+		$errors['active'] = 'This field is required';
+		$foundError = TRUE;
+	}
+	if($foundError) {
+		print json_encode(array('success' => false, 'errors' => $errors));
+		return FALSE;
+	}
+	$domain = getDomain($domainId);
+	if(!$domain) {
+		$errors['domain'] = 'Invalid domain';
+		$foundError = TRUE;
+	}
+	if(!validEmailAddress($destination)) {
+		$errors['destination'] = 'Invalid destination';
+		$foundError = TRUE;
+	}
+	if($foundError) {
+		print json_encode(array('success' => false, 'errors' => $errors));
+		return FALSE;
+	}
+	$destinationParts = split('@', $destination);
+	$allDomainsHash = getAllDomains();
+	$allDomains = array();
+	foreach($allDomainsHash as $tmpDomain) {
+		$allDomains[] = $tmpDomain['domain'];
+	}
+	if(in_array($destinationParts[1], $allDomains)) {
+		if(!userExists($destination)) {
+			print json_encode(array(
+				'success' => false,
+				'errors' => array(
+					'destination' => 'User does not exist in local domain: '.$destinationParts[1]
+				)
+			));
+			return FALSE;
+		}
+	}
+	$adminDomains = getAdminDomains();
+	if(!in_array($domain, $adminDomains)) {
+		$errors['domain'] = 'Permission denied on domain: '.$domain;
+		$foundError = TRUE;
+	}
+	$email = '@'.$domain;
+	if(aliasExists($email, $destination)) {
+		$errors['destination'] = 'Catch all already exists';
+		$foundError = TRUE;
+	}
+	if($foundError) {
+		print json_encode(array('success' => false, 'errors' => $errors));
+		return FALSE;
+	}
+	$params = array(
+		'username'    => '',
+		'domain_id'   => $domainId,
+		'destination' => $destination,
+		'active'      => $active
+	);
+	$ret = db_insert('virtual_aliases', $params, 'alias_id');
+	if($ret) {
+		print json_encode(array('success' => TRUE));
+		return;
+	}
+	print json_encode(array('success' => FALSE, 'msg' => 'Unknown error'));
 }
 
 function addAlias($username, $domainId, $destinationId, $active) {
