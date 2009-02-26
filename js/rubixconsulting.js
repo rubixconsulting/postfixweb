@@ -32,7 +32,7 @@ RubixConsulting.user = function() {
 	var aliasSm         = new Ext.grid.CheckboxSelectionModel();
 	var manageForwardSm = new Ext.grid.CheckboxSelectionModel();
 	var localForwardSm  = new Ext.grid.CheckboxSelectionModel();
-	var catchAllSm  = new Ext.grid.CheckboxSelectionModel();
+	var catchAllSm      = new Ext.grid.CheckboxSelectionModel();
 
 	var domainsLoaded        = false;
 	var usersLoaded          = false;
@@ -49,6 +49,7 @@ RubixConsulting.user = function() {
 	var removedManageForwards = new Array();
 	var removedAliases        = new Array();
 	var removedLocalForwards  = new Array();
+	var removedCatchAlls      = new Array();
 
 	var domainRecord = Ext.data.Record.create([
 		{name: 'domain_id', type: 'int'},
@@ -998,6 +999,10 @@ RubixConsulting.user = function() {
 			saveLocalForwardsBtn.enable();
 			revertLocalForwardsBtn.enable();
 		}, this);
+		catchAllStore.on('update', function(store, record, operation) {
+			saveCatchAllBtn.enable();
+			revertCatchAllsBtn.enable();
+		}, this);
 		localForwardStore.on( 'loadexception', loadException, this);
 		domainListStore.on(   'loadexception', loadException, this);
 		userStore.on(         'loadexception', loadException, this);
@@ -1005,6 +1010,7 @@ RubixConsulting.user = function() {
 		siteAdminStore.on(    'loadexception', loadException, this);
 		localAliasStore.on(   'loadexception', loadException, this);
 		manageForwardStore.on('loadexception', loadException, this);
+		catchAllStore.on(     'loadexception', loadException, this);
 		domainSm.on('beforerowselect', function(selectionmodel, row, keep, record) {
 			if(record.get('domain') == user.domain) {
 				return false;
@@ -1016,6 +1022,13 @@ RubixConsulting.user = function() {
 				return false;
 			}
 			return true;
+		}, this);
+		catchAllSm.on('selectionchange', function(selectionmodel) {
+			if(catchAllSm.getCount() > 0) {
+				removeCatchAllBtn.enable();
+			} else {
+				removeCatchAllBtn.disable();
+			}
 		}, this);
 		aliasSm.on('selectionchange', function(selectionmodel) {
 			if(aliasSm.getCount() > 0) {
@@ -2104,7 +2117,19 @@ RubixConsulting.user = function() {
 	}
 
 	var removeSelectedCatchAlls = function() {
-		// TODO
+		Ext.MessageBox.show({
+			closable: false,
+			buttons: Ext.MessageBox.YESNO,
+			icon: Ext.MessageBox.QUESTION,
+			title: 'Remove catch alls?',
+			width: 450,
+			msg: '<table><tr><td>Do you really want to remove the selected catch alls?</td></tr></table>',
+			fn: function(btn) {
+				if(btn == 'yes') {
+					doRemoveSelectedCatchAlls();
+				}
+			}
+		});
 	}
 
 	var removeSelectedAliases = function() {
@@ -2201,6 +2226,18 @@ RubixConsulting.user = function() {
 		}
 	}
 
+	var doRemoveSelectedCatchAlls = function() {
+		catchAllMask =  new Ext.LoadMask(catchAllGrid.getEl(), {msg: 'Removing catch all forwards...'});
+		catchAllMask.show();
+		var selected = catchAllSm.getSelections();
+		for(var i = 0; i < selected.length; i++) {
+			removedCatchAlls.push(selected[i].get('alias_id'));
+			selected[i].commit();
+			catchAllStore.remove(selected[i]);
+		}
+		saveCatchAll();
+	}
+
 	var doRemoveSelectedAliases = function() {
 		aliasMask = new Ext.LoadMask(aliasesGrid.getEl(), {msg: 'Removing aliases...'});
 		aliasMask.show();
@@ -2291,10 +2328,6 @@ RubixConsulting.user = function() {
 		});
 	}
 
-	var saveCatchAll = function() {
-		// TODO
-	}
-
 	var saveDomainPerms = function() {
 		var modifiedDomains = new Array();
 		var modified = domainPermStore.getModifiedRecords();
@@ -2336,6 +2369,30 @@ RubixConsulting.user = function() {
 			params: {
 				mode: 'save',
 				update: Ext.util.JSON.encode(modifiedUsers)
+			}
+		});
+	}
+
+	var saveCatchAll = function() {
+		var modifiedCatchAlls = new Array();
+		var modified = catchAllStore.getModifiedRecords();
+		for(var i = 0; i < modified.length; i++) {
+			var tmpCatchAll = new Object();
+			tmpCatchAll.alias_id    = modified[i].get('alias_id');
+			tmpCatchAll.destination = modified[i].get('destination');
+			tmpCatchAll.active      = modified[i].get('active');
+			modifiedCatchAlls.push(tmpCatchAll);
+		}
+		catchAllMask =  new Ext.LoadMask(catchAllGrid.getEl(), {msg: 'Saving catch all forwards...'});
+		catchAllMask.show();
+		Ext.Ajax.request({
+			url: 'data/catchAll.php',
+			success: completeSaveCatchAlls,
+			failure: ajaxFailure,
+			params: {
+				mode: 'save',
+				update: Ext.util.JSON.encode(modifiedCatchAlls),
+				remove: removedCatchAlls.join(',')
 			}
 		});
 	}
@@ -2473,6 +2530,14 @@ RubixConsulting.user = function() {
 		siteAdminMask.hide();
 	}
 
+	var completeSaveCatchAlls = function() {
+		catchAllStore.commitChanges();
+		removedCatchAlls = new Array();
+		saveCatchAllBtn.disable();
+		revertCatchAllsBtn.disable();
+		catchAllMask.hide();
+	}
+
 	var completeSaveAliases = function() {
 		aliasStore.commitChanges();
 		removedAliases = new Array();
@@ -2514,7 +2579,9 @@ RubixConsulting.user = function() {
 	}
 
 	var revertCatchAlls = function() {
-		// TODO
+		catchAllStore.rejectChanges();
+		saveCatchAllBtn.disable();
+		revertCatchAllsBtn.disable();
 	}
 
 	var revertAliases = function() {
