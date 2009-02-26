@@ -605,6 +605,31 @@ function addUser($newUser) {
 	print json_encode(array('success' => false, 'errors' => array('username' => 'Unknown Error')));
 }
 
+function removeCatchAll($catchAllId) {
+	if(!$catchAllId) {
+		return FALSE;
+	}
+	if(!isDomainAdmin()) {
+		return FALSE;
+	}
+	$catchAll = loadAlias($catchAllId);
+	if(!$catchAll) {
+		return FALSE;
+	}
+	if($catchAll['username'] != '') {
+		return FALSE;
+	}
+	$domain = $catchAll['domain'];
+	$adminDomains = getAdminDomains();
+	if(!in_array($domain, $adminDomains)) {
+		return FALSE;
+	}
+	$conditions = array(
+		'alias_id' => $catchAllId
+	);
+	return db_delete('virtual_aliases', $conditions);
+}
+
 function removeUser($userId) {
 	if(!$userId) {
 		return FALSE;
@@ -630,6 +655,43 @@ function removeUser($userId) {
 	);
 	## TODO remove the virtual home directory
 	return db_delete('virtual_users', $condition);
+}
+
+function modifyCatchAll($catchAllId, $destination, $active) {
+	if(!$active) {
+		$active = 'f';
+	} else {
+		$active = 't';
+	}
+	if(!$catchAllId || !$destination || !$active) {
+		return FALSE;
+	}
+	if(!isDomainAdmin()) {
+		return FALSE;
+	}
+	$catchAll = loadAlias($catchAllId);
+	if(!$catchAll) {
+		return FALSE;
+	}
+	if($catchAll['username'] != '') {
+		return FALSE;
+	}
+	$domain = $catchAll['domain'];
+	$adminDomains = getAdminDomains();
+	if(!in_array($domain, $adminDomains)) {
+		return FALSE;
+	}
+	if(!validEmailAddress($destination)) {
+		return FALSE;
+	}
+	$updates = array(
+		'destination' => $destination,
+		'active'      => $active
+	);
+	$conditions = array(
+		'alias_id' => $catchAllId
+	);
+	return db_update('virtual_aliases', $updates, $conditions);
 }
 
 function modifyUser($userId, $description, $active) {
