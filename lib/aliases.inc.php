@@ -30,6 +30,7 @@ function getAliases() {
 		'  WHERE domain IN ('.
 			quotedAdminDomainString().
 		'  )'.
+		'    AND username != \'\''.
 		'    AND (username || \'@\' || domain) NOT IN ('.
 			quotedAdminUserString().
 		'    )'.

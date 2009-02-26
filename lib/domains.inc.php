@@ -25,23 +25,14 @@ function addDomain($domain) {
 		print json_encode(array('success' => FALSE, 'errors' => array('domain' => 'Can not delete your own domain')));
 		return;
 	}
-	beginTransaction();
 	$add = array(
 		'domain' => $domain
 	);
 	$domain_id = db_insert('virtual_domains', $add, 'domain_id');
 	if(!$domain_id) {
-		cancelTransaction();
 		print json_encode(array('success' => FALSE, 'errors' => array('domain' => 'Unknown error')));
 		return;
 	}
-	$catchall_id = addCatchAll($domain);
-	if(!$catchall_id) {
-		cancelTransaction();
-		print json_encode(array('success' => FALSE, 'errors' => array('domain' => 'Unknown error')));
-		return;
-	}
-	endTransaction();
 	print json_encode(array('success' => true));
 }
 
@@ -51,27 +42,6 @@ function domainExists($domain) {
 		return TRUE;
 	}
 	return FALSE;
-}
-
-function addCatchAll($domain, $active = FALSE) {
-	if(!isSiteAdmin() || !$domain || !validDomain($domain)) {
-		return FALSE;
-	}
-	if($active) {
-		$active = 't';
-	} else {
-		$active = 'f';
-	}
-	$domainId = getDomainId($domain);
-	$catchall = array(
-		'username'    => '',
-		'domain_id'   => $domainId,
-		'password'    => '!',
-		'role_id'     => getRoleId('catchall'),
-		'description' => $domain.' catch all',
-		'active'      => $active
-	);
-	return db_insert('virtual_users', $catchall, 'user_id');
 }
 
 function validDomain($domain) {

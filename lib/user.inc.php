@@ -59,6 +59,24 @@ function authenticateUser($email, $pass) {
 	return db_getval($sql, array($email, $pass));
 }
 
+function getAllActiveUsers() {
+	if(!isDomainAdmin()) {
+		return FALSE;
+	}
+	$sql = 'SELECT'.
+		'  user_id,'.
+		'  (username || \'@\' || domain) AS email,'.
+		'  domain'.
+		'  FROM virtual_users'.
+		'  JOIN virtual_domains USING(domain_id)'.
+		'  WHERE active = \'y\''.
+		'    AND domain IN ('.
+			quotedAdminDomainString().
+		'    )'.
+		'  ORDER BY domain, username';
+	return db_getrows($sql);
+}
+
 function getAllActiveUsersByRole($role) {
 	if(!$role || !isDomainAdmin()) {
 		return FALSE;
@@ -93,7 +111,26 @@ function getDomainAdminsById($domainId) {
 	return db_getrows($sql, array($domainId));
 }
 
-function getDomainPermissions($domainId = FALSE) {
+function getCatchAlls() {
+	if(!isDomainAdmin()) {
+		return FALSE;
+	}
+	$sql = 'SELECT'.
+		'  alias_id,'.
+		'  domain,'.
+		'  destination,'.
+		'  active'.
+		'  FROM virtual_aliases'.
+		'  JOIN virtual_domains USING (domain_id)'.
+		'  WHERE username = \'\''.
+		'    AND domain IN ('.
+			quotedAdminDomainString().
+		'    )'.
+		'  ORDER BY domain, destination';
+	return db_getrows($sql);
+}
+
+function getDomainPermissions($domainId) {
 	if(!$domainId || !isDomainAdmin()) {
 		return FALSE;
 	}
@@ -199,8 +236,7 @@ function getAdminUsers($like = FALSE, $userId = FALSE) {
 		'    active'.
 		'  FROM virtual_users'.
 		'  JOIN virtual_domains USING(domain_id)'.
-		'  WHERE role_id != ?'.
-		'  AND domain IN ('.
+		'  WHERE domain IN ('.
 			quotedAdminDomainString().
 		'  )';
 	if($like) {
@@ -208,9 +244,9 @@ function getAdminUsers($like = FALSE, $userId = FALSE) {
 	}
 	$sql .= ' ORDER BY domain, username';
 	if($like) {
-		$params = array(getRoleId('catchall'), '%'.$like.'%');
+		$params = array('%'.$like.'%');
 	} else {
-		$params = array(getRoleId('catchall'));
+		$params = array();
 	}
 	$users = db_getrows($sql, $params);
 	if(!$users) {
