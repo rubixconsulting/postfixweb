@@ -337,6 +337,7 @@ function getUserAliases($email) {
 		'  FROM virtual_aliases'.
 		'  JOIN virtual_domains USING(domain_id)'.
 		'  WHERE destination = ?'.
+		'    AND username != \'\''.
 		'    AND active = \'t\''.
 		'    AND (username || \'@\' || domain) != ?'.
 		'  ORDER BY domain, username';
