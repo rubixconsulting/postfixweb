@@ -7,11 +7,9 @@
 		<link rel="stylesheet" type="text/css" href="/js/ext/resources/css/xtheme-gray.css" />
 		<link rel='stylesheet' type='text/css' href='css/passwordmeter.css' />
 		<link rel="stylesheet" type="text/css" href="css/rubixconsulting.css" />
-<!--
 		<script type="text/javascript" src="http://getfirebug.com/releases/lite/1.2/firebug-lite-compressed.js"></script>
--->
 		<script type="text/javascript" src="/js/ext/adapter/ext/ext-base.js"></script>
-		<script type="text/javascript" src="/js/ext/ext-all.js"></script>
+		<script type="text/javascript" src="/js/ext/ext-all-debug.js"></script>
 		<script type="text/javascript" src="js/passwordmeter.js"></script>
 		<script type="text/javascript" src="js/miframe-min.js"></script>
 		<script type="text/javascript" src="js/rubixconsulting.js"></script>

@@ -550,7 +550,7 @@ RubixConsulting.user = function() {
 									text: 'Revert Changes',
 									handler: revertDomainAdmins,
 									disabled: true
-								}),
+								})
 							],
 							store: domainPermStore,
 							cm: new Ext.grid.ColumnModel([
@@ -677,7 +677,7 @@ RubixConsulting.user = function() {
 									id: 'destination',
 									editor: new Ext.form.TextField({
 										allowBlank: true
-									}),
+									})
 								},{
 									header: 'Virtual Forwards',
 									sortable: true,
@@ -3134,7 +3134,7 @@ RubixConsulting.user = function() {
 		catchAllLoaded = false;
 		catchAllStore.load({
 			params: {
-				mode: 'load',
+				mode: 'load'
 			},
 			callback: function(r, options, success) {
 				if(success) {
