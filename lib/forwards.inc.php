@@ -6,19 +6,60 @@ include_once('domains.inc.php');
 include_once('email.inc.php');
 include_once('aliases.inc.php');
 
-function getUserForwards($email) {
+function getActiveUserForwards($email = FALSE) {
 	if(!$email) {
-		return FALSE;
+		$email = $_SESSION['user']['email'];
 	}
 	$sql = 'SELECT'.
-		'  destination'.
+		'  alias_id,'.
+		'  (username || \'@\' || domain) AS email,'.
+		'  domain,'.
+		'  destination,'.
+		'  active'.
 		'  FROM virtual_aliases'.
 		'  JOIN virtual_domains USING(domain_id)'.
 		'  WHERE active = \'t\''.
 		'    AND (username || \'@\' || domain) = ?'.
-		'    AND destination != ?';
+		'    AND destination != ?'.
 		'  ORDER BY destination';
-	return db_getcol($sql, array($email, $email));
+	$rows = db_getrows($sql, array($email, $email));
+	$i = 0;
+	foreach($rows as $row) {
+		if($row['active'] == 't') {
+			$rows[$i]['active'] = TRUE;
+		} else {
+			$rows[$i]['active'] = FALSE;
+		}
+		$i++;
+	}
+	return $rows;
+}
+
+function getUserForwards($email = FALSE) {
+	if(!$email) {
+		$email = $_SESSION['user']['email'];
+	}
+	$sql = 'SELECT'.
+		'  alias_id,'.
+		'  (username || \'@\' || domain) AS email,'.
+		'  domain,'.
+		'  destination,'.
+		'  active'.
+		'  FROM virtual_aliases'.
+		'  JOIN virtual_domains USING(domain_id)'.
+		'    WHERE (username || \'@\' || domain) = ?'.
+		'  ORDER BY destination';
+	$rows = db_getrows($sql, array($email));
+	$i = 0;
+	foreach($rows as $row) {
+		if($row['active'] == 't') {
+			$rows[$i]['active'] = TRUE;
+		} else {
+			$rows[$i]['active'] = FALSE;
+		}
+		$i++;
+	}
+	return $rows;
 }
 
 function getForwards() {
@@ -40,7 +81,17 @@ function getForwards() {
 			quotedAdminUserString().
 		'  )'.
 		'  ORDER BY domain, username, destination';
-	return db_getrows($sql);
+	$rows = db_getrows($sql);
+	$i = 0;
+	foreach($rows as $row) {
+		if($row['active'] == 't') {
+			$rows[$i]['active'] = TRUE;
+		} else {
+			$rows[$i]['active'] = FALSE;
+		}
+		$i++;
+	}
+	return $rows;
 }
 
 function addForward($destination, $active, $userId = FALSE) {

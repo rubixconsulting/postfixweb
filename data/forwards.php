@@ -3,14 +3,12 @@
 include_once('../lib/session.inc.php');
 include_once('../lib/forwards.inc.php');
 
-requireDomainAdmin();
-
 $mode = $_POST['mode'];
 
 if($mode == 'load') {
 	print json_encode(array(
 		'success' => TRUE,
-		'forwards' => getForwards()
+		'forwards' => getUserForwards()
 	));
 } else if($mode == 'save') {
 	$update = $_POST['update'];
@@ -32,7 +30,6 @@ if($mode == 'load') {
 	}
 	print json_encode(array('success' => TRUE));
 } else if($mode == 'add') {
-	$userId      = $_POST['email'];
 	$destination = $_POST['destination'];
 	$active      = $_POST['active'];
 	if($active == 'true') {
@@ -41,5 +38,5 @@ if($mode == 'load') {
 		$active = FALSE;
 	}
 	$destination = trim($destination);
-	addForward($destination, $active, $userId);
+	addForward($destination, $active);
 }

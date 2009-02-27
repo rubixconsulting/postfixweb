@@ -73,7 +73,7 @@ function validLocalAliasDestination($destination) {
 	if(validUserName($destination)) {
 		return TRUE;
 	}
-	## TODO
+	## TODO is there any other local alias destination validation that makes sense?
 	return TRUE;
 }
 

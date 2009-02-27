@@ -24,7 +24,9 @@ RubixConsulting.user = function() {
 	var bulkAddLocalForwardBtn, bulkAddLocalForwardWindow, bulkAddLocalForwardArea;
 	var addCatchAllBtn, removeCatchAllBtn, revertCatchAllsBtn, saveCatchAllBtn;
 	var saveCatchAllBtn, addCatchAllWindow, addCatchAllDomain, addCatchAllDestination;
-	var catchAllMask;
+	var catchAllMask, forwardGrid, addForwardBtn, removeForwardBtn, revertForwardsBtn;
+	var saveForwardsBtn, addForwardWindow, addForwardDestination;
+	var forwardMask, addManageForwardDestination, revertDomainPermBtn;
 
 	var domainSm        = new Ext.grid.CheckboxSelectionModel();
 	var userSm          = new Ext.grid.CheckboxSelectionModel();
@@ -33,6 +35,7 @@ RubixConsulting.user = function() {
 	var manageForwardSm = new Ext.grid.CheckboxSelectionModel();
 	var localForwardSm  = new Ext.grid.CheckboxSelectionModel();
 	var catchAllSm      = new Ext.grid.CheckboxSelectionModel();
+	var forwardSm       = new Ext.grid.CheckboxSelectionModel();
 
 	var domainsLoaded        = false;
 	var usersLoaded          = false;
@@ -43,6 +46,7 @@ RubixConsulting.user = function() {
 	var manageForwardsLoaded = false;
 	var localForwardsLoaded  = false;
 	var catchAllLoaded       = false;
+	var forwardsLoaded       = false;
 
 	var removedUsers          = new Array();
 	var removedLocalAliases   = new Array();
@@ -50,6 +54,7 @@ RubixConsulting.user = function() {
 	var removedAliases        = new Array();
 	var removedLocalForwards  = new Array();
 	var removedCatchAlls      = new Array();
+	var removedForwards       = new Array();
 
 	var domainRecord = Ext.data.Record.create([
 		{name: 'domain_id', type: 'int'},
@@ -120,6 +125,12 @@ RubixConsulting.user = function() {
 		{name: 'destination', type: 'string'},
 		{name: 'active',      type: 'boolean'}
 	]);
+
+	var forwardStore = new Ext.data.JsonStore({
+		url: 'data/forwards.php',
+		root: 'forwards',
+		fields: forwardRecord
+	});
 
 	var catchAllStore = new Ext.data.JsonStore({
 		url: 'data/catchAll.php',
@@ -219,7 +230,6 @@ RubixConsulting.user = function() {
 	var formFailure = function(form, action) {
 		if(form.url == 'data/changePass.php') {
 			passwordMask.hide();
-		// TODO are these complete? test adding with bad values
 		} else if(form.url == 'data/users.php') {
 			userMask.hide();
 		} else if(form.url == 'data/manageForwards.php') {
@@ -234,6 +244,8 @@ RubixConsulting.user = function() {
 			localAliasMask.hide();
 		} else if(form.url == 'data/catchAll.php') {
 			catchAllMask.hide();
+		} else if(form.url == 'data/forwards.php') {
+			forwardMask.hide();
 		}
 		if(action && action.response && action.response.statusText && (action.response.statusText != 'OK')) {
 			showError(action.response.statusText);
@@ -317,8 +329,7 @@ RubixConsulting.user = function() {
 								},{
 									html: '<b>Email Address</b>',
 									cellCls: 'alignTop',
-									border: false,
-									width: 200
+									border: false
 								},{
 									html: user.email,
 									cellCls: 'alignTop',
@@ -532,7 +543,12 @@ RubixConsulting.user = function() {
 									text: 'Save Changes',
 									handler: saveDomainPerms,
 									disabled: true
-								})
+								}),
+								revertDomainPermBtn = new Ext.Toolbar.Button({
+									text: 'Revert Changes',
+									handler: revertDomainAdmins,
+									disabled: true
+								}),
 							],
 							store: domainPermStore,
 							cm: new Ext.grid.ColumnModel([
@@ -890,7 +906,6 @@ RubixConsulting.user = function() {
 							border: true,
 							id: 'catchall-addresses-panel',
 							autoScroll: true,
-							autoExpandColumn: 'destination',
 							loadMask: true,
 							clicksToEdit: 1,
 							tbar: [
@@ -944,7 +959,60 @@ RubixConsulting.user = function() {
 								}
 							]),
 							iconCls: 'icon-grid'
+						}),
+						forwardGrid = new Ext.grid.EditorGridPanel({
+							border: true,
+							id: 'forwards-panel',
+							autoScroll: true,
+							autoExpandColumn: false,
+							loadMask: true,
+							clicksToEdit: 1,
+							tbar: [
+								addForwardBtn = new Ext.Toolbar.Button({
+									text: 'Add New',
+									handler: addForward
+								}),
+								removeForwardBtn = new Ext.Toolbar.Button({
+									text: 'Remove Selected',
+									handler: removeSelectedForwards,
+									disabled: true
+								}),
+								revertForwardsBtn = new Ext.Toolbar.Button({
+									text: 'Revert Changes',
+									handler: revertForwards,
+									disabled: true
+								}),
+								saveForwardsBtn = new Ext.Toolbar.Button({
+									text: 'Save Changes',
+									handler: saveForwards,
+									disabled: true
+								})
+							],
+							store: forwardStore,
+							sm: forwardSm,
+							cm: new Ext.grid.ColumnModel([
+								forwardSm, {
+									header: 'Destination',
+									sortable: true,
+									dataIndex: 'destination',
+									id: 'destination',
+									width: 200,
+									editor: new Ext.form.TextField({
+										allowBlank: false
+									})
+								},{
+									header: 'Active',
+									sortable: true,
+									dataIndex: 'active',
+									id: 'active',
+									width: 50,
+									editor: boolEditor(),
+									renderer: boolRenderer
+								}
+							]),
+							iconCls: 'icon-grid'
 						})
+
 					]
 				})
 			]
@@ -986,6 +1054,7 @@ RubixConsulting.user = function() {
 		}, this);
 		domainPermStore.on('update', function(store, record, operation) {
 			saveDomainPermBtn.enable();
+			revertDomainPermBtn.enable();
 		}, this);
 		siteAdminStore.on('update', function(store, record, operation) {
 			saveSiteAdminBtn.enable();
@@ -1003,6 +1072,10 @@ RubixConsulting.user = function() {
 			saveCatchAllBtn.enable();
 			revertCatchAllsBtn.enable();
 		}, this);
+		forwardStore.on('update', function(store, record, operation) {
+			saveForwardsBtn.enable();
+			revertForwardsBtn.enable();
+		}, this);
 		localForwardStore.on( 'loadexception', loadException, this);
 		domainListStore.on(   'loadexception', loadException, this);
 		userStore.on(         'loadexception', loadException, this);
@@ -1011,6 +1084,7 @@ RubixConsulting.user = function() {
 		localAliasStore.on(   'loadexception', loadException, this);
 		manageForwardStore.on('loadexception', loadException, this);
 		catchAllStore.on(     'loadexception', loadException, this);
+		forwardStore.on(      'loadexception', loadException, this);
 		domainSm.on('beforerowselect', function(selectionmodel, row, keep, record) {
 			if(record.get('domain') == user.domain) {
 				return false;
@@ -1022,6 +1096,13 @@ RubixConsulting.user = function() {
 				return false;
 			}
 			return true;
+		}, this);
+		forwardSm.on('selectionchange', function(selectionmodel) {
+			if(forwardSm.getCount() > 0) {
+				removeForwardBtn.enable();
+			} else {
+				removeForwardBtn.disable();
+			}
 		}, this);
 		catchAllSm.on('selectionchange', function(selectionmodel) {
 			if(catchAllSm.getCount() > 0) {
@@ -1090,7 +1171,7 @@ RubixConsulting.user = function() {
 			return true;
 		}, this);
 		userGrid.on('beforeedit', function(e) {
-			if(e.record.get('email') == user.email) {
+			if((e.record.get('email') == user.email) && (e.column == 4)) {
 				return false;
 			}
 			return true;
@@ -1111,6 +1192,64 @@ RubixConsulting.user = function() {
 			msg = response.statusText;
 		}
 		showError(msg);
+	}
+
+	var addForward = function() {
+		if(!addForwardWindow) {
+			addForwardWindow = new Ext.Window({
+				resizable: false,
+				layout: 'fit',
+				width: 380,
+				height: 150,
+				constrain: true,
+				constrainHeader: true,
+				minimizable: false,
+				closable: false,
+				plain: false,
+				title: 'Add a new forward...',
+				modal: true,
+				items: [{
+					id: 'add-forward-form',
+					layout: 'form',
+					url: 'data/forwards.php',
+					frame: true,
+					monitorValid: true,
+					xtype: 'form',
+					bodyStyle: 'padding: 15px',
+					defaults: {
+						msgTarget: 'side'
+					},
+					baseParams: {
+						mode: 'add'
+					},
+					buttons: [{
+						text: 'Cancel',
+						handler: hideAddForwardWindow
+					},{
+						text: 'Add',
+						formBind: true,
+						handler: doAddForward
+					}],
+					layoutConfig: {
+						labelSeparator: ''
+					},
+					items: [
+						addForwardDestination = new Ext.form.TextField({
+							fieldLabel: 'Destination',
+							allowBlank: false,
+							width: 200,
+							name: 'destination',
+							vtype: 'email'
+						}),
+						boolEditor('Active', 'active', 200)
+					]
+				}]
+			});
+		}
+		addForwardWindow.show(addForwardBtn.getEl());
+		new Ext.util.DelayedTask(function() {
+			addForwardDestination.focus();
+		}, this).delay(700);
 	}
 
 	var addDomain = function() {
@@ -1169,7 +1308,16 @@ RubixConsulting.user = function() {
 		}, this).delay(700);
 	}
 
-	var doAddDomain = function(domain) {
+	var doAddForward = function() {
+		forwardMask = new Ext.LoadMask(forwardGrid.getEl(), {msg: 'Adding forward...'});
+		forwardMask.show();
+		Ext.getCmp('add-forward-form').getForm().submit({
+			success: addForwardSuccess,
+			failure: formFailure
+		});
+	}
+
+	var doAddDomain = function() {
 		domainListMask = new Ext.LoadMask(domainGrid.getEl(), {msg: 'Adding new domain...'});
 		domainListMask.show();
 		Ext.getCmp('add-domain-form').getForm().submit({
@@ -1520,7 +1668,8 @@ RubixConsulting.user = function() {
 							fieldLabel: 'Destination',
 							allowBlank: false,
 							width: 200,
-							name: 'destination'
+							name: 'destination',
+							vtype: 'email'
 						}),
 						boolEditor('Active', 'active', 200)
 					]
@@ -1686,11 +1835,12 @@ RubixConsulting.user = function() {
 							queryParam: 'query',
 							allQuery: 'all'
 						}),
-						addLocalAliasDestination = new Ext.form.TextField({
+						addManageForwardDestination = new Ext.form.TextField({
 							fieldLabel: 'Destination',
 							allowBlank: false,
 							width: 200,
-							name: 'destination'
+							name: 'destination',
+							vtype: 'email'
 						}),
 						boolEditor('Active', 'active', 200)
 					]
@@ -1701,7 +1851,6 @@ RubixConsulting.user = function() {
 		new Ext.util.DelayedTask(function() {
 			addManageForwardEmail.focus();
 		}, this).delay(700);
-
 	}
 
 	var showAddLocalAliasWindow = function() {
@@ -1897,6 +2046,11 @@ RubixConsulting.user = function() {
 		}
 	}
 
+	var hideAddForwardWindow = function() {
+		Ext.getCmp('add-forward-form').getForm().reset();
+		addForwardWindow.hide(addForwardBtn.getEl());
+	}
+
 	var hideAddManageForwardWindow = function() {
 		Ext.getCmp('add-manage-forward-form').getForm().reset();
 		addManageForwardWindow.hide(addManageForwardBtn.getEl());
@@ -2048,6 +2202,14 @@ RubixConsulting.user = function() {
 		showInfo('Password reset', 'Password was reset successfully');
 	}
 
+	var addForwardSuccess = function(form, action) {
+		hideAddForwardWindow();
+		saveForwardsBtn.disable();
+		revertForwardsBtn.disable();
+		forwardMask.hide();
+		loadForwards();
+	}
+
 	var addManageForwardSuccess = function(form, action) {
 		hideAddManageForwardWindow();
 		saveManageForwardsBtn.disable();
@@ -2096,6 +2258,22 @@ RubixConsulting.user = function() {
 		revertUserBtn.disable();
 		userMask.hide();
 		loadUsers();
+	}
+
+	var removeSelectedForwards = function() {
+		Ext.MessageBox.show({
+			closable: false,
+			buttons: Ext.MessageBox.YESNO,
+			icon: Ext.MessageBox.QUESTION,
+			title: 'Remove forwards?',
+			width: 450,
+			msg: '<table><tr><td>Do you really want to remove the selected forwards?</td></tr></table>',
+			fn: function(btn) {
+				if(btn == 'yes') {
+					doRemoveSelectedForwards();
+				}
+			}
+		});
 	}
 
 	var removeSelectedDomains = function() {
@@ -2260,6 +2438,18 @@ RubixConsulting.user = function() {
 			localForwardStore.remove(selected[i]);
 		}
 		saveLocalForwards();
+	}
+
+	var doRemoveSelectedForwards = function() {
+		forwardMask = new Ext.LoadMask(forwardGrid.getEl(), {msg: 'Removing forwards...'});
+		forwardMask.show();
+		var selected = forwardSm.getSelections();
+		for(var i = 0; i < selected.length; i++) {
+			removedForwards.push(selected[i].get('alias_id'));
+			selected[i].commit();
+			forwardStore.remove(selected[i]);
+		}
+		saveForwards();
 	}
 
 	var doRemoveSelectedManageForwards = function() {
@@ -2444,6 +2634,30 @@ RubixConsulting.user = function() {
 		});
 	}
 
+	var saveForwards = function() {
+		var modifiedForwards = new Array();
+		var modified = forwardStore.getModifiedRecords();
+		for(var i = 0; i < modified.length; i++) {
+			var tmpForward = new Object();
+			tmpForward.alias_id    = modified[i].get('alias_id');
+			tmpForward.destination = modified[i].get('destination');
+			tmpForward.active      = modified[i].get('active');
+			modifiedForwards.push(tmpForward);
+		}
+		forwardMask = new Ext.LoadMask(forwardGrid.getEl(), {msg: 'Saving forwards...'});
+		forwardMask.show();
+		Ext.Ajax.request({
+			url: 'data/forwards.php',
+			success: completeSaveForwards,
+			failure: ajaxFailure,
+			params: {
+				mode: 'save',
+				update: Ext.util.JSON.encode(modifiedForwards),
+				remove: removedForwards.join(',')
+			}
+		});
+	}
+
 	var saveManageForwards = function() {
 		var modifiedManageForwards = new Array();
 		var modified = manageForwardStore.getModifiedRecords();
@@ -2520,6 +2734,7 @@ RubixConsulting.user = function() {
 	var completeSaveDomainPerms = function() {
 		domainPermStore.commitChanges();
 		saveDomainPermBtn.disable();
+		revertDomainPermBtn.disable();
 		domainPermMask.hide();
 	}
 
@@ -2555,6 +2770,14 @@ RubixConsulting.user = function() {
 		loadLocalForwards();
 	}
 
+	var completeSaveForwards = function() {
+		forwardStore.commitChanges();
+		removedForwards = new Array();
+		saveForwardsBtn.disable();
+		revertForwardsBtn.disable();
+		forwardMask.hide();
+	}
+
 	var completeSaveManageForwards = function() {
 		manageForwardStore.commitChanges();
 		removedManageForwards = new Array();
@@ -2576,6 +2799,12 @@ RubixConsulting.user = function() {
 		userStore.commitChanges();
 		removedUsers = new Array();
 		userMask.hide();
+	}
+
+	var revertForwards = function() {
+		forwardStore.rejectChanges();
+		saveForwardsBtn.disable();
+		revertForwardsBtn.disable();
 	}
 
 	var revertCatchAlls = function() {
@@ -2606,6 +2835,12 @@ RubixConsulting.user = function() {
 		localAliasStore.rejectChanges();
 		saveLocalAliasesBtn.disable();
 		revertLocalAliasesBtn.disable();
+	}
+
+	var revertDomainAdmins = function() {
+		domainPermStore.rejectChanges();
+		saveDomainPermBtn.disable();
+		revertDomainPermBtn.disable();
 	}
 
 	var revertSiteAdmins = function() {
@@ -2701,6 +2936,8 @@ RubixConsulting.user = function() {
 			loadLocalForwards();
 		} else if((node.id == 'catchall-addresses') && (!catchAllLoaded)) {
 			loadCatchAlls();
+		} else if((node.id == 'forwards') && (!forwardsLoaded)) {
+			loadForwards();
 		}
 	}
 
@@ -2714,6 +2951,22 @@ RubixConsulting.user = function() {
 			callback: function(r, options, success) {
 				if(success) {
 					domainsLoaded = true;
+				}
+			},
+			scope: this
+		});
+	}
+
+	var loadForwards = function() {
+		forwardStore.removeAll();
+		forwardsLoaded = false;
+		forwardStore.load({
+			params: {
+				mode: 'load'
+			},
+			callback: function(r, options, success) {
+				if(success) {
+					forwardsLoaded = true;
 				}
 			},
 			scope: this
@@ -2845,6 +3098,7 @@ RubixConsulting.user = function() {
 				if(success) {
 					domainPermsLoaded = true;
 					saveDomainPermBtn.disable();
+					revertDomainPermBtn.disable();
 				}
 			},
 			scope: this
@@ -3073,6 +3327,8 @@ RubixConsulting.user = function() {
 		localForwardsLoaded = false;
 		catchAllStore.removeAll();
 		catchAllLoaded = false;
+		forwardStore.removeAll();
+		forwardsLoaded = false;
 		getUserInfo();
 	}
 

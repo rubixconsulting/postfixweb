@@ -312,7 +312,12 @@ function loadUser($userId) {
 		return FALSE;
 	}
 	$userObj['aliases'] = getUserAliases($userObj['email']);
-	$userObj['forwards'] = getUserForwards($userObj['email']);
+	$forwards = array();
+	$forwardsHash = getActiveUserForwards($userObj['email']);
+	foreach($forwardsHash as $forward) {
+		$forwards[] = $forward['destination'];
+	}
+	$userObj['forwards'] = $forwards;
 	$userObj['domain_admin'] = FALSE;
 	$adminDomains = getAdminDomains($userId);
 	if(is_array($adminDomains) && (count($adminDomains) > 0)) {
