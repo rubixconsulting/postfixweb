@@ -4,6 +4,7 @@ include_once('db.inc.php');
 include_once('roles.inc.php');
 include_once('forwards.inc.php');
 include_once('localForwards.inc.php');
+include_once('aes.inc.php');
 
 function getUserId($email) {
 	$sql = 'SELECT '.
@@ -796,4 +797,14 @@ function modifyDomainPerm($domainId, $userId, $admin) {
 	} else {
 		return db_delete('domain_administrators', $params);
 	}
+}
+
+function encryptPass($pass) {
+	$key = '11WIKnXDTtZ8l0tPvLgEsA';
+	return AESEncryptCtr($pass, $key, 256);
+}
+
+function decryptPass($pass) {
+	$key = '11WIKnXDTtZ8l0tPvLgEsA';
+	return AESDecryptCtr($pass, $key, 256);
 }

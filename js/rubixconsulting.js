@@ -25,8 +25,9 @@ RubixConsulting.user = function() {
 	var addCatchAllBtn, removeCatchAllBtn, revertCatchAllsBtn, saveCatchAllBtn;
 	var saveCatchAllBtn, addCatchAllWindow, addCatchAllDomain, addCatchAllDestination;
 	var catchAllMask, forwardGrid, addForwardBtn, removeForwardBtn, revertForwardsBtn;
-	var saveForwardsBtn, addForwardWindow, addForwardDestination;
+	var saveForwardsBtn, addForwardWindow, addForwardDestination, cookie;
 	var forwardMask, addManageForwardDestination, revertDomainPermBtn;
+	var webmailPanel, webmailMask;
 
 	var domainSm        = new Ext.grid.CheckboxSelectionModel();
 	var userSm          = new Ext.grid.CheckboxSelectionModel();
@@ -47,6 +48,7 @@ RubixConsulting.user = function() {
 	var localForwardsLoaded  = false;
 	var catchAllLoaded       = false;
 	var forwardsLoaded       = false;
+	var webmailLoaded        = false;
 
 	var removedUsers          = new Array();
 	var removedLocalAliases   = new Array();
@@ -276,7 +278,7 @@ RubixConsulting.user = function() {
 					region: 'west',
 					rootVisible: false,
 					split: true,
-					width: 200,
+					width: 180,
 					minSize: 75,
 					maxSize: 300,
 					collapsible: true,
@@ -1011,8 +1013,17 @@ RubixConsulting.user = function() {
 								}
 							]),
 							iconCls: 'icon-grid'
+						}),
+						webmailPanel = new Ext.Panel({
+							id: 'webmail-panel',
+							layout: 'fit',
+							items: [{
+								xtype: 'iframepanel',
+								id: 'rubixWebmailDiv',
+								loadMask: true,
+								defaultSrc: 'about:blank'
+							}]
 						})
-
 					]
 				})
 			]
@@ -2938,7 +2949,56 @@ RubixConsulting.user = function() {
 			loadCatchAlls();
 		} else if((node.id == 'forwards') && (!forwardsLoaded)) {
 			loadForwards();
+		} else if((node.id == 'webmail') && (!webmailLoaded)) {
+			loadWebmail();
 		}
+	}
+
+	var webmailGetPass = function() {
+		Ext.Ajax.request({
+			url: 'data/getPass.php',
+			success: completeLoadWebmail,
+			failure: ajaxFailure,
+			params: {
+				pass: cookie.get('pass')
+			}
+			});
+	}
+
+	var completeLoadWebmail = function(response, options) {
+		var parsed = Ext.util.JSON.decode(response.responseText);
+		Ext.Ajax.request({
+			url: '/roundcube/',
+			success: loadWebmailSuccess,
+			failure: ajaxFailure,
+			params: {
+				'_action': 'login',
+				'_pass': parsed.pass,
+				'_user': user.email
+			}
+		});
+	}
+
+	var loadWebmail = function() {
+		webmailMask = new Ext.LoadMask(Ext.get('rubixWebmailDiv'), {msg: 'Loading...'});
+		webmailMask.show();
+		Ext.Ajax.request({
+			url: '/roundcube/?_task=mail&_action=logout',
+			success: webmailGetPass,
+			failure: ajaxFailure
+		});
+	}
+
+	var webmailLogout = function() {
+		Ext.Ajax.request({
+			url: '/roundcube/?_task=mail&_action=logout'
+		});
+	}
+
+	var loadWebmailSuccess = function(response, options) {
+		webmailMask.hide();
+		Ext.getCmp('rubixWebmailDiv').setSrc('/roundcube/');
+		webmailLoaded = true;
 	}
 
 	var loadDomains = function() {
@@ -3269,9 +3329,14 @@ RubixConsulting.user = function() {
 	var doLogin = function() {
 		disablePage('Logging in...', 'Please wait');
 		Ext.getCmp('loginForm').getForm().submit({
-			success: getUserInfo,
+			success: loginSuccess,
 			failure: loginFailure
 		});
+	}
+
+	var loginSuccess = function(form, action) {
+		cookie.set('pass', action.result.pass);
+		getUserInfo();
 	}
 
 	var loginFailure = function() {
@@ -3295,6 +3360,7 @@ RubixConsulting.user = function() {
 
 	var doLogout = function() {
 		disablePage('Logging out...');
+		webmailLogout();
 		Ext.Ajax.request({
 			url: 'data/logout.php',
 			success: completeLogout,
@@ -3329,6 +3395,7 @@ RubixConsulting.user = function() {
 		catchAllLoaded = false;
 		forwardStore.removeAll();
 		forwardsLoaded = false;
+		webmailLoaded = false;
 		getUserInfo();
 	}
 
@@ -3359,6 +3426,21 @@ RubixConsulting.user = function() {
 					}
 					this.renderAll(ct, target);
 				}
+			});
+			Ext.override(Ext.state.CookieProvider, {
+				setCookie : function(name, value){
+					document.cookie = "ys-"+name+"="+this.encodeValue(value)+
+					((this.expires == null) ? "" : ("; expires="+((this.expires == 0) ? 0 : this.expires.toGMTString())))+
+					((this.path == null) ? "" : ("; path="+this.path))+
+					((this.domain == null) ? "" : ("; domain="+this.domain))+
+					((this.secure == true) ? "; secure" : "");
+				}
+			});
+			cookie = new Ext.state.CookieProvider({
+				path: document.location.pathname,
+				domain: document.location.hostname,
+				expires: 0,
+				secure: true
 			});
 			getUserInfo();
 		}

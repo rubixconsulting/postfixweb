@@ -12,6 +12,11 @@ $tree = array(
 		'leaf' => TRUE
 	),
 	array(
+		'text' => 'Webmail',
+		'id'   => 'webmail',
+		'leaf' => TRUE
+	),
+	array(
 		'text' => 'Your Settings',
 		'id'   => 'your-settings',
 		'children' => array(
@@ -27,14 +32,8 @@ $tree = array(
 #			),
 ## TODO investigate how to do auto replies
 #			array(
-#				'text' => 'Auto Replies',
-#				'id'   => 'auto-replies',
-#				'leaf' => TRUE
-#			)
-## TODO add a way to log into webmail here
-#			array(
-#				'text' => 'Webmail',
-#				'id'   => 'webmail',
+#				'text' => 'Auto Reply',
+#				'id'   => 'auto-reply',
 #				'leaf' => TRUE
 			)
 		)

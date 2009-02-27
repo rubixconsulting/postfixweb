@@ -9,7 +9,7 @@ $pass = $_POST['pass'];
 $userId = authenticateUser($user, $pass);
 if($userId) {
 	$_SESSION['user'] = loadUser($userId);
-	print json_encode(array('success' => true))."\n";
+	print json_encode(array('success' => true, 'pass' => encryptPass($pass)));
 } else {
-	print json_encode(array('success' => false))."\n";
+	print json_encode(array('success' => false));
 }
