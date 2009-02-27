@@ -104,12 +104,14 @@ function bulkAddLocalForward($email, $destination) {
 	if(!$domainId) {
 		return FALSE;
 	}
-	return addLocalForward($username, $domainId, $destination, TRUE);
+	return addLocalForward($username, $domainId, $destination, TRUE, FALSE);
 }
 
-function addLocalForward($username, $domainId, $destination, $active) {
+function addLocalForward($username, $domainId, $destination, $active, $printErrors = TRUE) {
 	if(!isSiteAdmin()) {
-		print json_encode(array('success' => false, 'errors' => array('username' => 'Permission denied')));
+		if($printErrors) {
+			print json_encode(array('success' => false, 'errors' => array('username' => 'Permission denied')));
+		}
 		return FALSE;
 	}
 	if($active) {
@@ -136,7 +138,9 @@ function addLocalForward($username, $domainId, $destination, $active) {
 		$errors['active'] = 'This field is required';
 	}
 	if($foundError) {
-		print json_encode(array('success' => false, 'errors' => $errors));
+		if($printErrors) {
+			print json_encode(array('success' => false, 'errors' => $errors));
+		}
 		return FALSE;
 	}
 	if(!validUserName($username)) {
@@ -153,12 +157,16 @@ function addLocalForward($username, $domainId, $destination, $active) {
 		$errors['destination'] = 'Invalid destination';
 	}
 	if($foundError) {
-		print json_encode(array('success' => false, 'errors' => $errors));
+		if($printErrors) {
+			print json_encode(array('success' => false, 'errors' => $errors));
+		}
 		return FALSE;
 	}
 	$email = $username.'@'.$domain;
 	if(userExists($email) || localForwardExists($email)) {
-		print json_encode(array('success' => false, 'errors' => array('username' => 'Username already exists')));
+		if($printErrors) {
+			print json_encode(array('success' => false, 'errors' => array('username' => 'Username already exists')));
+		}
 		return FALSE;
 	}
 	$params = array(

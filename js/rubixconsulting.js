@@ -865,7 +865,7 @@ RubixConsulting.user = function() {
 									header: 'Email',
 									sortable: true,
 									dataIndex: 'email',
-									width: 200,
+									width: 275,
 									id: 'email',
 									editor: false
 								},{
