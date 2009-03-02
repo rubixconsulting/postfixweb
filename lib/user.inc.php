@@ -1,5 +1,6 @@
 <?php
 
+include_once('config.inc.php');
 include_once('db.inc.php');
 include_once('roles.inc.php');
 include_once('forwards.inc.php');
@@ -801,11 +802,13 @@ function modifyDomainPerm($domainId, $userId, $admin) {
 }
 
 function encryptPass($pass) {
-	$key = '11WIKnXDTtZ8l0tPvLgEsA';
+	global $config;
+	$key = $config['encryption']['key'];
 	return AESEncryptCtr($pass, $key, 256);
 }
 
 function decryptPass($pass) {
-	$key = '11WIKnXDTtZ8l0tPvLgEsA';
+	global $config;
+	$key = $config['encryption']['key'];
 	return AESDecryptCtr($pass, $key, 256);
 }

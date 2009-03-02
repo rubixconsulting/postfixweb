@@ -1,25 +1,20 @@
 <?php
 
+include_once('config.inc.php');
 include_once('adodb/adodb.inc.php');
 
 function db_connect() {
+	global $config;
 	global $DB;
 	if($DB && $DB->IsConnected()) {
 		return;
 	}
-	$dbparams = array(
-		'type' => 'postgres',
-		'host' => 'localhost',
-		'db'   => 'mail',
-		'user' => 'mail',
-		'pass' => 'nBROycJQEitMocpPM2ZGtg'
-	);
-	$DB = NewADOConnection($dbparams['type']);
+	$DB = NewADOConnection($config['db']['type']);
 	$DB->Connect(
-		$dbparams['host'],
-		$dbparams['user'],
-		$dbparams['pass'],
-		$dbparams['db']
+		$config['db']['host'],
+		$config['db']['user'],
+		$config['db']['pass'],
+		$config['db']['name']
 	);
 	if(!$DB->IsConnected()) {
 		unset($DB);

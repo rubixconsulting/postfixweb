@@ -1,9 +1,11 @@
 <?php
 
+include_once('config.inc.php');
 include_once('user.inc.php');
 
-ini_set('session.name', 'RubixConsultingMailUser');
-session_set_cookie_params(0, '/mailuser/', 'rubixconsulting.com', TRUE, TRUE);
+global $config;
+ini_set('session.name', $config['cookie']['name']);
+session_set_cookie_params(0, $config['page']['path'], $config['cookie']['host'], TRUE, TRUE);
 session_start();
 
 function requireLogin() {

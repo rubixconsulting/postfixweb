@@ -316,7 +316,7 @@ RubixConsulting.user = function() {
 							border: false,
 							items: [
 								{
-									html: '<div style="text-align: center;"><img src="/images/rubix_consulting_medium.png" /></div>',
+									html: '<div style="text-align: center;"><img src="img/logo.png" /></div>',
 									cellCls: 'alignTop',
 									border: false,
 									colspan: 4
@@ -2968,7 +2968,7 @@ RubixConsulting.user = function() {
 	var completeLoadWebmail = function(response, options) {
 		var parsed = Ext.util.JSON.decode(response.responseText);
 		Ext.Ajax.request({
-			url: '/roundcube/',
+			url: '../roundcube/',
 			success: loadWebmailSuccess,
 			failure: ajaxFailure,
 			params: {
@@ -2983,7 +2983,7 @@ RubixConsulting.user = function() {
 		webmailMask = new Ext.LoadMask(Ext.get('rubixWebmailDiv'), {msg: 'Loading...'});
 		webmailMask.show();
 		Ext.Ajax.request({
-			url: '/roundcube/?_task=mail&_action=logout',
+			url: '../roundcube/?_task=mail&_action=logout',
 			success: webmailGetPass,
 			failure: ajaxFailure
 		});
@@ -2991,13 +2991,13 @@ RubixConsulting.user = function() {
 
 	var webmailLogout = function() {
 		Ext.Ajax.request({
-			url: '/roundcube/?_task=mail&_action=logout'
+			url: '../roundcube/?_task=mail&_action=logout'
 		});
 	}
 
 	var loadWebmailSuccess = function(response, options) {
 		webmailMask.hide();
-		Ext.getCmp('rubixWebmailDiv').setSrc('/roundcube/');
+		Ext.getCmp('rubixWebmailDiv').setSrc('../roundcube/');
 		webmailLoaded = true;
 	}
 
@@ -3238,7 +3238,7 @@ RubixConsulting.user = function() {
 				//	fn: doLogin
 				//}],
 				items: [{
-					html: '<div style="text-align: center;"><img src="/images/rubix_consulting_medium.png" /></div>'
+					html: '<div style="text-align: center;"><img src="img/logo.png" /></div>'
 				},{
 					xtype: 'fieldset',
 					autoHeight: true,

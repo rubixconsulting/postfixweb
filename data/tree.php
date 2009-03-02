@@ -1,5 +1,6 @@
 <?php
 
+include_once('../lib/config.inc.php');
 include_once('../lib/session.inc.php');
 include_once('../lib/user.inc.php');
 
@@ -10,32 +11,36 @@ $tree = array(
 		'text' => 'User Information',
 		'id'   => 'user-info',
 		'leaf' => TRUE
-	),
-	array(
+	)
+);
+
+if($config['webmail']['enabled']) {
+	$tree[] = array(
 		'text' => 'Webmail',
 		'id'   => 'webmail',
 		'leaf' => TRUE
-	),
-	array(
-		'text' => 'Your Settings',
-		'id'   => 'your-settings',
-		'children' => array(
-			array(
-				'text' => 'Password',
-				'id'   => 'change-password',
-				'leaf' => TRUE
-			),
-			array(
-				'text' => 'Forwards',
-				'id'   => 'forwards',
-				'leaf' => TRUE
-#			),
+	);
+}
+
+$tree[] = array(
+	'text' => 'Your Settings',
+	'id'   => 'your-settings',
+	'children' => array(
+		array(
+			'text' => 'Password',
+			'id'   => 'change-password',
+			'leaf' => TRUE
+		),
+		array(
+			'text' => 'Forwards',
+			'id'   => 'forwards',
+			'leaf' => TRUE
+#		),
 ## TODO investigate how to do auto replies
-#			array(
-#				'text' => 'Auto Reply',
-#				'id'   => 'auto-reply',
-#				'leaf' => TRUE
-			)
+#		array(
+#			'text' => 'Auto Reply',
+#			'id'   => 'auto-reply',
+#			'leaf' => TRUE
 		)
 	)
 );
