@@ -27,7 +27,7 @@ RubixConsulting.user = function() {
 	var catchAllMask, forwardGrid, addForwardBtn, removeForwardBtn, revertForwardsBtn;
 	var saveForwardsBtn, addForwardWindow, addForwardDestination, cookie;
 	var forwardMask, addManageForwardDestination, revertDomainPermBtn;
-	var webmailPanel, webmailMask;
+	var webmailPanel, webmailMask, namePanel, nameMask;
 
 	var domainSm        = new Ext.grid.CheckboxSelectionModel();
 	var userSm          = new Ext.grid.CheckboxSelectionModel();
@@ -49,6 +49,7 @@ RubixConsulting.user = function() {
 	var catchAllLoaded       = false;
 	var forwardsLoaded       = false;
 	var webmailLoaded        = false;
+	var nameLoaded           = false;
 
 	var removedUsers          = new Array();
 	var removedLocalAliases   = new Array();
@@ -248,6 +249,8 @@ RubixConsulting.user = function() {
 			catchAllMask.hide();
 		} else if(form.url == 'data/forwards.php') {
 			forwardMask.hide();
+		} else if(form.url == 'data/name.php') {
+			nameMask.hide();
 		}
 		if(action && action.response && action.response.statusText && (action.response.statusText != 'OK')) {
 			showError(action.response.statusText);
@@ -1023,6 +1026,38 @@ RubixConsulting.user = function() {
 								loadMask: true,
 								defaultSrc: 'about:blank'
 							}]
+						}),
+						namePanel = new Ext.form.FormPanel({
+							url: 'data/name.php',
+							monitorValid: true,
+							autoScroll: true,
+							labelWidth: 50,
+							id: 'name-panel',
+							layoutConfig: {
+								labelSeparator: ''
+							},
+							defaultType: 'textfield',
+							bodyStyle: 'padding:15px',
+							defaults: {
+								width: 150,
+								msgTarget: 'side'
+							},
+							items: [{
+								fieldLabel: 'Name',
+								name: 'name',
+								id: 'name-field',
+								allowBlank: false
+							}],
+							buttons: [
+								{
+									text: 'Reset Form',
+									handler: resetNameForm
+								},{
+									text: 'Change Name',
+									formBind: true,
+									handler: changeName
+								}
+							]
 						})
 					]
 				})
@@ -2952,6 +2987,8 @@ RubixConsulting.user = function() {
 			loadForwards();
 		} else if((node.id == 'webmail') && (!webmailLoaded)) {
 			loadWebmail();
+		} else if((node.id == 'name') && (!nameLoaded)) {
+			loadName();
 		}
 	}
 
@@ -3015,6 +3052,22 @@ RubixConsulting.user = function() {
 				}
 			},
 			scope: this
+		});
+	}
+
+	var loadName = function() {
+		nameLoaded = false;
+		nameMask = new Ext.LoadMask(Ext.get('name-panel'), {msg: 'Loading...'});
+		nameMask.show();
+		namePanel.getForm().load({
+			params: {
+				mode: 'load'
+			},
+			success: function(form, action) {
+				nameLoaded = true;
+				nameMask.hide();
+			},
+			failure: formFailure
 		});
 	}
 
@@ -3288,6 +3341,18 @@ RubixConsulting.user = function() {
 		Ext.Msg.hide();
 	}
 
+	var changeName = function() {
+		nameMask = new Ext.LoadMask(Ext.get('name-panel'), {msg: 'Changing name...'});
+		nameMask.show();
+		Ext.getCmp('name-panel').getForm().submit({
+			params: {
+				mode: 'save'
+			},
+			success: changeNameSuccess,
+			failure: formFailure
+		});
+	}
+
 	var changePassword = function() {
 		passwordMask = new Ext.LoadMask(Ext.get('change-password-panel'), {msg: 'Changing password...'});
 		passwordMask.show();
@@ -3297,8 +3362,17 @@ RubixConsulting.user = function() {
 		});
 	}
 
+	var resetNameForm = function() {
+		loadName();
+	}
+
 	var resetChangePassword = function() {
 		Ext.getCmp('change-password-panel').getForm().reset();
+	}
+
+	var changeNameSuccess = function(form, action) {
+		loadName();
+		showInfo('Name changed', 'Name changed successfully');
 	}
 
 	var changePasswordSuccess = function(form, action) {
@@ -3397,6 +3471,7 @@ RubixConsulting.user = function() {
 		forwardStore.removeAll();
 		forwardsLoaded = false;
 		webmailLoaded = false;
+		nameLoaded = false;
 		getUserInfo();
 	}
 

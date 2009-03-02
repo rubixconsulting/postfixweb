@@ -35,6 +35,11 @@ $tree[] = array(
 			'text' => 'Forwards',
 			'id'   => 'forwards',
 			'leaf' => TRUE
+		),
+		array(
+			'text' => 'Name',
+			'id'   => 'name',
+			'leaf' => TRUE
 #		),
 ## TODO investigate how to do auto replies
 #		array(

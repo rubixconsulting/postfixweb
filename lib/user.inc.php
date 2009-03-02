@@ -812,3 +812,20 @@ function decryptPass($pass) {
 	$key = $config['encryption']['key'];
 	return AESDecryptCtr($pass, $key, 256);
 }
+
+function changeName($name) {
+	if(!isLoggedIn()) {
+		return FALSE;
+	}
+	$userId = $_SESSION['user']['user_id'];
+	if(!$name || !$userId) {
+		return FALSE;
+	}
+	$updates = array(
+		'description' => $name
+	);
+	$conditions = array(
+		'user_id' => $userId
+	);
+	return db_update('virtual_users', $updates, $conditions);
+}
