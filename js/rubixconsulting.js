@@ -3405,7 +3405,7 @@ RubixConsulting.user = function() {
 
 		// public methods
 		init: function() {
-			Ext.BLANK_IMAGE_URL = '/js/ext/resources/images/default/s.gif';
+			Ext.BLANK_IMAGE_URL = 'js/ext/resources/images/default/s.gif';
 			Ext.QuickTips.init();
 			Ext.override(Ext.layout.TableLayout, {
 				onLayout: function(ct, target) {
