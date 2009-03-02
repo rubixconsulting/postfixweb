@@ -2931,6 +2931,7 @@ RubixConsulting.user = function() {
 		}
 		center.getLayout().setActiveItem(node.id+'-panel');
 		center.doLayout();
+		center.setTitle(node.text);
 		if((node.id == 'manage-domains') && (!domainsLoaded)) {
 			loadDomains();
 		} else if((node.id == 'manage-users') && (!usersLoaded)) {
