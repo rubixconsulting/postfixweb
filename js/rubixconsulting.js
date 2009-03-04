@@ -28,7 +28,7 @@ RubixConsulting.user = function() {
 	var saveForwardsBtn, addForwardWindow, addForwardDestination, cookie;
 	var forwardMask, addManageForwardDestination, revertDomainPermBtn;
 	var webmailPanel, webmailMask, namePanel, nameMask;
-	var logSummaryMask, statsMask;
+	var logSummaryMask, statsMask, logSummaryCombo;
 
 	var domainSm        = new Ext.grid.CheckboxSelectionModel();
 	var userSm          = new Ext.grid.CheckboxSelectionModel();
@@ -51,6 +51,7 @@ RubixConsulting.user = function() {
 	var forwardsLoaded       = false;
 	var webmailLoaded        = false;
 	var nameLoaded           = false;
+	var logSummaryLoaded     = false;
 
 	var removedUsers          = new Array();
 	var removedLocalAliases   = new Array();
@@ -129,6 +130,17 @@ RubixConsulting.user = function() {
 		{name: 'destination', type: 'string'},
 		{name: 'active',      type: 'boolean'}
 	]);
+
+	var logFileRecord = Ext.data.Record.create([
+		{name: 'file', type: 'string'}
+	]);
+
+	var logSummaryStore = new Ext.data.JsonStore({
+		url: 'data/logSummary.php',
+		root: 'files',
+		totalProperty: 'numFiles',
+		fields: logFileRecord
+	});
 
 	var forwardStore = new Ext.data.JsonStore({
 		url: 'data/forwards.php',
@@ -1064,7 +1076,25 @@ RubixConsulting.user = function() {
 							id: 'log-summary-panel',
 							border: false,
 							autoScroll: true,
-							html: '<div id="logSummaryContents"></div>'
+							html: '<div id="logSummaryContents"></div>',
+							tbar: [
+								{xtype: 'tbtext', text: 'File'},
+								logSummaryCombo = new Ext.form.ComboBox({
+									store: logSummaryStore,
+									displayField: 'file',
+									valueField: 'file',
+									forceSelection: true,
+									typeAhead: true,
+									minChars: 1,
+									editable: true,
+									hiddenName: 'file',
+									triggerAction: 'all',
+									queryParam: 'query',
+									allQuery: 'all',
+									emptyText: 'Choose a file',
+									pageSize: 14
+								})
+							]
 						}),
 						new Ext.Panel({
 							id: 'last-day-stats-panel',
@@ -1260,6 +1290,7 @@ RubixConsulting.user = function() {
 			return true;
 		}, this);
 		domainPermCombo.on('select', loadDomainPerms, this);
+		logSummaryCombo.on('select', loadLogSummary,  this);
 		enablePage();
 	}
 
@@ -3021,7 +3052,7 @@ RubixConsulting.user = function() {
 			loadWebmail();
 		} else if((node.id == 'name') && (!nameLoaded)) {
 			loadName();
-		} else if(node.id == 'log-summary') {
+		} else if((node.id == 'log-summary') && (!logSummaryLoaded)) {
 			loadLogSummary();
 		} else if(node.id == 'last-day-stats') {
 			loadStats('day');
@@ -3037,12 +3068,17 @@ RubixConsulting.user = function() {
 	var loadLogSummary = function() {
 		logSummaryMask = new Ext.LoadMask(Ext.get('log-summary-panel'), {msg: 'Loading...'});
 		logSummaryMask.show();
+		file = logSummaryCombo.getValue();
 		Ext.get('logSummaryContents').update();
 		Ext.Ajax.request({
+			params: {
+				file: (file ? file : '')
+			},
 			url: 'data/logSummary.php',
 			success: function(response, options) {
 				Ext.get('logSummaryContents').update(response.responseText);
 				logSummaryMask.hide();
+				logSummaryLoaded = true;
 			},
 			failure: ajaxFailure,
 			scope: this
@@ -3549,6 +3585,8 @@ RubixConsulting.user = function() {
 		catchAllLoaded = false;
 		forwardStore.removeAll();
 		forwardsLoaded = false;
+		logSummaryCombo.removeAll();
+		logSummaryLoaded = false;
 		webmailLoaded = false;
 		nameLoaded = false;
 		getUserInfo();

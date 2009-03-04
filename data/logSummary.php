@@ -13,13 +13,48 @@ if(!$config['stats']['enabled'] || !$config['stats']['pflogsumm']['enabled']) {
 
 $dir = $config['stats']['pflogsumm']['dir'];
 
+$limit = $_POST['limit'];
+$query = $_POST['query'];
+$start = $_POST['start'];
+
+if(!$start) {
+	$start = 0;
+}
+
+if($limit && $query) {
+	$files = array();
+	$string = $dir.'/*.txt';
+	if($query && ($query != 'all')) {
+		$string = $dir.'/*'.$query.'*';
+	}
+	foreach(glob($string) as $tmpFile) {
+		$files[] = array('file' => basename($tmpFile));
+	}
+	rsort($files);
+	$results = array();
+	$i = 0;
+	foreach($files as $tmpFile) {
+		if(($i >= $start) && ($i < $start + $limit)) {
+			$results[] = $tmpFile;
+		}
+		$i++;
+	}
+	print json_encode(array('numFiles' => $i, 'files' => $results));
+	exit;
+}
+
+$file = $_POST['file'];
 $time = 0;
-$file = null;
-foreach(glob($dir.'/*.txt') as $tmpFile) {
-	$tmpTime = filemtime($tmpFile);
-	if($tmpTime > $time) {
-		$time = $tmpTime;
-		$file = $tmpFile;
+if($file) {
+	$file = $dir.'/'.$file;
+	$time = filemtime($file);
+} else {
+	foreach(glob($dir.'/*.txt') as $tmpFile) {
+		$tmpTime = filemtime($tmpFile);
+		if($tmpTime > $time) {
+			$time = $tmpTime;
+			$file = $tmpFile;
+		}
 	}
 }
 
