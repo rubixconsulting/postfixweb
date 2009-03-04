@@ -27,5 +27,17 @@ $config = array(
 	),
 	'webmail' => array(
 		'enabled' => TRUE
+	),
+	'stats' => array(
+		'enabled' => TRUE,
+		'mailgraph' => array(
+			'enabled'   => TRUE,
+			'rrd'       => '/var/lib/mailgraph/mailgraph.rrd',
+			'rrd_virus' => '/var/lib/mailgraph/mailgraph_virus.rrd'
+		),
+		'pflogsumm' => array(
+			'enabled' => TRUE,
+			'dir'     => '/var/lib/pflogsumm'
+		)
 	)
 );

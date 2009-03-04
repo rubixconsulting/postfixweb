@@ -121,6 +121,43 @@ if(isSiteAdmin()) {
 		'id'       => 'site-administration',
 		'children' => $siteAdministration
 	);
+	$stats = array();
+	if($config['stats']['pflogsumm']['enabled']) {
+		$stats[] = array(
+			'text' => 'Log Summary',
+			'id'   => 'log-summary',
+			'leaf' => TRUE
+		);
+	}
+	if($config['stats']['mailgraph']['enabled']) {
+		$stats[] = array(
+			'text' => 'Last Day',
+			'id'   => 'last-day-stats',
+			'leaf' => TRUE
+		);
+		$stats[] = array(
+			'text' => 'Last Week',
+			'id'   => 'last-week-stats',
+			'leaf' => TRUE
+		);
+		$stats[] = array(
+			'text' => 'Last Month',
+			'id'   => 'last-month-stats',
+			'leaf' => TRUE
+		);
+		$stats[] = array(
+			'text' => 'Last Year',
+			'id'   => 'last-year-stats',
+			'leaf' => TRUE
+		);
+	}
+	if($config['stats']['enabled']) {
+		$tree[] = array(
+			'text'     => 'Mail Server Stats',
+			'id'       => 'server-stats',
+			'children' => $stats
+		);
+	}
 }
 
 print json_encode($tree)."\n";

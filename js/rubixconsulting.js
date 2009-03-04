@@ -28,6 +28,7 @@ RubixConsulting.user = function() {
 	var saveForwardsBtn, addForwardWindow, addForwardDestination, cookie;
 	var forwardMask, addManageForwardDestination, revertDomainPermBtn;
 	var webmailPanel, webmailMask, namePanel, nameMask;
+	var logSummaryMask, statsMask;
 
 	var domainSm        = new Ext.grid.CheckboxSelectionModel();
 	var userSm          = new Ext.grid.CheckboxSelectionModel();
@@ -1058,6 +1059,36 @@ RubixConsulting.user = function() {
 									handler: changeName
 								}
 							]
+						}),
+						new Ext.Panel({
+							id: 'log-summary-panel',
+							border: false,
+							autoScroll: true,
+							html: '<div id="logSummaryContents"></div>'
+						}),
+						new Ext.Panel({
+							id: 'last-day-stats-panel',
+							border: false,
+							autoScroll: true,
+							html: '<div id="lastdayStatsContents"></div>'
+						}),
+						new Ext.Panel({
+							id: 'last-week-stats-panel',
+							border: false,
+							autoScroll: true,
+							html: '<div id="lastweekStatsContents"></div>'
+						}),
+						new Ext.Panel({
+							id: 'last-month-stats-panel',
+							border: false,
+							autoScroll: true,
+							html: '<div id="lastmonthStatsContents"></div>'
+						}),
+						new Ext.Panel({
+							id: 'last-year-stats-panel',
+							border: false,
+							autoScroll: true,
+							html: '<div id="lastyearStatsContents"></div>'
 						})
 					]
 				})
@@ -2960,6 +2991,7 @@ RubixConsulting.user = function() {
 		if(
 			(node.id == 'your-settings')		||
 			(node.id == 'domain-administration')	||
+			(node.id == 'server-stats')		||
 			(node.id == 'site-administration')
 		) {
 			return;
@@ -2989,7 +3021,51 @@ RubixConsulting.user = function() {
 			loadWebmail();
 		} else if((node.id == 'name') && (!nameLoaded)) {
 			loadName();
+		} else if(node.id == 'log-summary') {
+			loadLogSummary();
+		} else if(node.id == 'last-day-stats') {
+			loadStats('day');
+		} else if(node.id == 'last-week-stats') {
+			loadStats('week');
+		} else if(node.id == 'last-month-stats') {
+			loadStats('month');
+		} else if(node.id == 'last-year-stats') {
+			loadStats('year');
 		}
+	}
+
+	var loadLogSummary = function() {
+		logSummaryMask = new Ext.LoadMask(Ext.get('log-summary-panel'), {msg: 'Loading...'});
+		logSummaryMask.show();
+		Ext.get('logSummaryContents').update();
+		Ext.Ajax.request({
+			url: 'data/logSummary.php',
+			success: function(response, options) {
+				Ext.get('logSummaryContents').update(response.responseText);
+				logSummaryMask.hide();
+			},
+			failure: ajaxFailure,
+			scope: this
+		});
+	}
+
+	var loadStats = function(time) {
+		statsMask = new Ext.LoadMask(Ext.get('last-'+time+'-stats-panel'), {msg: 'Loading...'});
+		statsMask.show();
+		Ext.get('last'+time+'StatsContents').update();
+		Ext.Ajax.request({
+			url: 'data/stats.php',
+			params: {
+				time: time
+			},
+			method: 'GET',
+			success: function(response, options) {
+				Ext.get('last'+options.params.time+'StatsContents').update(response.responseText);
+				statsMask.hide();
+			},
+			failure: ajaxFailure,
+			scope: this
+		});
 	}
 
 	var webmailGetPass = function() {
@@ -2997,10 +3073,11 @@ RubixConsulting.user = function() {
 			url: 'data/getPass.php',
 			success: completeLoadWebmail,
 			failure: ajaxFailure,
+			scope: this,
 			params: {
 				pass: cookie.get('pass')
 			}
-			});
+		});
 	}
 
 	var completeLoadWebmail = function(response, options) {
@@ -3009,6 +3086,7 @@ RubixConsulting.user = function() {
 			url: '../roundcube/',
 			success: loadWebmailSuccess,
 			failure: ajaxFailure,
+			scope: this,
 			params: {
 				'_action': 'login',
 				'_pass': parsed.pass,
@@ -3023,6 +3101,7 @@ RubixConsulting.user = function() {
 		Ext.Ajax.request({
 			url: '../roundcube/?_task=mail&_action=logout',
 			success: webmailGetPass,
+			scope: this,
 			failure: ajaxFailure
 		});
 	}

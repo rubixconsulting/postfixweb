@@ -3,7 +3,7 @@
 include_once('db.inc.php');
 include_once('user.inc.php');
 include_once('email.inc.php');
-include_once('domain.inc.php');
+include_once('domains.inc.php');
 include_once('localAliases.inc.php');
 include_once('aliases.inc.php');
 
