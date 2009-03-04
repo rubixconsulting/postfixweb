@@ -3585,7 +3585,7 @@ RubixConsulting.user = function() {
 		catchAllLoaded = false;
 		forwardStore.removeAll();
 		forwardsLoaded = false;
-		logSummaryCombo.removeAll();
+		logSummaryStore.removeAll();
 		logSummaryLoaded = false;
 		webmailLoaded = false;
 		nameLoaded = false;
