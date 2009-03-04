@@ -22,7 +22,7 @@ $ypoints           = 160;
 $ypoints_err       = 96;
 $rrd               = $config['stats']['mailgraph']['rrd'];
 $rrd_virus         = $config['stats']['mailgraph']['rrd_virus'];
-$tmp_dir           = 'tmp';
+$tmp_dir           = $config['stats']['mailgraph']['tmp_dir'];
 
 $color = array(
 	'sent'     => '000099',
@@ -46,8 +46,8 @@ if($time == 'day') {
 	exit;
 }
 
-$graph_file     = '../'.$tmp_dir.'/mailgraph_'.$time.'.png';
-$err_graph_file = '../'.$tmp_dir.'/mailgraph_'.$time.'_err.png';
+$graph_file     = $tmp_dir.'/mailgraph_'.$time.'.png';
+$err_graph_file = $tmp_dir.'/mailgraph_'.$time.'_err.png';
 
 function rrd_graph($range, $file, $ypoints, $rrdargs) {
 	global $points_per_sample, $xpoints;

@@ -17,11 +17,13 @@ $limit = $_POST['limit'];
 $query = $_POST['query'];
 $start = $_POST['start'];
 
-if(!$start) {
-	$start = 0;
-}
-
 if($limit && $query) {
+	if(!$start) {
+		$start = 0;
+	}
+	if(!is_numeric($start) || !is_numeric($limit)) {
+		exit;
+	}
 	$files = array();
 	$string = $dir.'/*.txt';
 	if($query && ($query != 'all')) {
@@ -56,6 +58,10 @@ if($file) {
 			$file = $tmpFile;
 		}
 	}
+}
+
+if(!is_readable($file)) {
+	exit;
 }
 
 $text = file_get_contents($file);

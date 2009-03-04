@@ -33,7 +33,8 @@ $config = array(
 		'mailgraph' => array(
 			'enabled'   => TRUE,
 			'rrd'       => '/var/lib/mailgraph/mailgraph.rrd',
-			'rrd_virus' => '/var/lib/mailgraph/mailgraph_virus.rrd'
+			'rrd_virus' => '/var/lib/mailgraph/mailgraph_virus.rrd',
+			'tmp_dir'   => '/var/lib/mailgraph'
 		),
 		'pflogsumm' => array(
 			'enabled' => TRUE,

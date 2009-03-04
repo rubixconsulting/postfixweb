@@ -28,7 +28,7 @@ RubixConsulting.user = function() {
 	var saveForwardsBtn, addForwardWindow, addForwardDestination, cookie;
 	var forwardMask, addManageForwardDestination, revertDomainPermBtn;
 	var webmailPanel, webmailMask, namePanel, nameMask;
-	var logSummaryMask, statsMask, logSummaryCombo;
+	var logSummaryMask, statsMask, logSummaryCombo, loginCookie;
 
 	var domainSm        = new Ext.grid.CheckboxSelectionModel();
 	var userSm          = new Ext.grid.CheckboxSelectionModel();
@@ -3337,7 +3337,7 @@ RubixConsulting.user = function() {
 			user = data.user;
 			if(loginWindow) {
 				loginWindow.hide();
-				Ext.getCmp('loginForm').getForm().reset()
+				resetLogin();
 			}
 			if(!viewport) {
 				showPortal();
@@ -3372,19 +3372,32 @@ RubixConsulting.user = function() {
 		}
 	}
 
-	var showLogin = function() {
-		if(loginWindow) {
-			loginWindow.show();
+	var completeShowLogin = function() {
+		var username = loginCookie.get('user', null);
+		if(username) {
+			Ext.getCmp('loginUser').setValue(username);
+			Ext.getCmp('rememberMe').setValue(true);
+			new Ext.util.DelayedTask(function() {
+				Ext.getCmp('loginPass').focus();
+			}, this).delay(700);
+		} else {
 			new Ext.util.DelayedTask(function() {
 				Ext.getCmp('loginUser').focus();
-			}, this).delay(0);
+			}, this).delay(700);
+		}
+		loginWindow.show();
+	}
+
+	var showLogin = function() {
+		if(loginWindow) {
+			completeShowLogin();
 			return;
 		}
 		loginWindow = new Ext.Window({
 			applyTo: 'login',
 			layout: 'fit',
-			width: 350,
-			height: 300,
+			width: 355,
+			height: 310,
 			closable: false,
 			plain: false,
 			resizable: false,
@@ -3407,7 +3420,7 @@ RubixConsulting.user = function() {
 					xtype: 'fieldset',
 					autoHeight: true,
 					title: 'User Information',
-					labelWidth: 70,
+					labelWidth: 75,
 					defaultType: 'textfield',
 					defaults: {
 						width: 205,
@@ -3417,29 +3430,34 @@ RubixConsulting.user = function() {
 						labelSeparator: ''
 					},
 					items: [{
-						fieldLabel: 'User Name',
+						fieldLabel: 'Email Address',
 						name: 'user',
 						id: 'loginUser',
-						allowBlank: false
+						allowBlank: false,
+						vtype: 'email'
 					},{
 						fieldLabel: 'Password',
 						name: 'pass',
 						id: 'loginPass',
 						allowBlank: false,
 						inputType: 'password'
+					},{
+						boxLabel: 'Remember me',
+						xtype: 'checkbox',
+						id: 'rememberMe'
 					}]
 				}],
 				buttons: [{
+					text: 'Reset',
+					handler: resetLogin
+				},{
 					text: 'Log In',
 					formBind: true,
 					handler: doLogin
 				}]
 			}]
 		});
-		loginWindow.show();
-		new Ext.util.DelayedTask(function() {
-			Ext.getCmp('loginUser').focus();
-		}, this).delay(0);
+		completeShowLogin();
 		enablePage();
 	}
 
@@ -3511,6 +3529,10 @@ RubixConsulting.user = function() {
 		});
 	}
 
+	var resetLogin = function() {
+		Ext.getCmp('loginForm').getForm().reset();
+	}
+
 	var doLogin = function() {
 		disablePage('Logging in...', 'Please wait');
 		Ext.getCmp('loginForm').getForm().submit({
@@ -3521,6 +3543,11 @@ RubixConsulting.user = function() {
 
 	var loginSuccess = function(form, action) {
 		cookie.set('pass', action.result.pass);
+		if(Ext.getCmp('rememberMe').getValue()) {
+			loginCookie.set('user', Ext.getCmp('loginUser').getValue());
+		} else {
+			loginCookie.clear('user');
+		}
 		getUserInfo();
 	}
 
@@ -3584,6 +3611,7 @@ RubixConsulting.user = function() {
 		logSummaryLoaded = false;
 		webmailLoaded = false;
 		nameLoaded = false;
+		cookie.clear('pass');
 		getUserInfo();
 	}
 
@@ -3628,6 +3656,12 @@ RubixConsulting.user = function() {
 				path: document.location.pathname,
 				domain: document.location.hostname,
 				expires: 0,
+				secure: true
+			});
+			loginCookie = new Ext.state.CookieProvider({
+				path: document.location.pathname,
+				domain: document.location.hostname,
+				expires: new Date(new Date().getTime()+(1000*60*60*24*7)),
 				secure: true
 			});
 			getUserInfo();
