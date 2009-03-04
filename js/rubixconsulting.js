@@ -3019,12 +3019,7 @@ RubixConsulting.user = function() {
 	}
 
 	var clickTree = function(selectionmodel, node) {
-		if(
-			(node.id == 'your-settings')		||
-			(node.id == 'domain-administration')	||
-			(node.id == 'server-stats')		||
-			(node.id == 'site-administration')
-		) {
+		if(!node.leaf) {
 			return;
 		}
 		center.getLayout().setActiveItem(node.id+'-panel');

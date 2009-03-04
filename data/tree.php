@@ -131,24 +131,30 @@ if(isSiteAdmin()) {
 	}
 	if($config['stats']['mailgraph']['enabled']) {
 		$stats[] = array(
-			'text' => 'Last Day',
-			'id'   => 'last-day-stats',
-			'leaf' => TRUE
-		);
-		$stats[] = array(
-			'text' => 'Last Week',
-			'id'   => 'last-week-stats',
-			'leaf' => TRUE
-		);
-		$stats[] = array(
-			'text' => 'Last Month',
-			'id'   => 'last-month-stats',
-			'leaf' => TRUE
-		);
-		$stats[] = array(
-			'text' => 'Last Year',
-			'id'   => 'last-year-stats',
-			'leaf' => TRUE
+			'text' => 'Graphs',
+			'id'   => 'graphs',
+			'children' => array(
+				array(
+					'text' => 'Last Day',
+					'id'   => 'last-day-stats',
+					'leaf' => TRUE
+				),
+				array(
+					'text' => 'Last Week',
+					'id'   => 'last-week-stats',
+					'leaf' => TRUE
+				),
+				array(
+					'text' => 'Last Month',
+					'id'   => 'last-month-stats',
+					'leaf' => TRUE
+				),
+				array(
+					'text' => 'Last Year',
+					'id'   => 'last-year-stats',
+					'leaf' => TRUE
+				)
+			)
 		);
 	}
 	if($config['stats']['enabled']) {
