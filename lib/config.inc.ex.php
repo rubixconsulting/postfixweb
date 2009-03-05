@@ -4,11 +4,20 @@ global $config;
 
 $config = array(
 	'db' => array(
-		'type' => 'postgres',
-		'host' => 'localhost',
-		'name' => 'mail',
-		'user' => 'mail',
-		'pass' => 'replace with db password'
+		'default' => array(
+			'type' => 'postgres',
+			'host' => 'localhost',
+			'name' => 'mail',
+			'user' => 'mail',
+			'pass' => 'replace with db password'
+		),
+		'logs' => array(
+			'type' => 'postgres',
+			'host' => 'localhost',
+			'name' => 'rsyslog',
+			'user' => 'mail',
+			'pass' => 'replace with db password'
+		)
 	),
 	'cookie' => array(
 		'name' => 'RubixConsultingMailUser',
@@ -40,5 +49,8 @@ $config = array(
 			'enabled' => TRUE,
 			'dir'     => '/var/lib/pflogsumm'
 		)
+	),
+	'logs' => array(
+		'enabled' => TRUE
 	)
 );

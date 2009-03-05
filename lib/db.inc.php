@@ -3,22 +3,30 @@
 include_once('config.inc.php');
 include_once('adodb/adodb.inc.php');
 
+function db_set_active($name) {
+	global $ACTIVE_DB;
+	$ACTIVE_DB = $name;
+}
+
 function db_connect() {
-	global $config;
-	global $DB;
-	if($DB && $DB->IsConnected()) {
+	global $config, $DB, $ACTIVE_DB, $CONNECTED_DB;
+	if($DB && $DB->IsConnected() && ($ACTIVE_DB == $CONNECTED_DB)) {
 		return;
 	}
-	$DB = NewADOConnection($config['db']['type']);
+	if(!$ACTIVE_DB) {
+		$ACTIVE_DB = 'default';
+	}
+	$DB = NewADOConnection($config['db'][$ACTIVE_DB]['type']);
 	$DB->Connect(
-		$config['db']['host'],
-		$config['db']['user'],
-		$config['db']['pass'],
-		$config['db']['name']
+		$config['db'][$ACTIVE_DB]['host'],
+		$config['db'][$ACTIVE_DB]['user'],
+		$config['db'][$ACTIVE_DB]['pass'],
+		$config['db'][$ACTIVE_DB]['name']
 	);
 	if(!$DB->IsConnected()) {
 		unset($DB);
 	}
+	$CONNECTED_DB = $ACTIVE_DB;
 }
 
 function db_getval($sql, $params = FALSE) {

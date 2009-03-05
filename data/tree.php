@@ -164,6 +164,13 @@ if(isSiteAdmin()) {
 			'children' => $stats
 		);
 	}
+	if($config['logs']['enabled']) {
+		$tree[] = array(
+			'text' => 'Mail Server Log',
+			'id'   => 'mail-log',
+			'leaf' => TRUE
+		);
+	}
 }
 
 print json_encode($tree)."\n";

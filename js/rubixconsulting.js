@@ -27,8 +27,19 @@ RubixConsulting.user = function() {
 	var catchAllMask, forwardGrid, addForwardBtn, removeForwardBtn, revertForwardsBtn;
 	var saveForwardsBtn, addForwardWindow, addForwardDestination, cookie;
 	var forwardMask, addManageForwardDestination, revertDomainPermBtn;
-	var webmailPanel, webmailMask, namePanel, nameMask;
+	var webmailPanel, webmailMask, namePanel, nameMask, mailLogGrid;
 	var logSummaryMask, statsMask, logSummaryCombo, loginCookie;
+
+	var priorities = [
+		'Emergency',
+		'Alert',
+		'Critical',
+		'Error',
+		'Warning',
+		'Notice',
+		'Info',
+		'Debug'
+	]
 
 	var domainSm        = new Ext.grid.CheckboxSelectionModel();
 	var userSm          = new Ext.grid.CheckboxSelectionModel();
@@ -134,6 +145,22 @@ RubixConsulting.user = function() {
 	var logFileRecord = Ext.data.Record.create([
 		{name: 'file', type: 'string'}
 	]);
+
+	var mailLogRecord = Ext.data.Record.create([
+		{name: 'id',          type: 'int'                          },
+		{name: 'priority_id', type: 'int'                          },
+		{name: 'pid',         type: 'int'                          },
+		{name: 'priority',    type: 'string'                       },
+		{name: 'service',     type: 'string'                       },
+		{name: 'message',     type: 'string'                       },
+		{name: 'time',        type: 'date', dateFormat: 'timestamp'}
+	]);
+
+	var mailLogStore = new Ext.data.JsonStore({
+		url: 'data/log.php',
+		root: 'log',
+		fields: mailLogRecord
+	});
 
 	var logSummaryStore = new Ext.data.JsonStore({
 		url: 'data/logSummary.php',
@@ -430,12 +457,54 @@ RubixConsulting.user = function() {
 								}
 							]
 						}),
+						mailLogGrid = new Ext.grid.GridPanel({
+							border: true,
+							id: 'mail-log-panel',
+							autoScroll: true,
+							loadMask: true,
+							tbar: false,
+							autoExpandColumn: 'message',
+							store: mailLogStore,
+							cm: new Ext.grid.ColumnModel([{
+								header:    'Time',
+								sortable:  true,
+								dataIndex: 'time',
+								id:        'time',
+								renderer:  Ext.util.Format.dateRenderer('n/d g:i:s A'),
+								width:     110
+							},{
+								header:    'Priority',
+								sortable:  true,
+								dataIndex: 'priority_id',
+								id:        'priority',
+								renderer:  priorityRenderer,
+								width:     65
+							},{
+								header:    'Service',
+								sortable:  true,
+								dataIndex: 'service',
+								id:        'service',
+								width:     90
+							},{
+								header:    'Message',
+								sortable:  true,
+								dataIndex: 'message',
+								id:        'message',
+								renderer:  wrapCell,
+								width:     false
+							},{
+								header:    'PID',
+								sortable:  true,
+								dataIndex: 'pid',
+								id:        'pid',
+								width:     false
+							}])
+						}),
 						domainGrid = new Ext.grid.GridPanel({
 							border: true,
 							id: 'manage-domains-panel',
 							autoScroll: true,
 							loadMask: true,
-							clicksToEdit: 1,
 							tbar: [
 								addDomainBtn = new Ext.Toolbar.Button({
 									text: 'Add New',
@@ -455,10 +524,7 @@ RubixConsulting.user = function() {
 									sortable: true,
 									dataIndex: 'domain',
 									id: 'domain',
-									width: 200,
-									editor: new Ext.form.TextField({
-										allowBlank: false
-									})
+									width: 200
 								}
 							]),
 							iconCls: 'icon-grid'
@@ -1183,6 +1249,9 @@ RubixConsulting.user = function() {
 			saveForwardsBtn.enable();
 			revertForwardsBtn.enable();
 		}, this);
+		mailLogGrid.getView().getRowClass = function(row, index) {
+			return 'log_row_'+row.data.priority;
+		}
 		localForwardStore.on( 'loadexception', loadException, this);
 		domainListStore.on(   'loadexception', loadException, this);
 		userStore.on(         'loadexception', loadException, this);
@@ -1192,6 +1261,7 @@ RubixConsulting.user = function() {
 		manageForwardStore.on('loadexception', loadException, this);
 		catchAllStore.on(     'loadexception', loadException, this);
 		forwardStore.on(      'loadexception', loadException, this);
+		mailLogStore.on(      'loadexception', loadException, this);
 		domainSm.on('beforerowselect', function(selectionmodel, row, keep, record) {
 			if(record.get('domain') == user.domain) {
 				return false;
@@ -1292,6 +1362,14 @@ RubixConsulting.user = function() {
 		domainPermCombo.on('select', loadDomainPerms, this);
 		logSummaryCombo.on('select', loadLogSummary,  this);
 		enablePage();
+	}
+
+	var priorityRenderer = function(id) {
+		return priorities[id];
+	}
+
+	var wrapCell = function(text) {
+		return '<div style="white-space: normal">'+text+'</div>';
 	}
 
 	var loadException = function(item, options, response, error) {
@@ -2630,10 +2708,10 @@ RubixConsulting.user = function() {
 		var modifiedDomains = new Array();
 		var modified = domainPermStore.getModifiedRecords();
 		for(var i = 0; i < modified.length; i++) {
-			var tmpDomain = new Object();
-			tmpDomain.user_id   = modified[i].get('user_id');
-			tmpDomain.admin     = modified[i].get('admin');
-			modifiedDomains.push(tmpDomain);
+			modifiedDomains.push({
+				user_id: modified[i].get('user_id'),
+				admin:   modified[i].get('admin')
+			});
 		}
 		domainPermMask = new Ext.LoadMask(domainPermGrid.getEl(), {msg: 'Saving domain administrators...'});
 		domainPermMask.show();
@@ -2653,10 +2731,10 @@ RubixConsulting.user = function() {
 		var modifiedUsers = new Array();
 		var modified = siteAdminStore.getModifiedRecords();
 		for(var i = 0; i < modified.length; i++) {
-			var tmpUser = new Object();
-			tmpUser.user_id = modified[i].get('user_id');
-			tmpUser.site_admin = modified[i].get('site_admin');
-			modifiedUsers.push(tmpUser);
+			modifiedUsers.push({
+				user_id: modified[i].get('user_id'),
+				site_admin: modified[i].get('site_admin')
+			});
 		}
 		siteAdminMask = new Ext.LoadMask(siteAdminGrid.getEl(), {msg: 'Saving site administrators...'});
 		siteAdminMask.show();
@@ -2675,11 +2753,11 @@ RubixConsulting.user = function() {
 		var modifiedCatchAlls = new Array();
 		var modified = catchAllStore.getModifiedRecords();
 		for(var i = 0; i < modified.length; i++) {
-			var tmpCatchAll = new Object();
-			tmpCatchAll.alias_id    = modified[i].get('alias_id');
-			tmpCatchAll.destination = modified[i].get('destination');
-			tmpCatchAll.active      = modified[i].get('active');
-			modifiedCatchAlls.push(tmpCatchAll);
+			modifiedCatchAlls.push({
+				alias_id:    modified[i].get('alias_id'),
+				destination: modified[i].get('destination'),
+				active:      modified[i].get('active')
+			});
 		}
 		catchAllMask =  new Ext.LoadMask(catchAllGrid.getEl(), {msg: 'Saving catch all forwards...'});
 		catchAllMask.show();
@@ -2699,10 +2777,10 @@ RubixConsulting.user = function() {
 		var modifiedAliases = new Array();
 		var modified = aliasStore.getModifiedRecords();
 		for(var i = 0; i < modified.length; i++) {
-			var tmpAlias = new Object();
-			tmpAlias.alias_id = modified[i].get('alias_id');
-			tmpAlias.active   = modified[i].get('active');
-			modifiedAliases.push(tmpAlias);
+			modifiedAliases.push({
+				alias_id: modified[i].get('alias_id'),
+				active:   modified[i].get('active')
+			});
 		}
 		aliasMask = new Ext.LoadMask(aliasesGrid.getEl(), {msg: 'Saving aliases...'});
 		aliasMask.show();
@@ -2722,11 +2800,11 @@ RubixConsulting.user = function() {
 		var modifiedLocalForwards = new Array();
 		var modified = localForwardStore.getModifiedRecords();
 		for(var i = 0; i < modified.length; i++) {
-			var tmpLocalForward = new Object();
-			tmpLocalForward.alias_id    = modified[i].get('alias_id');
-			tmpLocalForward.destination = modified[i].get('destination');
-			tmpLocalForward.active      = modified[i].get('active');
-			modifiedLocalForwards.push(tmpLocalForward);
+			modifiedLocalForwards.push({
+				alias_id:    modified[i].get('alias_id'),
+				destination: modified[i].get('destination'),
+				active:      modified[i].get('active')
+			});
 		}
 		localForwardMask = new Ext.LoadMask(localForwardsGrid.getEl(), {msg: 'Saving local forwards...'});
 		localForwardMask.show();
@@ -2746,11 +2824,11 @@ RubixConsulting.user = function() {
 		var modifiedForwards = new Array();
 		var modified = forwardStore.getModifiedRecords();
 		for(var i = 0; i < modified.length; i++) {
-			var tmpForward = new Object();
-			tmpForward.alias_id    = modified[i].get('alias_id');
-			tmpForward.destination = modified[i].get('destination');
-			tmpForward.active      = modified[i].get('active');
-			modifiedForwards.push(tmpForward);
+			modifiedForwards.push({
+				alias_id:    modified[i].get('alias_id'),
+				destination: modified[i].get('destination'),
+				active:      modified[i].get('active')
+			});
 		}
 		forwardMask = new Ext.LoadMask(forwardGrid.getEl(), {msg: 'Saving forwards...'});
 		forwardMask.show();
@@ -2770,11 +2848,11 @@ RubixConsulting.user = function() {
 		var modifiedManageForwards = new Array();
 		var modified = manageForwardStore.getModifiedRecords();
 		for(var i = 0; i < modified.length; i++) {
-			var tmpManageForward = new Object();
-			tmpManageForward.alias_id    = modified[i].get('alias_id');
-			tmpManageForward.destination = modified[i].get('destination');
-			tmpManageForward.active      = modified[i].get('active');
-			modifiedManageForwards.push(tmpManageForward);
+			modifiedManageForwards.push({
+				alias_id:    modified[i].get('alias_id'),
+				destination: modified[i].get('destination'),
+				active:      modified[i].get('active')
+			});
 		}
 		manageForwardMask = new Ext.LoadMask(manageForwardsGrid.getEl(), {msg: 'Saving forwards...'});
 		manageForwardMask.show();
@@ -2794,12 +2872,12 @@ RubixConsulting.user = function() {
 		var modifiedLocalAliases = new Array();
 		var modified = localAliasStore.getModifiedRecords();
 		for(var i = 0; i < modified.length; i++) {
-			var tmpLocalAlias = new Object();
-			tmpLocalAlias.alias_id    = modified[i].get('alias_id');
-			tmpLocalAlias.name        = modified[i].get('name');
-			tmpLocalAlias.destination = modified[i].get('destination');
-			tmpLocalAlias.active      = modified[i].get('active');
-			modifiedLocalAliases.push(tmpLocalAlias);
+			modifiedLocalAliases.push({
+				alias_id:    modified[i].get('alias_id'),
+				name:        modified[i].get('name'),
+				destination: modified[i].get('destination'),
+				active:      modified[i].get('active')
+			});
 		}
 		localAliasMask = new Ext.LoadMask(localAliasGrid.getEl(), {msg: 'Saving local aliases...'});
 		localAliasMask.show();
@@ -2819,11 +2897,11 @@ RubixConsulting.user = function() {
 		var modifiedUsers = new Array();
 		var modified = userStore.getModifiedRecords();
 		for(var i = 0; i < modified.length; i++) {
-			var tmpUser = new Object();
-			tmpUser.user_id = modified[i].get('user_id');
-			tmpUser.name    = modified[i].get('name');
-			tmpUser.active  = modified[i].get('active');
-			modifiedUsers.push(tmpUser);
+			modifiedUsers.push({
+				user_id: modified[i].get('user_id'),
+				name:    modified[i].get('name'),
+				active:  modified[i].get('active')
+			});
 		}
 		userMask = new Ext.LoadMask(userGrid.getEl(), {msg: 'Saving users...'});
 		userMask.show();
@@ -3057,6 +3135,8 @@ RubixConsulting.user = function() {
 			loadStats('month');
 		} else if(node.id == 'last-year-stats') {
 			loadStats('year');
+		} else if(node.id == 'mail-log') {
+			loadMailLog();
 		}
 	}
 
@@ -3147,6 +3227,10 @@ RubixConsulting.user = function() {
 		webmailMask.hide();
 		Ext.getCmp('rubixWebmailDiv').setSrc('../roundcube/');
 		webmailLoaded = true;
+	}
+
+	var loadMailLog = function() {
+		mailLogStore.load();
 	}
 
 	var loadDomains = function() {

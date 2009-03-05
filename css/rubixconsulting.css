@@ -1,3 +1,35 @@
 .alignTop {
 	vertical-align: top;
 }
+
+.log_row_Emergency {
+	background-color: #FF0000;
+}
+
+.log_row_Alert {
+	background-color: #FF3333;
+}
+
+.log_row_Critical {
+	background-color: #FF6666;
+}
+
+.log_row_Error {
+	background-color: #FF9999;
+}
+
+.log_row_Warning {
+	background-color: #FFCCCC;
+}
+
+.log_row_Notice {
+	background-color: #CCFFCC;
+}
+
+.log_row_Info {
+	background-color: #FFFFFF;
+}
+
+.log_row_Debug {
+	background-color: #CCCCFF;
+}
