@@ -503,7 +503,7 @@ RubixConsulting.user = function() {
 								sortable:  true,
 								dataIndex: 'pid',
 								id:        'pid',
-								width:     false
+								width:     50
 							}])
 						}),
 						domainGrid = new Ext.grid.GridPanel({
