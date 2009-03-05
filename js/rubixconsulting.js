@@ -466,6 +466,12 @@ RubixConsulting.user = function() {
 							autoExpandColumn: 'message',
 							store: mailLogStore,
 							cm: new Ext.grid.ColumnModel([{
+								header:    'ID',
+								sortable:  true,
+								dataIndex: 'id',
+								id:        'id',
+								width:     50
+							},{
 								header:    'Time',
 								sortable:  true,
 								dataIndex: 'time',

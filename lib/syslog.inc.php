@@ -87,13 +87,13 @@ function getSyslog($limit = FALSE, $start = FALSE) {
 		$sql .= ' AND id > ?';
 		$params[] = $start;
 	}
-		$sql .= ' ORDER BY time DESC';
+		$sql .= ' ORDER BY id DESC';
 	if($limit) {
 		$sql .= ' LIMIT ?';
 		$params[] = $limit;
 	}
 	$sql .= ') AS LOG'.
-		'  ORDER BY time';
+		'  ORDER BY id';
 	db_set_active('logs');
 	$rows = db_getrows($sql, $params);
 	db_set_active('default');
@@ -115,6 +115,9 @@ function getSyslog($limit = FALSE, $start = FALSE) {
 		}
 		$rows[$i]['pid']     = $pid;
 		$rows[$i]['service'] = $service;
+
+		$message = htmlspecialchars($row['message']);
+		$rows[$i]['message'] = $message;
 
 		$i++;
 	}
