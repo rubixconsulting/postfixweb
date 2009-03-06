@@ -3774,6 +3774,10 @@ RubixConsulting.user = function() {
 		forwardsLoaded = false;
 		logSummaryStore.removeAll();
 		logSummaryLoaded = false;
+		mailLogStore.removeAll();
+		if(tailTimer) {
+			tailTimer.cancel();
+		}
 		webmailLoaded = false;
 		nameLoaded = false;
 		cookie.clear('pass');

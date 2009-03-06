@@ -69,7 +69,7 @@ $text = str_replace(" ", "&nbsp;", $text);
 $text = str_replace("<", "&lt;", $text);
 $text = str_replace(">", "&gt;", $text);
 $text = str_replace("\n", "<br />\n", $text);
-$time = "Log Summary for: ".strftime("%Y-%m-%d", $time - (60 * 60 * 24));
+$time = "Log Summary for: ".strftime("%Y-%m-%d", $time);
 
 print <<< EOF
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
