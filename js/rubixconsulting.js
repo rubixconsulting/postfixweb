@@ -28,7 +28,8 @@ RubixConsulting.user = function() {
 	var saveForwardsBtn, addForwardWindow, addForwardDestination, cookie;
 	var forwardMask, addManageForwardDestination, revertDomainPermBtn;
 	var webmailPanel, webmailMask, namePanel, nameMask, mailLogGrid;
-	var logSummaryMask, statsMask, logSummaryCombo, loginCookie;
+	var logSummaryMask, statsMask, logSummaryCombo, loginCookie, tailTimer;
+
 
 	var priorities = [
 		'Emergency',
@@ -462,7 +463,12 @@ RubixConsulting.user = function() {
 							id: 'mail-log-panel',
 							autoScroll: true,
 							loadMask: true,
-							tbar: false,
+							tbar: [
+								tailLogChk = new Ext.form.Checkbox({
+									boxLabel:'Watch Log',
+									handler: tailLog
+								})
+							],
 							autoExpandColumn: 'message',
 							store: mailLogStore,
 							cm: new Ext.grid.ColumnModel([{
@@ -3236,7 +3242,76 @@ RubixConsulting.user = function() {
 	}
 
 	var loadMailLog = function() {
-		mailLogStore.load();
+		mailLogStore.removeAll();
+		mailLogGrid.getView().focusEl.setStyle('top', '0px');
+		tailLogChk.setValue(false);
+		mailLogStore.load({
+			params: {
+				limit: 250
+			},
+			callback: mailLogLoaded,
+			scope: this
+		});
+	}
+
+	var tailLog = function(checkbox, checked) {
+		if(!tailTimer) {
+			tailTimer = new Ext.util.DelayedTask(getTail, this);
+		}
+		if(tailLogChk.getValue()) {
+			getTail();
+		} else {
+			tailTimer.cancel();
+		}
+	}
+
+	var mailLogUpdated = function(response, options) {
+		var data = Ext.util.JSON.decode(response.responseText);
+		if(!data.success) {
+			return;
+		}
+		var rs = new Array();
+		for(var i = 0; i < data.log.length; i++) {
+			var r = new mailLogRecord(data.log[i]);
+			var t = r.get('time');
+			t = new Date.parseDate(t, 'U');
+			r.set('time', t);
+			r.commit();
+			rs.push(r);
+		}
+		mailLogStore.add(rs);
+		mailLogScrollToBottom();
+		if(tailLogChk.getValue()) {
+			tailTimer.delay(5000);
+		}
+	}
+
+	var getTail = function() {
+		if(center.getLayout().activeItem.id != 'mail-log-panel') {
+			return;
+		}
+		var count  = mailLogStore.getCount() - 1;
+		var lastId = mailLogStore.getAt(count).get('id');
+		Ext.Ajax.request({
+			url: 'data/log.php',
+			params: {
+				start: lastId
+			},
+			success: mailLogUpdated,
+			failure: ajaxFailure,
+			scope: this
+		});
+	}
+
+	var mailLogLoaded = function(r, options, success) {
+		if(!success) {
+			return;
+		}
+		mailLogScrollToBottom();
+	}
+
+	var mailLogScrollToBottom = function() {
+		mailLogGrid.getView().scroller.scroll('down', 9999999999, true);
 	}
 
 	var loadDomains = function() {

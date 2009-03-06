@@ -12,5 +12,12 @@ if(!$config['logs']['enabled']) {
 	exit;
 }
 
-$log = getSyslog(500);
+$limit = $_POST['limit'];
+$start = $_POST['start'];
+
+if(!$limit) {
+	$limit = 30;
+}
+
+$log = getSyslog($limit, $start);
 print json_encode(array('success' => TRUE, 'log' => $log));
