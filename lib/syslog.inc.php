@@ -104,9 +104,6 @@ function getSyslog($limit = FALSE, $start = FALSE) {
 
 	$i = 0;
 	foreach($rows as $row) {
-		$priority = $priorities[$row['priority_id']]['display'];
-		$rows[$i]['priority'] = $priorities[$row['priority_id']]['display'];
-
 		$pid     = null;
 		$service = str_replace(':', '', $row['service']);
 		if(preg_match('/^(.*)\[(.*)\]$/', $service, $matches)) {

@@ -151,7 +151,6 @@ RubixConsulting.user = function() {
 		{name: 'id',          type: 'int'                          },
 		{name: 'priority_id', type: 'int'                          },
 		{name: 'pid',         type: 'int'                          },
-		{name: 'priority',    type: 'string'                       },
 		{name: 'service',     type: 'string'                       },
 		{name: 'message',     type: 'string'                       },
 		{name: 'time',        type: 'date', dateFormat: 'timestamp'}
@@ -294,7 +293,11 @@ RubixConsulting.user = function() {
 			nameMask.hide();
 		}
 		if(action && action.response && action.response.statusText && (action.response.statusText != 'OK')) {
-			showError(action.response.statusText);
+			if(action.response.statusText == 'Forbidden: Not logged in') {
+				completeLogout();
+			} else {
+				showError(action.response.statusText);
+			}
 		} else {
 			showError('Please correct the underlined items');
 		}
@@ -308,7 +311,11 @@ RubixConsulting.user = function() {
 			if(response && response.statusText) {
 				msg = response.statusText;
 			}
-			showError(msg);
+			if(msg == 'Forbidden: Not logged in') {
+				completeLogout();
+			} else {
+				showError(msg);
+			}
 		}
 	}
 
@@ -1262,7 +1269,7 @@ RubixConsulting.user = function() {
 			revertForwardsBtn.enable();
 		}, this);
 		mailLogGrid.getView().getRowClass = function(row, index) {
-			return 'log_row_'+row.data.priority;
+			return 'log_row_'+priorityRenderer(row.data.priority_id);
 		}
 		localForwardStore.on( 'loadexception', loadException, this);
 		domainListStore.on(   'loadexception', loadException, this);
@@ -1389,7 +1396,11 @@ RubixConsulting.user = function() {
 		if(response && response.statusText) {
 			msg = response.statusText;
 		}
-		showError(msg);
+		if(msg == 'Forbidden: Not logged in') {
+			completeLogout();
+		} else {
+			showError(msg);
+		}
 	}
 
 	var addForward = function() {
