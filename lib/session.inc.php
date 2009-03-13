@@ -5,7 +5,7 @@ include_once('user.inc.php');
 
 global $config;
 ini_set('session.name', $config['cookie']['name']);
-session_set_cookie_params(0, $config['page']['path'], $config['cookie']['host'], TRUE, TRUE);
+session_set_cookie_params($config['cookie']['lifetime'], $config['page']['path'], $config['cookie']['host'], $config['cookie']['secure'], TRUE);
 session_start();
 
 function requireLogin() {

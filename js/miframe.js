@@ -185,7 +185,7 @@ Ext.ux.ManagedIFrame = function(){
 
     Ext.apply(el,{
       disableMessaging : config.disableMessaging===true
-     ,loadMask         : Ext.apply({msg:'Loading..'
+     ,loadMask         : Ext.apply({msg:'Loading...'
                             ,msgCls:'x-mask-loading'
                             ,maskEl: el._maskEl
                             ,hideOnReady:true

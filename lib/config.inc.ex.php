@@ -20,8 +20,10 @@ $config = array(
 		)
 	),
 	'cookie' => array(
-		'name' => 'RubixConsultingMailUser',
-		'host' => 'replace with hostname'
+		'lifetime' => 0,
+		'name'     => 'RubixConsultingMailUser',
+		'host'     => 'replace with hostname',
+		'secure'   => TRUE
 	),
 	'page' => array(
 		'title'   => 'Rubix Consulting, Inc. Mail User Portal',
