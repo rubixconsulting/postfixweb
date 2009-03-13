@@ -3577,7 +3577,7 @@ RubixConsulting.user = function() {
 			closable: false,
 			plain: false,
 			resizable: false,
-			title: 'Log In',
+			title: 'Log in',
 			items: [{
 				layout: 'form',
 				xtype: 'form',
