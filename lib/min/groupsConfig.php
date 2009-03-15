@@ -11,7 +11,7 @@
 
 return array(
 	'js' => array(
-		'../../js/ext/adapter/ext/ext-base.js',
+		'../../js/ext/ext-base.js',
 		'../../js/ext/ext-all.js',
 		'../../js/passwordmeter.js',
 		'../../js/miframe-min.js',

@@ -1,4 +1,11 @@
 ------------------------------------------------------------
+revno: 53
+committer: Joshua Rubin <support@rubixconsulting.com>
+branch nick: HEAD
+timestamp: Sun 2009-03-15 10:51:57 -0600
+message:
+  add license documents and changelog
+------------------------------------------------------------
 revno: 52
 committer: Joshua Rubin <support@rubixconsulting.com>
 branch nick: mailuser-beta
