@@ -1,0 +1,371 @@
+------------------------------------------------------------
+revno: 52
+committer: Joshua Rubin <support@rubixconsulting.com>
+branch nick: mailuser-beta
+timestamp: Sun 2009-03-15 10:01:31 -0600
+message:
+  add sql schemas
+------------------------------------------------------------
+revno: 51
+committer: Joshua Rubin <support@rubixconsulting.com>
+branch nick: mailuser-beta
+timestamp: Thu 2009-03-12 22:14:29 -0600
+message:
+  change case
+    ------------------------------------------------------------
+    revno: 49.1.1
+    committer: Joshua Rubin <support@rubixconsulting.com>
+    branch nick: mailuser
+    timestamp: Tue 2009-03-10 16:05:58 -0600
+    message:
+      change a string case
+------------------------------------------------------------
+revno: 50
+committer: Joshua Rubin <support@rubixconsulting.com>
+branch nick: mailuser-beta
+timestamp: Thu 2009-03-12 22:13:23 -0600
+message:
+  add a few more cookie config params. fix a small typo.
+------------------------------------------------------------
+revno: 49
+committer: Joshua Rubin <support@rubixconsulting.com>
+branch nick: mailuser-beta
+timestamp: Fri 2009-03-06 08:23:10 -0700
+message:
+  fix a few more small annoyances
+------------------------------------------------------------
+revno: 48
+committer: Joshua Rubin <support@rubixconsulting.com>
+branch nick: mailuser-beta
+timestamp: Fri 2009-03-06 01:11:58 -0700
+message:
+  fix a few small bugs
+------------------------------------------------------------
+revno: 47
+committer: Joshua Rubin <support@rubixconsulting.com>
+branch nick: mailuser-beta
+timestamp: Fri 2009-03-06 01:04:38 -0700
+message:
+  complete the log viewer
+------------------------------------------------------------
+revno: 46
+committer: Joshua Rubin <support@rubixconsulting.com>
+branch nick: mailuser-beta
+timestamp: Thu 2009-03-05 02:47:32 -0700
+message:
+  set the pid width
+------------------------------------------------------------
+revno: 45
+committer: Joshua Rubin <support@rubixconsulting.com>
+branch nick: mailuser-beta
+timestamp: Thu 2009-03-05 02:43:56 -0700
+message:
+  fix a few small bugs with the mail log
+------------------------------------------------------------
+revno: 44
+committer: Joshua Rubin <support@rubixconsulting.com>
+branch nick: mailuser-beta
+timestamp: Thu 2009-03-05 02:22:03 -0700
+message:
+  begin the ability to show the mail server log
+------------------------------------------------------------
+revno: 43
+committer: Joshua Rubin <support@rubixconsulting.com>
+branch nick: mailuser-beta
+timestamp: Wed 2009-03-04 11:03:45 -0700
+message:
+  add ability to remember login username. add some more post validation to the log summary checking. add a tmp dir option to mailgraph.
+------------------------------------------------------------
+revno: 42
+committer: Joshua Rubin <support@rubixconsulting.com>
+branch nick: mailuser
+timestamp: Tue 2009-03-03 21:49:16 -0700
+message:
+  group the graphs in the tree. simplify the javascript tree selection logic.
+------------------------------------------------------------
+revno: 41
+committer: Joshua Rubin <support@rubixconsulting.com>
+branch nick: mailuser-beta
+timestamp: Tue 2009-03-03 21:27:32 -0700
+message:
+  fix small js typo
+------------------------------------------------------------
+revno: 40
+committer: Joshua Rubin <support@rubixconsulting.com>
+branch nick: mailuser-beta
+timestamp: Tue 2009-03-03 21:25:10 -0700
+message:
+  add ability to look at older log summary files
+------------------------------------------------------------
+revno: 39
+committer: Joshua Rubin <support@rubixconsulting.com>
+branch nick: mailuser-beta
+timestamp: Tue 2009-03-03 17:13:22 -0700
+message:
+  add mail server stats
+------------------------------------------------------------
+revno: 38
+committer: Joshua Rubin <support@rubixconsulting.com>
+branch nick: mailuser
+timestamp: Mon 2009-03-02 01:08:16 -0700
+message:
+  add a noscript notice
+------------------------------------------------------------
+revno: 37
+committer: Joshua Rubin <support@rubixconsulting.com>
+branch nick: mailuser-beta
+timestamp: Sun 2009-03-01 21:58:44 -0700
+message:
+  add ability for user to change own name
+------------------------------------------------------------
+revno: 36
+committer: Joshua Rubin <support@rubixconsulting.com>
+branch nick: mailuser
+timestamp: Sun 2009-03-01 20:47:49 -0700
+message:
+  set center panel title to tree text
+------------------------------------------------------------
+revno: 35
+committer: Joshua Rubin <support@rubixconsulting.com>
+branch nick: mailuser
+timestamp: Sun 2009-03-01 17:36:28 -0700
+message:
+  fix s.gif location
+------------------------------------------------------------
+revno: 34
+committer: Joshua Rubin <support@rubixconsulting.com>
+branch nick: mailuser-beta
+timestamp: Sun 2009-03-01 17:32:26 -0700
+message:
+  minify the css and js. include ext in bzr. include minify libraries. use a config file.
+------------------------------------------------------------
+revno: 33
+committer: Joshua Rubin <support@rubixconsulting.com>
+branch nick: mailuser
+timestamp: Fri 2009-02-27 10:46:44 -0700
+message:
+  fix a few more small bug
+------------------------------------------------------------
+revno: 32
+committer: Joshua Rubin <support@rubixconsulting.com>
+branch nick: mailuser
+timestamp: Fri 2009-02-27 09:14:50 -0700
+message:
+  dont show catchalls in user aliases
+------------------------------------------------------------
+revno: 31
+committer: Joshua Rubin <support@rubixconsulting.com>
+branch nick: mailuser
+timestamp: Fri 2009-02-27 09:04:02 -0700
+message:
+  disable firebug lite and use minified ext
+------------------------------------------------------------
+revno: 30
+committer: Joshua Rubin <support@rubixconsulting.com>
+branch nick: mailuser
+timestamp: Fri 2009-02-27 09:03:31 -0700
+message:
+  remove extra commas for ie compatibility
+------------------------------------------------------------
+revno: 29
+committer: Joshua Rubin <support@rubixconsulting.com>
+branch nick: mailuser
+timestamp: Fri 2009-02-27 01:09:53 -0700
+message:
+  add webmail to the interface
+------------------------------------------------------------
+revno: 28
+committer: Joshua Rubin <support@rubixconsulting.com>
+branch nick: mailuser
+timestamp: Thu 2009-02-26 22:03:47 -0700
+message:
+  fix a lot of bugs. finish personal forward management.
+------------------------------------------------------------
+revno: 27
+committer: Joshua Rubin <support@rubixconsulting.com>
+branch nick: mailuser
+timestamp: Thu 2009-02-26 11:24:18 -0700
+message:
+  enable server side removal and modification of catch all addresses
+------------------------------------------------------------
+revno: 26
+committer: Joshua Rubin <support@rubixconsulting.com>
+branch nick: mailuser
+timestamp: Thu 2009-02-26 10:07:05 -0700
+message:
+  complete the js side of removing, modifying and saving catch alls
+------------------------------------------------------------
+revno: 25
+committer: Joshua Rubin <support@rubixconsulting.com>
+branch nick: mailuser
+timestamp: Thu 2009-02-26 09:48:05 -0700
+message:
+  add ability to add catchall forwards
+------------------------------------------------------------
+revno: 24
+committer: Joshua Rubin <support@rubixconsulting.com>
+branch nick: mailuser
+timestamp: Wed 2009-02-25 23:45:06 -0700
+message:
+  begin the catch all address page
+------------------------------------------------------------
+revno: 23
+committer: Joshua Rubin <support@rubixconsulting.com>
+branch nick: mailuser
+timestamp: Wed 2009-02-25 16:51:44 -0700
+message:
+  complete local forwards remove, modify and save
+------------------------------------------------------------
+revno: 22
+committer: Joshua Rubin <support@rubixconsulting.com>
+branch nick: mailuser
+timestamp: Wed 2009-02-25 00:58:57 -0700
+message:
+  add domain column where useful. add local forwards page that loads, adds and bulk adds but does not remove, revert, modify or save yet
+------------------------------------------------------------
+revno: 21
+committer: Joshua Rubin <support@rubixconsulting.com>
+branch nick: mailuser
+timestamp: Tue 2009-02-24 01:24:02 -0700
+message:
+  complete the alias management page
+------------------------------------------------------------
+revno: 20
+committer: Joshua Rubin <support@rubixconsulting.com>
+branch nick: mailuser
+timestamp: Mon 2009-02-23 00:21:56 -0700
+message:
+  complete administrative forward management. load, but do not save or edit, aliases.
+------------------------------------------------------------
+revno: 19
+committer: Joshua Rubin <support@rubixconsulting.com>
+branch nick: mailuser
+timestamp: Sun 2009-02-22 13:47:23 -0700
+message:
+  complete transition away from disable/enable page to element masks
+------------------------------------------------------------
+revno: 18
+committer: Joshua Rubin <support@rubixconsulting.com>
+branch nick: mailuser
+timestamp: Sun 2009-02-22 03:38:46 -0700
+message:
+  fix bug in bulk adding aliases. prevent ajax reloads where possible. begin transition away from disablepage to element masks.
+------------------------------------------------------------
+revno: 17
+committer: Joshua Rubin <support@rubixconsulting.com>
+branch nick: mailuser
+timestamp: Sun 2009-02-22 02:37:41 -0700
+message:
+  add site administrators and local aliases pages
+------------------------------------------------------------
+revno: 16
+committer: Joshua Rubin <support@rubixconsulting.com>
+branch nick: mailuser
+timestamp: Fri 2009-02-20 14:55:45 -0700
+message:
+  add ability to save domain permissions
+------------------------------------------------------------
+revno: 15
+committer: Joshua Rubin <support@rubixconsulting.com>
+branch nick: mailuser
+timestamp: Fri 2009-02-20 00:15:29 -0700
+message:
+  add better quoting of strings used in sql queries
+------------------------------------------------------------
+revno: 14
+committer: Joshua Rubin <support@rubixconsulting.com>
+branch nick: mailuser
+timestamp: Thu 2009-02-19 23:41:25 -0700
+message:
+  change field width for login screen
+------------------------------------------------------------
+revno: 13
+committer: Joshua Rubin <support@rubixconsulting.com>
+branch nick: mailuser
+timestamp: Thu 2009-02-19 23:37:11 -0700
+message:
+  give domain admins ability to delegate other domain admins
+------------------------------------------------------------
+revno: 12
+committer: Joshua Rubin <support@rubixconsulting.com>
+branch nick: mailuser
+timestamp: Thu 2009-02-19 22:52:48 -0700
+message:
+  add domain permissions page that loads but does not yet save
+------------------------------------------------------------
+revno: 11
+committer: Joshua Rubin <support@rubixconsulting.com>
+branch nick: mailuser
+timestamp: Thu 2009-02-19 03:12:25 -0700
+message:
+  disable ability to modify domain names
+------------------------------------------------------------
+revno: 10
+committer: Joshua Rubin <support@rubixconsulting.com>
+branch nick: mailuser
+timestamp: Thu 2009-02-19 01:42:52 -0700
+message:
+  add much better permission checking and input validation
+------------------------------------------------------------
+revno: 9
+committer: Joshua Rubin <support@rubixconsulting.com>
+branch nick: mailuser
+timestamp: Tue 2009-02-17 02:09:33 -0700
+message:
+  add some more validation
+------------------------------------------------------------
+revno: 8
+committer: Joshua Rubin <support@rubixconsulting.com>
+branch nick: mailuser
+timestamp: Tue 2009-02-17 01:55:25 -0700
+message:
+  remove unnecessary prints
+------------------------------------------------------------
+revno: 7
+committer: Joshua Rubin <support@rubixconsulting.com>
+branch nick: mailuser
+timestamp: Tue 2009-02-17 01:51:00 -0700
+message:
+  complete the user management page
+------------------------------------------------------------
+revno: 6
+committer: Joshua Rubin <support@rubixconsulting.com>
+branch nick: mailuser
+timestamp: Mon 2009-02-16 10:44:35 -0700
+message:
+  get site working with IE
+------------------------------------------------------------
+revno: 5
+committer: Joshua Rubin <support@rubixconsulting.com>
+branch nick: mailuser
+timestamp: Mon 2009-02-16 00:06:03 -0700
+message:
+  well underway for user management. display and add new user are done.
+------------------------------------------------------------
+revno: 4
+committer: Joshua Rubin <support@rubixconsulting.com>
+branch nick: mailuser
+timestamp: Sun 2009-02-15 09:34:02 -0700
+message:
+  update backend permission system
+------------------------------------------------------------
+revno: 3
+committer: Joshua Rubin <support@rubixconsulting.com>
+branch nick: mailuser
+timestamp: Sun 2009-02-15 02:04:20 -0700
+message:
+  add support for database transactions. create a disabled catchall address user with every domain. add beginning support for catchall addresses.
+------------------------------------------------------------
+revno: 2
+committer: Joshua Rubin <support@rubixconsulting.com>
+branch nick: mailuser
+timestamp: Sun 2009-02-15 01:44:02 -0700
+message:
+  complete the manage domains page
+------------------------------------------------------------
+revno: 1
+committer: Joshua Rubin <support@rubixconsulting.com>
+branch nick: mailuser
+timestamp: Fri 2009-02-13 14:53:09 -0700
+message:
+  initial import
