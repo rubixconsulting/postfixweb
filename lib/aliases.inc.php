@@ -148,6 +148,7 @@ function addAlias($username, $domainId, $destinationId, $active) {
 		print json_encode(array('success' => false, 'errors' => $errors));
 		return FALSE;
 	}
+	$username = strtolower($username);
 	if(!validUserName($username)) {
 		$errors['username'] = 'Invalid username';
 		print json_encode(array('success' => false, 'errors' => $errors));

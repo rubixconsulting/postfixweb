@@ -105,6 +105,7 @@ function addLocalAlias($name, $destination, $active, $bulk = FALSE) {
 		}
 		return FALSE;
 	}
+	$name = strtolower($name);
 	if(!validUserName($name)) {
 		$foundError = TRUE;
 		$errors['name'] = 'Invalid name';

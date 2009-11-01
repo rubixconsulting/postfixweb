@@ -538,6 +538,7 @@ function addUser($newUser) {
 		print json_encode(array('success' => false, 'errors' => $errors));
 		return;
 	}
+	$username = strtolower($username);
 	if(!validUserName($username)) {
 		$foundError = TRUE;
 		$errors['username'] = 'Invalid username';

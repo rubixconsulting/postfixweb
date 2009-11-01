@@ -143,6 +143,7 @@ function addLocalForward($username, $domainId, $destination, $active, $printErro
 		}
 		return FALSE;
 	}
+	$username = strtolower($username);
 	if(!validUserName($username)) {
 		$foundError = TRUE;
 		$errors['username'] = 'Invalid username';

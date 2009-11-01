@@ -12,6 +12,7 @@ function addDomain($domain) {
 		print json_encode(array('success' => FALSE, 'errors' => array('domain' => 'This field is required')));
 		return;
 	}
+	$domain = strtolower($domain);
 	if(!validDomain($domain)) {
 		print json_encode(array('success' => FALSE, 'errors' => array('domain' => 'Invalid domain')));
 		return;

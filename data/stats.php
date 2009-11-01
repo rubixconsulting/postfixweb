@@ -163,8 +163,13 @@ if($img) {
 	exit;
 }
 
-unlink($graph_file);
-unlink($err_graph_file);
+if(file_exists($graph_file)) {
+	unlink($graph_file);
+}
+
+if(file_exists($err_graph_file)) {
+	unlink($err_graph_file);
+}
 
 graph($seconds, $graph_file);
 graph_err($seconds, $err_graph_file);
