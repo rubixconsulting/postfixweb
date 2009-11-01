@@ -65,6 +65,9 @@ RubixConsulting.user = function() {
 	var nameLoaded           = false;
 	var logSummaryLoaded     = false;
 
+	var timeout = 300000;
+	Ext.Ajax.timeout = timeout;
+
 	var removedUsers          = new Array();
 	var removedLocalAliases   = new Array();
 	var removedManageForwards = new Array();
@@ -157,74 +160,110 @@ RubixConsulting.user = function() {
 	]);
 
 	var mailLogStore = new Ext.data.JsonStore({
-		url: 'data/log.php',
+		proxy: new Ext.data.HttpProxy({
+			url: 'data/log.php',
+			timeout: timeout
+		}),
 		root: 'log',
 		fields: mailLogRecord
 	});
 
 	var logSummaryStore = new Ext.data.JsonStore({
-		url: 'data/logSummary.php',
+		proxy: new Ext.data.HttpProxy({
+			url: 'data/logSummary.php',
+			timeout: timeout
+		}),
 		root: 'files',
 		totalProperty: 'numFiles',
 		fields: logFileRecord
 	});
 
 	var forwardStore = new Ext.data.JsonStore({
-		url: 'data/forwards.php',
+		proxy: new Ext.data.HttpProxy({
+			url: 'data/forwards.php',
+			timeout: timeout
+		}),
 		root: 'forwards',
 		fields: forwardRecord
 	});
 
 	var catchAllStore = new Ext.data.JsonStore({
-		url: 'data/catchAll.php',
+		proxy: new Ext.data.HttpProxy({
+			url: 'data/catchAll.php',
+			timeout: timeout
+		}),
 		root: 'catchalls',
 		fields: catchAllRecord
 	});
 
 	var siteAdminStore = new Ext.data.JsonStore({
-		url: 'data/siteAdmins.php',
+		proxy: new Ext.data.HttpProxy({
+			url: 'data/siteAdmins.php',
+			timeout: timeout
+		}),
 		root: 'admins',
 		fields: siteAdminRecord
 	});
 
 	var domainPermStore = new Ext.data.JsonStore({
-		url: 'data/domainPerms.php',
+		proxy: new Ext.data.HttpProxy({
+			url: 'data/domainPerms.php',
+			timeout: timeout
+		}),
 		root: 'domains',
 		fields: domainPermRecord
 	});
 
 	var domainListStore = new Ext.data.JsonStore({
-		url: 'data/domains.php',
+		proxy: new Ext.data.HttpProxy({
+			url: 'data/domains.php',
+			timeout: timeout
+		}),
 		root: 'domains',
 		fields: domainRecord
 	});
 
 	var userStore = new Ext.data.JsonStore({
-		url: 'data/users.php',
+		proxy: new Ext.data.HttpProxy({
+			url: 'data/users.php',
+			timeout: timeout
+		}),
 		root: 'users',
 		fields: userRecord
 	});
 
 	var localForwardStore = new Ext.data.JsonStore({
-		url: 'data/localForwards.php',
+		proxy: new Ext.data.HttpProxy({
+			url: 'data/localForwards.php',
+			timeout: timeout
+		}),
 		root: 'forwards',
 		fields: localForwardRecord
 	});
 
 	var manageForwardStore = new Ext.data.JsonStore({
-		url: 'data/manageForwards.php',
+		proxy: new Ext.data.HttpProxy({
+			url: 'data/manageForwards.php',
+			timeout: timeout
+		}),
 		root: 'forwards',
 		fields: forwardRecord
 	});
 
 	var aliasStore = new Ext.data.JsonStore({
-		url: 'data/aliases.php',
+		proxy: new Ext.data.HttpProxy({
+			url: 'data/aliases.php',
+			timeout: timeout
+		}),
 		root: 'aliases',
 		fields: aliasRecord
 	});
 
 	var localAliasStore = new Ext.data.JsonStore({
-		url: 'data/localAliases.php',
+		proxy: new Ext.data.HttpProxy({
+			url: 'data/localAliases.php',
+			timeout: timeout
+		}),
 		root: 'aliases',
 		fields: localAliasRecord
 	});
@@ -416,6 +455,7 @@ RubixConsulting.user = function() {
 						}),
 						new Ext.form.FormPanel({
 							url: 'data/changePass.php',
+							timeout: timeout,
 							monitorValid: true,
 							autoScroll: true,
 							labelWidth: 125,
@@ -1127,6 +1167,7 @@ RubixConsulting.user = function() {
 						}),
 						namePanel = new Ext.form.FormPanel({
 							url: 'data/name.php',
+							timeout: timeout,
 							monitorValid: true,
 							autoScroll: true,
 							labelWidth: 50,
@@ -1421,6 +1462,7 @@ RubixConsulting.user = function() {
 					id: 'add-forward-form',
 					layout: 'form',
 					url: 'data/forwards.php',
+					timeout: timeout,
 					frame: true,
 					monitorValid: true,
 					xtype: 'form',
@@ -1479,6 +1521,7 @@ RubixConsulting.user = function() {
 					id: 'add-domain-form',
 					layout: 'form',
 					url: 'data/domains.php',
+					timeout: timeout,
 					frame: true,
 					monitorValid: true,
 					xtype: 'form',
@@ -1553,6 +1596,7 @@ RubixConsulting.user = function() {
 					id: 'reset-password-form',
 					layout: 'form',
 					url: 'data/users.php',
+					timeout: timeout,
 					frame: true,
 					monitorValid: true,
 					xtype: 'form',
@@ -1628,6 +1672,7 @@ RubixConsulting.user = function() {
 					id: 'bulk-add-local-forward-form',
 					layout: 'form',
 					url: 'data/localForwards.php',
+					timeout: timeout,
 					frame: true,
 					monitorValid: true,
 					xtype: 'form',
@@ -1689,6 +1734,7 @@ RubixConsulting.user = function() {
 					id: 'bulk-add-local-alias-form',
 					layout: 'form',
 					url: 'data/localAliases.php',
+					timeout: timeout,
 					frame: true,
 					monitorValid: true,
 					xtype: 'form',
@@ -1750,6 +1796,7 @@ RubixConsulting.user = function() {
 					id: 'add-local-forward-form',
 					layout: 'form',
 					url: 'data/localForwards.php',
+					timeout: timeout,
 					frame: true,
 					monitorValid: true,
 					xtype: 'form',
@@ -1835,6 +1882,7 @@ RubixConsulting.user = function() {
 					id: 'add-catchall-form',
 					layout: 'form',
 					url: 'data/catchAll.php',
+					timeout: timeout,
 					frame: true,
 					monitorValid: true,
 					xtype: 'form',
@@ -1909,6 +1957,7 @@ RubixConsulting.user = function() {
 					id: 'add-alias-form',
 					layout: 'form',
 					url: 'data/aliases.php',
+					timeout: timeout,
 					frame: true,
 					monitorValid: true,
 					xtype: 'form',
@@ -2005,6 +2054,7 @@ RubixConsulting.user = function() {
 					id: 'add-manage-forward-form',
 					layout: 'form',
 					url: 'data/manageForwards.php',
+					timeout: timeout,
 					frame: true,
 					monitorValid: true,
 					xtype: 'form',
@@ -2080,6 +2130,7 @@ RubixConsulting.user = function() {
 					id: 'add-local-alias-form',
 					layout: 'form',
 					url: 'data/localAliases.php',
+					timeout: timeout,
 					frame: true,
 					monitorValid: true,
 					xtype: 'form',
@@ -2142,6 +2193,7 @@ RubixConsulting.user = function() {
 				items: [{
 					id: 'add-user-form',
 					layout: 'form',
+					timeout: timeout,
 					url: 'data/users.php',
 					frame: true,
 					monitorValid: true,
@@ -3582,6 +3634,7 @@ RubixConsulting.user = function() {
 				layout: 'form',
 				xtype: 'form',
 				url: 'data/login.php',
+				timeout: timeout,
 				frame: true,
 				monitorValid: true,
 				id: 'loginForm',
