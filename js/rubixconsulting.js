@@ -64,6 +64,7 @@ RubixConsulting.user = function() {
 	var webmailLoaded        = false;
 	var nameLoaded           = false;
 	var logSummaryLoaded     = false;
+	var loginInProgress      = false;
 
 	var timeout = 300000;
 	Ext.Ajax.timeout = timeout;
@@ -3638,11 +3639,10 @@ RubixConsulting.user = function() {
 				frame: true,
 				monitorValid: true,
 				id: 'loginForm',
-				// TODO prevent enter on the submit button from double submitting
-				//keys: [{
-				//	key: Ext.EventObject.ENTER,
-				//	fn: doLogin
-				//}],
+				keys: [{
+					key: Ext.EventObject.ENTER,
+					fn: doLogin
+				}],
 				items: [{
 					html: '<div style="text-align: center;"><img src="img/logo.png" /></div>'
 				},{
@@ -3763,6 +3763,10 @@ RubixConsulting.user = function() {
 	}
 
 	var doLogin = function() {
+		if(loginInProgress) {
+			return;
+		}
+		loginInProgress = true;
 		disablePage('Logging in...', 'Please wait');
 		Ext.getCmp('loginForm').getForm().submit({
 			success: loginSuccess,
@@ -3771,6 +3775,7 @@ RubixConsulting.user = function() {
 	}
 
 	var loginSuccess = function(form, action) {
+		loginInProgress = false;
 		cookie.set('pass', action.result.pass);
 		if(Ext.getCmp('rememberMe').getValue()) {
 			loginCookie.set('user', Ext.getCmp('loginUser').getValue());
@@ -3781,6 +3786,7 @@ RubixConsulting.user = function() {
 	}
 
 	var loginFailure = function() {
+		loginInProgress = false;
 		showError('Invalid User Name and/or Password');
 	}
 
