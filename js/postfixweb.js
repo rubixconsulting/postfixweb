@@ -462,6 +462,7 @@ RubixConsulting.user = function() {
 							labelWidth: 125,
 							width: 318,
 							id: 'change-password-panel',
+							border: false,
 							layoutConfig: {
 								labelSeparator: ''
 							},
@@ -507,7 +508,7 @@ RubixConsulting.user = function() {
 							]
 						}),
 						mailLogGrid = new Ext.grid.GridPanel({
-							border: true,
+							border: false,
 							id: 'mail-log-panel',
 							autoScroll: true,
 							loadMask: true,
@@ -561,7 +562,7 @@ RubixConsulting.user = function() {
 							}])
 						}),
 						domainGrid = new Ext.grid.GridPanel({
-							border: true,
+							border: false,
 							id: 'manage-domains-panel',
 							autoScroll: true,
 							loadMask: true,
@@ -590,7 +591,7 @@ RubixConsulting.user = function() {
 							iconCls: 'icon-grid'
 						}),
 						userGrid = new Ext.grid.EditorGridPanel({
-							border: true,
+							border: false,
 							id: 'manage-users-panel',
 							autoScroll: true,
 							autoExpandColumn: 'name',
@@ -660,7 +661,7 @@ RubixConsulting.user = function() {
 							iconCls: 'icon-grid'
 						}),
 						domainPermGrid = new Ext.grid.EditorGridPanel({
-							border: true,
+							border: false,
 							id: 'manage-domain-permissions-panel',
 							autoScroll: true,
 							autoExpandColumn: null,
@@ -723,7 +724,7 @@ RubixConsulting.user = function() {
 							iconCls: 'icon-grid'
 						}),
 						siteAdminGrid = new Ext.grid.EditorGridPanel({
-							border: true,
+							border: false,
 							id: 'manage-site-administrators-panel',
 							autoScroll: true,
 							loadMask: true,
@@ -769,7 +770,7 @@ RubixConsulting.user = function() {
 							iconCls: 'icon-grid'
 						}),
 						localAliasGrid = new Ext.grid.EditorGridPanel({
-							border: true,
+							border: false,
 							id: 'manage-local-aliases-panel',
 							autoScroll: true,
 							autoExpandColumn: 'destination',
@@ -841,7 +842,7 @@ RubixConsulting.user = function() {
 							iconCls: 'icon-grid'
 						}),
 						aliasesGrid = new Ext.grid.EditorGridPanel({
-							border: true,
+							border: false,
 							id: 'manage-aliases-panel',
 							autoScroll: true,
 							autoExpandColumn: 'destination',
@@ -904,7 +905,7 @@ RubixConsulting.user = function() {
 							iconCls: 'icon-grid'
 						}),
 						manageForwardsGrid = new Ext.grid.EditorGridPanel({
-							border: true,
+							border: false,
 							id: 'manage-forwards-panel',
 							autoScroll: true,
 							autoExpandColumn: 'destination',
@@ -969,7 +970,7 @@ RubixConsulting.user = function() {
 							iconCls: 'icon-grid'
 						}),
 						localForwardsGrid = new Ext.grid.EditorGridPanel({
-							border: true,
+							border: false,
 							id: 'manage-local-forwards-panel',
 							autoScroll: true,
 							autoExpandColumn: 'destination',
@@ -1047,7 +1048,7 @@ RubixConsulting.user = function() {
 							iconCls: 'icon-grid'
 						}),
 						catchAllGrid = new Ext.grid.EditorGridPanel({
-							border: true,
+							border: false,
 							id: 'catchall-addresses-panel',
 							autoScroll: true,
 							loadMask: true,
@@ -1105,7 +1106,7 @@ RubixConsulting.user = function() {
 							iconCls: 'icon-grid'
 						}),
 						forwardGrid = new Ext.grid.EditorGridPanel({
-							border: true,
+							border: false,
 							id: 'forwards-panel',
 							autoScroll: true,
 							autoExpandColumn: false,
@@ -1159,7 +1160,10 @@ RubixConsulting.user = function() {
 						webmailPanel = new Ext.Panel({
 							id: 'webmail-panel',
 							layout: 'fit',
+							border: false,
 							items: [{
+								border: false,
+								header: false,
 								xtype: 'iframepanel',
 								id: 'rubixWebmailDiv',
 								loadMask: true,
@@ -1172,6 +1176,7 @@ RubixConsulting.user = function() {
 							monitorValid: true,
 							autoScroll: true,
 							labelWidth: 50,
+							border: false,
 							id: 'name-panel',
 							layoutConfig: {
 								labelSeparator: ''
@@ -1196,6 +1201,51 @@ RubixConsulting.user = function() {
 									text: 'Change Name',
 									formBind: true,
 									handler: changeName
+								}
+							]
+						}),
+						new Ext.form.FormPanel({
+							url: 'data/autoReply.php',
+							timeout: timeout,
+							monitorValid: true,
+							autoScroll: true,
+							labelWidth: 125,
+							border: false,
+							id: 'auto-reply-panel',
+							layoutConfig: {
+								labelSeparator: ''
+							},
+							defaultType: 'textfield',
+							bodyStyle: 'padding:15px',
+							defaults: {
+								msgTarget: 'side'
+							},
+							items: [
+								new Ext.form.Checkbox({
+									boxLabel:'Enabled'
+								}),
+								new Ext.form.DateField({
+									fieldLabel: 'First day',
+									allowBlank: false
+								}),
+								new Ext.form.DateField({
+									fieldLabel: 'Ends'
+								}),
+								new Ext.form.TextArea({
+									fieldLabel: 'Message',
+									width: 400,
+									height: 250,
+									name: 'auto-reply-message'
+								})
+							],
+							buttons: [
+								{
+									text: 'Reset Form',
+									handler: resetAutoReply
+								},{
+									text: 'Save',
+									formBind: true,
+									handler: saveAutoReply
 								}
 							]
 						}),
@@ -3710,6 +3760,10 @@ RubixConsulting.user = function() {
 		});
 	}
 
+	var saveAutoReply = function() {
+		// TODO
+	}
+
 	var changePassword = function() {
 		passwordMask = new Ext.LoadMask(Ext.get('change-password-panel'), {msg: 'Changing password...'});
 		passwordMask.show();
@@ -3721,6 +3775,10 @@ RubixConsulting.user = function() {
 
 	var resetNameForm = function() {
 		loadName();
+	}
+
+	var resetAutoReply = function() {
+		// TODO
 	}
 
 	var resetChangePassword = function() {
