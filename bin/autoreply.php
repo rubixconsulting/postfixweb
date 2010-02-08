@@ -1,7 +1,7 @@
 #!/usr/bin/php
 <?php
 
-$path = "/var/www/secure/mailuser";
+$path = "/var/www/secure/postfixweb";
 set_include_path(get_include_path() . PATH_SEPARATOR . $path."/lib");
 
 include_once("db.inc.php");

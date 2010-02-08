@@ -1,378 +1,430 @@
-------------------------------------------------------------
-revno: 53
-committer: Joshua Rubin <support@rubixconsulting.com>
-branch nick: HEAD
-timestamp: Sun 2009-03-15 10:51:57 -0600
-message:
-  add license documents and changelog
-------------------------------------------------------------
-revno: 52
-committer: Joshua Rubin <support@rubixconsulting.com>
-branch nick: mailuser-beta
-timestamp: Sun 2009-03-15 10:01:31 -0600
-message:
-  add sql schemas
-------------------------------------------------------------
-revno: 51
-committer: Joshua Rubin <support@rubixconsulting.com>
-branch nick: mailuser-beta
-timestamp: Thu 2009-03-12 22:14:29 -0600
-message:
-  change case
-    ------------------------------------------------------------
-    revno: 49.1.1
-    committer: Joshua Rubin <support@rubixconsulting.com>
-    branch nick: mailuser
-    timestamp: Tue 2009-03-10 16:05:58 -0600
-    message:
-      change a string case
-------------------------------------------------------------
-revno: 50
-committer: Joshua Rubin <support@rubixconsulting.com>
-branch nick: mailuser-beta
-timestamp: Thu 2009-03-12 22:13:23 -0600
-message:
-  add a few more cookie config params. fix a small typo.
-------------------------------------------------------------
-revno: 49
-committer: Joshua Rubin <support@rubixconsulting.com>
-branch nick: mailuser-beta
-timestamp: Fri 2009-03-06 08:23:10 -0700
-message:
-  fix a few more small annoyances
-------------------------------------------------------------
-revno: 48
-committer: Joshua Rubin <support@rubixconsulting.com>
-branch nick: mailuser-beta
-timestamp: Fri 2009-03-06 01:11:58 -0700
-message:
-  fix a few small bugs
-------------------------------------------------------------
-revno: 47
-committer: Joshua Rubin <support@rubixconsulting.com>
-branch nick: mailuser-beta
-timestamp: Fri 2009-03-06 01:04:38 -0700
-message:
-  complete the log viewer
-------------------------------------------------------------
-revno: 46
-committer: Joshua Rubin <support@rubixconsulting.com>
-branch nick: mailuser-beta
-timestamp: Thu 2009-03-05 02:47:32 -0700
-message:
-  set the pid width
-------------------------------------------------------------
-revno: 45
-committer: Joshua Rubin <support@rubixconsulting.com>
-branch nick: mailuser-beta
-timestamp: Thu 2009-03-05 02:43:56 -0700
-message:
-  fix a few small bugs with the mail log
-------------------------------------------------------------
-revno: 44
-committer: Joshua Rubin <support@rubixconsulting.com>
-branch nick: mailuser-beta
-timestamp: Thu 2009-03-05 02:22:03 -0700
-message:
-  begin the ability to show the mail server log
-------------------------------------------------------------
-revno: 43
-committer: Joshua Rubin <support@rubixconsulting.com>
-branch nick: mailuser-beta
-timestamp: Wed 2009-03-04 11:03:45 -0700
-message:
-  add ability to remember login username. add some more post validation to the log summary checking. add a tmp dir option to mailgraph.
-------------------------------------------------------------
-revno: 42
-committer: Joshua Rubin <support@rubixconsulting.com>
-branch nick: mailuser
-timestamp: Tue 2009-03-03 21:49:16 -0700
-message:
-  group the graphs in the tree. simplify the javascript tree selection logic.
-------------------------------------------------------------
-revno: 41
-committer: Joshua Rubin <support@rubixconsulting.com>
-branch nick: mailuser-beta
-timestamp: Tue 2009-03-03 21:27:32 -0700
-message:
-  fix small js typo
-------------------------------------------------------------
-revno: 40
-committer: Joshua Rubin <support@rubixconsulting.com>
-branch nick: mailuser-beta
-timestamp: Tue 2009-03-03 21:25:10 -0700
-message:
-  add ability to look at older log summary files
-------------------------------------------------------------
-revno: 39
-committer: Joshua Rubin <support@rubixconsulting.com>
-branch nick: mailuser-beta
-timestamp: Tue 2009-03-03 17:13:22 -0700
-message:
-  add mail server stats
-------------------------------------------------------------
-revno: 38
-committer: Joshua Rubin <support@rubixconsulting.com>
-branch nick: mailuser
-timestamp: Mon 2009-03-02 01:08:16 -0700
-message:
-  add a noscript notice
-------------------------------------------------------------
-revno: 37
-committer: Joshua Rubin <support@rubixconsulting.com>
-branch nick: mailuser-beta
-timestamp: Sun 2009-03-01 21:58:44 -0700
-message:
-  add ability for user to change own name
-------------------------------------------------------------
-revno: 36
-committer: Joshua Rubin <support@rubixconsulting.com>
-branch nick: mailuser
-timestamp: Sun 2009-03-01 20:47:49 -0700
-message:
-  set center panel title to tree text
-------------------------------------------------------------
-revno: 35
-committer: Joshua Rubin <support@rubixconsulting.com>
-branch nick: mailuser
-timestamp: Sun 2009-03-01 17:36:28 -0700
-message:
-  fix s.gif location
-------------------------------------------------------------
-revno: 34
-committer: Joshua Rubin <support@rubixconsulting.com>
-branch nick: mailuser-beta
-timestamp: Sun 2009-03-01 17:32:26 -0700
-message:
-  minify the css and js. include ext in bzr. include minify libraries. use a config file.
-------------------------------------------------------------
-revno: 33
-committer: Joshua Rubin <support@rubixconsulting.com>
-branch nick: mailuser
-timestamp: Fri 2009-02-27 10:46:44 -0700
-message:
-  fix a few more small bug
-------------------------------------------------------------
-revno: 32
-committer: Joshua Rubin <support@rubixconsulting.com>
-branch nick: mailuser
-timestamp: Fri 2009-02-27 09:14:50 -0700
-message:
-  dont show catchalls in user aliases
-------------------------------------------------------------
-revno: 31
-committer: Joshua Rubin <support@rubixconsulting.com>
-branch nick: mailuser
-timestamp: Fri 2009-02-27 09:04:02 -0700
-message:
-  disable firebug lite and use minified ext
-------------------------------------------------------------
-revno: 30
-committer: Joshua Rubin <support@rubixconsulting.com>
-branch nick: mailuser
-timestamp: Fri 2009-02-27 09:03:31 -0700
-message:
-  remove extra commas for ie compatibility
-------------------------------------------------------------
-revno: 29
-committer: Joshua Rubin <support@rubixconsulting.com>
-branch nick: mailuser
-timestamp: Fri 2009-02-27 01:09:53 -0700
-message:
-  add webmail to the interface
-------------------------------------------------------------
-revno: 28
-committer: Joshua Rubin <support@rubixconsulting.com>
-branch nick: mailuser
-timestamp: Thu 2009-02-26 22:03:47 -0700
-message:
-  fix a lot of bugs. finish personal forward management.
-------------------------------------------------------------
-revno: 27
-committer: Joshua Rubin <support@rubixconsulting.com>
-branch nick: mailuser
-timestamp: Thu 2009-02-26 11:24:18 -0700
-message:
-  enable server side removal and modification of catch all addresses
-------------------------------------------------------------
-revno: 26
-committer: Joshua Rubin <support@rubixconsulting.com>
-branch nick: mailuser
-timestamp: Thu 2009-02-26 10:07:05 -0700
-message:
-  complete the js side of removing, modifying and saving catch alls
-------------------------------------------------------------
-revno: 25
-committer: Joshua Rubin <support@rubixconsulting.com>
-branch nick: mailuser
-timestamp: Thu 2009-02-26 09:48:05 -0700
-message:
-  add ability to add catchall forwards
-------------------------------------------------------------
-revno: 24
-committer: Joshua Rubin <support@rubixconsulting.com>
-branch nick: mailuser
-timestamp: Wed 2009-02-25 23:45:06 -0700
-message:
-  begin the catch all address page
-------------------------------------------------------------
-revno: 23
-committer: Joshua Rubin <support@rubixconsulting.com>
-branch nick: mailuser
-timestamp: Wed 2009-02-25 16:51:44 -0700
-message:
-  complete local forwards remove, modify and save
-------------------------------------------------------------
-revno: 22
-committer: Joshua Rubin <support@rubixconsulting.com>
-branch nick: mailuser
-timestamp: Wed 2009-02-25 00:58:57 -0700
-message:
-  add domain column where useful. add local forwards page that loads, adds and bulk adds but does not remove, revert, modify or save yet
-------------------------------------------------------------
-revno: 21
-committer: Joshua Rubin <support@rubixconsulting.com>
-branch nick: mailuser
-timestamp: Tue 2009-02-24 01:24:02 -0700
-message:
-  complete the alias management page
-------------------------------------------------------------
-revno: 20
-committer: Joshua Rubin <support@rubixconsulting.com>
-branch nick: mailuser
-timestamp: Mon 2009-02-23 00:21:56 -0700
-message:
-  complete administrative forward management. load, but do not save or edit, aliases.
-------------------------------------------------------------
-revno: 19
-committer: Joshua Rubin <support@rubixconsulting.com>
-branch nick: mailuser
-timestamp: Sun 2009-02-22 13:47:23 -0700
-message:
-  complete transition away from disable/enable page to element masks
-------------------------------------------------------------
-revno: 18
-committer: Joshua Rubin <support@rubixconsulting.com>
-branch nick: mailuser
-timestamp: Sun 2009-02-22 03:38:46 -0700
-message:
-  fix bug in bulk adding aliases. prevent ajax reloads where possible. begin transition away from disablepage to element masks.
-------------------------------------------------------------
-revno: 17
-committer: Joshua Rubin <support@rubixconsulting.com>
-branch nick: mailuser
-timestamp: Sun 2009-02-22 02:37:41 -0700
-message:
-  add site administrators and local aliases pages
-------------------------------------------------------------
-revno: 16
-committer: Joshua Rubin <support@rubixconsulting.com>
-branch nick: mailuser
-timestamp: Fri 2009-02-20 14:55:45 -0700
-message:
-  add ability to save domain permissions
-------------------------------------------------------------
-revno: 15
-committer: Joshua Rubin <support@rubixconsulting.com>
-branch nick: mailuser
-timestamp: Fri 2009-02-20 00:15:29 -0700
-message:
-  add better quoting of strings used in sql queries
-------------------------------------------------------------
-revno: 14
-committer: Joshua Rubin <support@rubixconsulting.com>
-branch nick: mailuser
-timestamp: Thu 2009-02-19 23:41:25 -0700
-message:
-  change field width for login screen
-------------------------------------------------------------
-revno: 13
-committer: Joshua Rubin <support@rubixconsulting.com>
-branch nick: mailuser
-timestamp: Thu 2009-02-19 23:37:11 -0700
-message:
-  give domain admins ability to delegate other domain admins
-------------------------------------------------------------
-revno: 12
-committer: Joshua Rubin <support@rubixconsulting.com>
-branch nick: mailuser
-timestamp: Thu 2009-02-19 22:52:48 -0700
-message:
-  add domain permissions page that loads but does not yet save
-------------------------------------------------------------
-revno: 11
-committer: Joshua Rubin <support@rubixconsulting.com>
-branch nick: mailuser
-timestamp: Thu 2009-02-19 03:12:25 -0700
-message:
-  disable ability to modify domain names
-------------------------------------------------------------
-revno: 10
-committer: Joshua Rubin <support@rubixconsulting.com>
-branch nick: mailuser
-timestamp: Thu 2009-02-19 01:42:52 -0700
-message:
-  add much better permission checking and input validation
-------------------------------------------------------------
-revno: 9
-committer: Joshua Rubin <support@rubixconsulting.com>
-branch nick: mailuser
-timestamp: Tue 2009-02-17 02:09:33 -0700
-message:
-  add some more validation
-------------------------------------------------------------
-revno: 8
-committer: Joshua Rubin <support@rubixconsulting.com>
-branch nick: mailuser
-timestamp: Tue 2009-02-17 01:55:25 -0700
-message:
-  remove unnecessary prints
-------------------------------------------------------------
-revno: 7
-committer: Joshua Rubin <support@rubixconsulting.com>
-branch nick: mailuser
-timestamp: Tue 2009-02-17 01:51:00 -0700
-message:
-  complete the user management page
-------------------------------------------------------------
-revno: 6
-committer: Joshua Rubin <support@rubixconsulting.com>
-branch nick: mailuser
-timestamp: Mon 2009-02-16 10:44:35 -0700
-message:
-  get site working with IE
-------------------------------------------------------------
-revno: 5
-committer: Joshua Rubin <support@rubixconsulting.com>
-branch nick: mailuser
-timestamp: Mon 2009-02-16 00:06:03 -0700
-message:
-  well underway for user management. display and add new user are done.
-------------------------------------------------------------
-revno: 4
-committer: Joshua Rubin <support@rubixconsulting.com>
-branch nick: mailuser
-timestamp: Sun 2009-02-15 09:34:02 -0700
-message:
-  update backend permission system
-------------------------------------------------------------
-revno: 3
-committer: Joshua Rubin <support@rubixconsulting.com>
-branch nick: mailuser
-timestamp: Sun 2009-02-15 02:04:20 -0700
-message:
-  add support for database transactions. create a disabled catchall address user with every domain. add beginning support for catchall addresses.
-------------------------------------------------------------
-revno: 2
-committer: Joshua Rubin <support@rubixconsulting.com>
-branch nick: mailuser
-timestamp: Sun 2009-02-15 01:44:02 -0700
-message:
-  complete the manage domains page
-------------------------------------------------------------
-revno: 1
-committer: Joshua Rubin <support@rubixconsulting.com>
-branch nick: mailuser
-timestamp: Fri 2009-02-13 14:53:09 -0700
-message:
-  initial import
+commit d4edbc378dcfffe82bba6a88d3fef320777511b3
+Author: Joshua Rubin <joshua@rubixconsulting.com>
+Date:   Sun Feb 7 20:18:14 2010 -0700
+
+    add a log so that people only get one autoreply per vacation
+
+commit 70b1d88aac100ab6ade9074a163521e417a5800c
+Author: Joshua Rubin <joshua@rubixconsulting.com>
+Date:   Mon Feb 1 20:48:02 2010 -0700
+
+    remove the .bzrignore file and add the .gitignore file
+
+commit b5b4596b1efe4c2d366e8811dab25594de08b101
+Author: Joshua Rubin <joshua@rubixconsulting.com>
+Date:   Mon Feb 1 20:47:54 2010 -0700
+
+    remove the .bzrignore file and add the .gitignore file
+
+commit ebb10ca04a35eca2950a92c3527eeb59111d41da
+Author: Joshua Rubin <rubinj@pub1>
+Date:   Mon Feb 1 00:19:14 2010 -0700
+
+    [project @ rubinj@pub1-20100201071914-78g9543yb0fhv2gt]
+    begin work on the autoreply system
+
+commit f43c47c8f305debd0737bc474f80d3ed3bc2545f
+Author: Joshua Rubin <rubinj@pub1>
+Date:   Tue Nov 3 20:23:26 2009 +0000
+
+    [project @ rubinj@pub1-20091103202326-ynlfoepx4ata2dxc]
+    submit the login form by pushing enter
+
+commit 327b38552d7f641930aec2dc366578ecd794530c
+Author: Joshua Rubin <rubinj@pub1>
+Date:   Sun Nov 1 22:16:07 2009 +0000
+
+    [project @ rubinj@pub1-20091101221607-s0ibkv9198hkslee]
+    add a 5 minute timeout in the javascript
+
+commit 1de4fd3971086ce000ac1b2aec4b4c143d8b3351
+Author: Joshua Rubin <rubinj@pub1>
+Date:   Sun Nov 1 20:42:45 2009 +0000
+
+    [project @ rubinj@pub1-20091101204245-zvaxo2kxzoxkfk6m]
+    fix a few random bugs
+
+commit a0a72d7ab61a088956e5c08c654a993faf7b00b3
+Author: Joshua Rubin <support@rubixconsulting.com>
+Date:   Sun Mar 15 11:27:01 2009 -0600
+
+    [project @ support@rubixconsulting.com-20090315172701-4grm0oxux7ssh0dk]
+    add password meter files to package
+
+commit 463922bd634b6623c83107188f57b167883cab84
+Author: Joshua Rubin <support@rubixconsulting.com>
+Date:   Sun Mar 15 11:00:01 2009 -0600
+
+    [project @ support@rubixconsulting.com-20090315170001-nwb2l7ec4abyn4ja]
+    remove ext cruft
+
+commit 591a5f3e6b527f5188667f42e0d2327fd1da2cf3
+Author: Joshua Rubin <support@rubixconsulting.com>
+Date:   Sun Mar 15 10:51:57 2009 -0600
+
+    [project @ support@rubixconsulting.com-20090315165157-5uzxiqu5i2njium1]
+    add license documents and changelog
+
+commit 249703ddfa978542093bf9cde8cfcdbeb380e93e
+Author: Joshua Rubin <support@rubixconsulting.com>
+Date:   Sun Mar 15 10:01:31 2009 -0600
+
+    [project @ support@rubixconsulting.com-20090315160131-g0cayjjtfhfk03dn]
+    add sql schemas
+
+commit 52feb820db85947767901ea556ae34f09507d592
+Author: Joshua Rubin <support@rubixconsulting.com>
+Date:   Thu Mar 12 22:14:29 2009 -0600
+
+    [project @ support@rubixconsulting.com-20090313041429-7v6he55ph44x5b16]
+    change case
+
+commit f9927795f928f173afdba0a490c64fbd05cb07de
+Author: Joshua Rubin <support@rubixconsulting.com>
+Date:   Thu Mar 12 22:13:23 2009 -0600
+
+    [project @ support@rubixconsulting.com-20090313041323-sppun1avaywdq0u5]
+    add a few more cookie config params. fix a small typo.
+
+commit 718121c683a5d92cad498f54d96481fa91d2172b
+Author: Joshua Rubin <support@rubixconsulting.com>
+Date:   Fri Mar 6 08:23:10 2009 -0700
+
+    [project @ support@rubixconsulting.com-20090306152310-fysszcfoc5tq5j38]
+    fix a few more small annoyances
+
+commit 51530e410bc5f5377d7ab13af39f893be01a7016
+Author: Joshua Rubin <support@rubixconsulting.com>
+Date:   Fri Mar 6 01:11:58 2009 -0700
+
+    [project @ support@rubixconsulting.com-20090306081158-alqfbv0io463j1bq]
+    fix a few small bugs
+
+commit e2ebbec1177d88b6727fb715bc15d23562ee9f33
+Author: Joshua Rubin <support@rubixconsulting.com>
+Date:   Fri Mar 6 01:04:38 2009 -0700
+
+    [project @ support@rubixconsulting.com-20090306080438-nx0eeqwyl4eermc6]
+    complete the log viewer
+
+commit b6f52cce8eea3d56b995109b1d9372f8b1f2bfbb
+Author: Joshua Rubin <support@rubixconsulting.com>
+Date:   Thu Mar 5 02:47:32 2009 -0700
+
+    [project @ support@rubixconsulting.com-20090305094732-7564uubziw85fspo]
+    set the pid width
+
+commit 823b41358120672ef18ef328ee2a28c535c69468
+Author: Joshua Rubin <support@rubixconsulting.com>
+Date:   Thu Mar 5 02:43:56 2009 -0700
+
+    [project @ support@rubixconsulting.com-20090305094356-87nsklloinsj7oki]
+    fix a few small bugs with the mail log
+
+commit bfa5c75cf80b2764cf69728c5f0a4c0bd83ca08f
+Author: Joshua Rubin <support@rubixconsulting.com>
+Date:   Thu Mar 5 02:22:03 2009 -0700
+
+    [project @ support@rubixconsulting.com-20090305092203-00w0f761793w4dt1]
+    begin the ability to show the mail server log
+
+commit cbd93dd180bcd9f902309cdf4e1ab5a805a8288e
+Author: Joshua Rubin <support@rubixconsulting.com>
+Date:   Wed Mar 4 11:03:45 2009 -0700
+
+    [project @ support@rubixconsulting.com-20090304180345-kvajmfi9ve7og7qq]
+    add ability to remember login username. add some more post validation to the log summary checking. add a tmp dir option to mailgraph.
+
+commit 52a8fd5c71288870368820fe649c168bf0323226
+Author: Joshua Rubin <support@rubixconsulting.com>
+Date:   Tue Mar 3 21:49:16 2009 -0700
+
+    [project @ support@rubixconsulting.com-20090304044916-5hnlub4mwanrxy68]
+    group the graphs in the tree. simplify the javascript tree selection logic.
+
+commit 581992837440fddd6dd7b5cb732deee1b5bfb875
+Author: Joshua Rubin <support@rubixconsulting.com>
+Date:   Tue Mar 3 21:27:32 2009 -0700
+
+    [project @ support@rubixconsulting.com-20090304042732-a5780w5q2185ogal]
+    fix small js typo
+
+commit 54e1d11eae5320318f647c4e3f8e9ded366e4a14
+Author: Joshua Rubin <support@rubixconsulting.com>
+Date:   Tue Mar 3 21:25:10 2009 -0700
+
+    [project @ support@rubixconsulting.com-20090304042510-9ovaa2jv0faj89nc]
+    add ability to look at older log summary files
+
+commit 38f38dd891208e7264e95790b13810ac88d2fd1c
+Author: Joshua Rubin <support@rubixconsulting.com>
+Date:   Tue Mar 3 17:13:22 2009 -0700
+
+    [project @ support@rubixconsulting.com-20090304001322-qahxji1nmol2qwiz]
+    add mail server stats
+
+commit a451d050e8ad3451d999eafa6f35de56f1c36cd2
+Author: Joshua Rubin <support@rubixconsulting.com>
+Date:   Mon Mar 2 01:08:16 2009 -0700
+
+    [project @ support@rubixconsulting.com-20090302080816-et4yagtnpxj2bxey]
+    add a noscript notice
+
+commit 6b1c1729dedeaff84b443a32f9e9ad73ddc51b61
+Author: Joshua Rubin <support@rubixconsulting.com>
+Date:   Sun Mar 1 21:58:44 2009 -0700
+
+    [project @ support@rubixconsulting.com-20090302045844-h6xhufsbkm6s504n]
+    add ability for user to change own name
+
+commit e2dc4aad3bfdde73c2170ac6085ecfbbd77f768f
+Author: Joshua Rubin <support@rubixconsulting.com>
+Date:   Sun Mar 1 20:47:49 2009 -0700
+
+    [project @ support@rubixconsulting.com-20090302034749-3y8gz0jmike0xwwg]
+    set center panel title to tree text
+
+commit c70a4136220bc8725a90de2ff91b32d0eb33ab96
+Author: Joshua Rubin <support@rubixconsulting.com>
+Date:   Sun Mar 1 17:36:28 2009 -0700
+
+    [project @ support@rubixconsulting.com-20090302003628-ulq730okzg90uzfj]
+    fix s.gif location
+
+commit a6c14177d97c8f13e9f93e630d003066d185713a
+Author: Joshua Rubin <support@rubixconsulting.com>
+Date:   Sun Mar 1 17:32:26 2009 -0700
+
+    [project @ support@rubixconsulting.com-20090302003226-h0n9vmx54g21m2hx]
+    minify the css and js. include ext in bzr. include minify libraries. use a config file.
+
+commit 9d9d14954e8e832c983d968866e3967185ec49a0
+Author: Joshua Rubin <support@rubixconsulting.com>
+Date:   Fri Feb 27 10:46:44 2009 -0700
+
+    [project @ support@rubixconsulting.com-20090227174644-20xa41hcs0yhoxz3]
+    fix a few more small bug
+
+commit a3ec3403223b77b1b556efaf1b001106ea7af217
+Author: Joshua Rubin <support@rubixconsulting.com>
+Date:   Fri Feb 27 09:14:50 2009 -0700
+
+    [project @ support@rubixconsulting.com-20090227161450-adx2ctcyll2h546c]
+    dont show catchalls in user aliases
+
+commit 47cd7238a96c8f6c1a2e7e7912337a41ccc405c5
+Author: Joshua Rubin <support@rubixconsulting.com>
+Date:   Fri Feb 27 09:04:02 2009 -0700
+
+    [project @ support@rubixconsulting.com-20090227160402-tqg0ewkvh52tcmoq]
+    disable firebug lite and use minified ext
+
+commit d08117289caf6c119aac8c6a19fe94fd0b9801fb
+Author: Joshua Rubin <support@rubixconsulting.com>
+Date:   Fri Feb 27 09:03:31 2009 -0700
+
+    [project @ support@rubixconsulting.com-20090227160331-9vpzkewq65sgpc0k]
+    remove extra commas for ie compatibility
+
+commit 760995cafe3a74c965ae5fc3c7fddf3f967520f1
+Author: Joshua Rubin <support@rubixconsulting.com>
+Date:   Fri Feb 27 01:09:53 2009 -0700
+
+    [project @ support@rubixconsulting.com-20090227080953-civ13bjvj2e831vn]
+    add webmail to the interface
+
+commit 54fd2fb943b355104f76ddff5a3648cb54c93f81
+Author: Joshua Rubin <support@rubixconsulting.com>
+Date:   Thu Feb 26 22:03:47 2009 -0700
+
+    [project @ support@rubixconsulting.com-20090227050347-vrj3em7ov9lrugrh]
+    fix a lot of bugs. finish personal forward management.
+
+commit d447930e60f3c02982950c9e949546158ad3fa84
+Author: Joshua Rubin <support@rubixconsulting.com>
+Date:   Thu Feb 26 11:24:18 2009 -0700
+
+    [project @ support@rubixconsulting.com-20090226182418-soba9siub7bp0vbl]
+    enable server side removal and modification of catch all addresses
+
+commit 1dd7351ef26495ddb0db75daa8281b9d10d20f56
+Author: Joshua Rubin <support@rubixconsulting.com>
+Date:   Thu Feb 26 10:07:05 2009 -0700
+
+    [project @ support@rubixconsulting.com-20090226170705-dbybxajap5zcircl]
+    complete the js side of removing, modifying and saving catch alls
+
+commit 565cc3149b30669a76df49d7d4ebac36ff389cf9
+Author: Joshua Rubin <support@rubixconsulting.com>
+Date:   Thu Feb 26 09:48:05 2009 -0700
+
+    [project @ support@rubixconsulting.com-20090226164805-gwrtl7rkt6g6k2jm]
+    add ability to add catchall forwards
+
+commit 79ee444a50514c98b9b39f0e590c7b3131fb47f1
+Author: Joshua Rubin <support@rubixconsulting.com>
+Date:   Wed Feb 25 23:45:06 2009 -0700
+
+    [project @ support@rubixconsulting.com-20090226064506-pifj26cpycjiixve]
+    begin the catch all address page
+
+commit 448901a8e52edfa874026f6d897b343054deccf4
+Author: Joshua Rubin <support@rubixconsulting.com>
+Date:   Wed Feb 25 16:51:44 2009 -0700
+
+    [project @ support@rubixconsulting.com-20090225235144-rcog9mmvrfo2w84d]
+    complete local forwards remove, modify and save
+
+commit 2a7f4d9706910111f134f81617fdc93e3d0f24cd
+Author: Joshua Rubin <support@rubixconsulting.com>
+Date:   Wed Feb 25 00:58:57 2009 -0700
+
+    [project @ support@rubixconsulting.com-20090225075857-02isx7o7u9ggnesy]
+    add domain column where useful. add local forwards page that loads, adds and bulk adds but does not remove, revert, modify or save yet
+
+commit cf2743425be27ce063c18d37136aa32eb77b7322
+Author: Joshua Rubin <support@rubixconsulting.com>
+Date:   Tue Feb 24 01:24:02 2009 -0700
+
+    [project @ support@rubixconsulting.com-20090224082402-s57yhd2cdpe3okdv]
+    complete the alias management page
+
+commit b5d0618a196015c24821b03bf6f5c07b35f0c508
+Author: Joshua Rubin <support@rubixconsulting.com>
+Date:   Mon Feb 23 00:21:56 2009 -0700
+
+    [project @ support@rubixconsulting.com-20090223072156-w9kolv2u512ilglb]
+    complete administrative forward management. load, but do not save or edit, aliases.
+
+commit a66098c917122c0caad543a42497fc95811edeb6
+Author: Joshua Rubin <support@rubixconsulting.com>
+Date:   Sun Feb 22 13:47:23 2009 -0700
+
+    [project @ support@rubixconsulting.com-20090222204723-3x3j53h4kv56pxz7]
+    complete transition away from disable/enable page to element masks
+
+commit 22e8ab45ef715a23154852fe67f497a83d312999
+Author: Joshua Rubin <support@rubixconsulting.com>
+Date:   Sun Feb 22 03:38:46 2009 -0700
+
+    [project @ support@rubixconsulting.com-20090222103846-eaj00qmfk993rn24]
+    fix bug in bulk adding aliases. prevent ajax reloads where possible. begin transition away from disablepage to element masks.
+
+commit caeaedb7e0082d4d9bd8ffde96eec1988ccc5536
+Author: Joshua Rubin <support@rubixconsulting.com>
+Date:   Sun Feb 22 02:37:41 2009 -0700
+
+    [project @ support@rubixconsulting.com-20090222093741-mbz9spc50ramd82h]
+    add site administrators and local aliases pages
+
+commit 28c9d19d810e721a3f1fbe20f340777bce8ab1c8
+Author: Joshua Rubin <support@rubixconsulting.com>
+Date:   Fri Feb 20 14:55:45 2009 -0700
+
+    [project @ support@rubixconsulting.com-20090220215545-f0prux9r3qwtw9h4]
+    add ability to save domain permissions
+
+commit c9e7c5081c1ff2f43705b14c95cf2818afca2d01
+Author: Joshua Rubin <support@rubixconsulting.com>
+Date:   Fri Feb 20 00:15:29 2009 -0700
+
+    [project @ support@rubixconsulting.com-20090220071529-n9ignwzs0ju9yosq]
+    add better quoting of strings used in sql queries
+
+commit 3b827bc4e247a93decf414a93d3de4740c4a202b
+Author: Joshua Rubin <support@rubixconsulting.com>
+Date:   Thu Feb 19 23:41:25 2009 -0700
+
+    [project @ support@rubixconsulting.com-20090220064125-z0sek6g7jamy9cau]
+    change field width for login screen
+
+commit 81ecaf2ec8550ace11d78b67098ada2532845269
+Author: Joshua Rubin <support@rubixconsulting.com>
+Date:   Thu Feb 19 23:37:11 2009 -0700
+
+    [project @ support@rubixconsulting.com-20090220063711-c0d6hjb2lkyvnhg7]
+    give domain admins ability to delegate other domain admins
+
+commit e98e6b95ad3a6c21069e7c7e2b1a64da9a7f1133
+Author: Joshua Rubin <support@rubixconsulting.com>
+Date:   Thu Feb 19 22:52:48 2009 -0700
+
+    [project @ support@rubixconsulting.com-20090220055248-t1qwvkvolyb1dald]
+    add domain permissions page that loads but does not yet save
+
+commit 4e94d13e20df9e99b30789b5513bc9c286540833
+Author: Joshua Rubin <support@rubixconsulting.com>
+Date:   Thu Feb 19 03:12:25 2009 -0700
+
+    [project @ support@rubixconsulting.com-20090219101225-xrcaa7v4hzj5n2ss]
+    disable ability to modify domain names
+
+commit 68582333d5ed0568a682424efd4adce4a76a2fb0
+Author: Joshua Rubin <support@rubixconsulting.com>
+Date:   Thu Feb 19 01:42:52 2009 -0700
+
+    [project @ support@rubixconsulting.com-20090219084252-vfbx2057xbodq8s9]
+    add much better permission checking and input validation
+
+commit 9c47cbea346a9e0d5933d4b01584393f85e690a7
+Author: Joshua Rubin <support@rubixconsulting.com>
+Date:   Tue Feb 17 02:09:33 2009 -0700
+
+    [project @ support@rubixconsulting.com-20090217090933-5jtmhqs4h1m12pgg]
+    add some more validation
+
+commit e5dcdb0290dfdb12ecdf7c9e21afc4d9cf4dd110
+Author: Joshua Rubin <support@rubixconsulting.com>
+Date:   Tue Feb 17 01:55:25 2009 -0700
+
+    [project @ support@rubixconsulting.com-20090217085525-3uvtw9g7t1ju2crh]
+    remove unnecessary prints
+
+commit 9b2ebc8921953b9c4c89feb20ef5e9f054c523a3
+Author: Joshua Rubin <support@rubixconsulting.com>
+Date:   Tue Feb 17 01:51:00 2009 -0700
+
+    [project @ support@rubixconsulting.com-20090217085100-5uk20h282esdb7m7]
+    complete the user management page
+
+commit 3894293a19cb5b7301259b611663d82a0bf97b5b
+Author: Joshua Rubin <support@rubixconsulting.com>
+Date:   Mon Feb 16 10:44:35 2009 -0700
+
+    [project @ support@rubixconsulting.com-20090216174435-e5gxky5bjnx5m6dv]
+    get site working with IE
+
+commit 314d72f597d7d4cb6cbf51136a556e9925fa7198
+Author: Joshua Rubin <support@rubixconsulting.com>
+Date:   Mon Feb 16 00:06:03 2009 -0700
+
+    [project @ support@rubixconsulting.com-20090216070603-o4l7w1a8m2657gsi]
+    well underway for user management. display and add new user are done.
+
+commit a2ab5fe37fce946e9afc747674b4b1e8f7358a3c
+Author: Joshua Rubin <support@rubixconsulting.com>
+Date:   Sun Feb 15 09:34:02 2009 -0700
+
+    [project @ support@rubixconsulting.com-20090215163402-vveyadb3ijjduhzc]
+    update backend permission system
+
+commit 97692a4c378a8817894e928fa46f1bb446aabd47
+Author: Joshua Rubin <support@rubixconsulting.com>
+Date:   Sun Feb 15 02:04:20 2009 -0700
+
+    [project @ support@rubixconsulting.com-20090215090420-7c3gskcah6cr0iqw]
+    add support for database transactions. create a disabled catchall address user with every domain. add beginning support for catchall addresses.
+
+commit c3a2177fcda62c3672aef12e78fb84e314cdcdc5
+Author: Joshua Rubin <support@rubixconsulting.com>
+Date:   Sun Feb 15 01:44:02 2009 -0700
+
+    [project @ support@rubixconsulting.com-20090215084402-7t4w67up40vw4ko2]
+    complete the manage domains page
+
+commit cd203cba8b59ad37b65cbca878cab1d7d4504b0d
+Author: Joshua Rubin <support@rubixconsulting.com>
+Date:   Fri Feb 13 14:53:09 2009 -0700
+
+    [project @ support@rubixconsulting.com-20090213215309-79scqztbuxuf69sv]
+    initial import

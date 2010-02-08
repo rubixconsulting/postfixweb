@@ -15,13 +15,13 @@ return array(
 		'../../js/ext/ext-all.js',
 		'../../js/passwordmeter.js',
 		'../../js/miframe-min.js',
-		'../../js/rubixconsulting.js'
+		'../../js/postfixweb.js'
 	),
 	'css' => array(
 		'../../js/ext/resources/css/ext-all.css',
 		'../../js/ext/resources/css/xtheme-gray.css',
 		'../../css/passwordmeter.css',
-		'../../css/rubixconsulting.css'
+		'../../css/postfixweb.css'
 	)
     // 'js' => array('//js/file1.js', '//js/file2.js'),
     // 'css' => array('//css/file1.css', '//css/file2.css'),

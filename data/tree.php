@@ -40,12 +40,11 @@ $tree[] = array(
 			'text' => 'Name',
 			'id'   => 'name',
 			'leaf' => TRUE
-#		),
-## TODO investigate how to do auto replies
-#		array(
-#			'text' => 'Auto Reply',
-#			'id'   => 'auto-reply',
-#			'leaf' => TRUE
+		),
+		array(
+			'text' => 'Auto Reply',
+			'id'   => 'auto-reply',
+			'leaf' => TRUE
 		)
 	)
 );

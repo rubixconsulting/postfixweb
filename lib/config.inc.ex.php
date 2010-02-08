@@ -21,13 +21,13 @@ $config = array(
 	),
 	'cookie' => array(
 		'lifetime' => 0,
-		'name'     => 'RubixConsultingMailUser',
+		'name'     => 'RubixConsultingPostfixWeb',
 		'host'     => 'replace with hostname',
 		'secure'   => TRUE
 	),
 	'page' => array(
 		'title'   => 'Rubix Consulting, Inc. Mail User Portal',
-		'path'    => '/mailuser/',
+		'path'    => '/postfixweb/',
 		'google_analytics' => array(
 			'enabled' => TRUE,
 			'code'    => 'replace with google code'

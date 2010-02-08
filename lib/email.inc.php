@@ -42,7 +42,7 @@ function sendEmail($to, $from, $subject, $body, $cc = FALSE, $bcc = FALSE) {
 	}
 	$headers  = 'From: '     . $from . "\n".
 		    'Reply-To: ' . $from . "\n".
-		    'X-Mailer: Rubix Consulting, Inc. Mailuser Autoreply';
+		    'X-Mailer: Rubix Consulting, Inc. Postfix Web Autoreply';
 	if($cc) {
 		$headers .= "\n" . 'Cc: ' . $cc . "\n";
 	}
