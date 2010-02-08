@@ -44,7 +44,28 @@ $userId  = $row['user_id'];
 $message = $row['message'];
 
 if($message) {
-	## TODO(rubinj) check to see if we have already sent an autoreply to the $from user
+	$sql  = "SELECT timestamp";
+	$sql .= "  FROM autoreply_log";
+	$sql .= "    JOIN autoreply USING(user_id)";
+	$sql .= "  WHERE active = 't'";
+	$sql .= "    AND begins <= timestamp";
+	$sql .= "    AND user_id = ?";
+	$sql .= "    AND from_email = ?";
+	$params = array();
+	$params[] = $userId;
+	$params[] = $from;
+	$time = db_getval($sql, $params);
+	if($time) {
+		exit(0);
+	}
+	$params = array();
+	$params['user_id']    = $userId;
+	$params['from_email'] = $from;
+	$time = db_insert('autoreply_log', $params, 'timestamp');
+	if(!$time) {
+		printErr("could not insert into autoreply_log");
+		exit(1);
+	}
 	$subject = "Re: ".getOrigSubject();
 	sendEmail($from, $to, $subject, $message);
 }
