@@ -14,12 +14,11 @@ return array(
 		'../../js/ext/ext-base.js',
 		'../../js/ext/ext-all.js',
 		'../../js/passwordmeter.js',
-		'../../js/miframe-min.js',
+		'../../js/miframe.js',
 		'../../js/postfixweb.js'
 	),
 	'css' => array(
 		'../../js/ext/resources/css/ext-all.css',
-		'../../js/ext/resources/css/xtheme-gray.css',
 		'../../css/passwordmeter.css',
 		'../../css/postfixweb.css'
 	)
