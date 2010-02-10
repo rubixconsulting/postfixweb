@@ -1235,7 +1235,8 @@ RubixConsulting.user = function() {
 									fieldLabel: 'Message',
 									width: 400,
 									height: 250,
-									name: 'auto-reply-message'
+									name: 'auto-reply-message',
+									allowBlank: false
 								})
 							],
 							buttons: [
