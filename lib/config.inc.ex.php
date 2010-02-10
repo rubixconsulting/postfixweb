@@ -26,7 +26,7 @@ $config = array(
 		'secure'   => TRUE
 	),
 	'page' => array(
-		'title'   => 'Rubix Consulting, Inc. Mail User Portal',
+		'title'   => 'Rubix Consulting, Inc. Email Portal',
 		'path'    => '/postfixweb/',
 		'google_analytics' => array(
 			'enabled' => TRUE,
