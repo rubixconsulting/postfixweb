@@ -29,7 +29,7 @@ RubixConsulting.user = function() {
 	var forwardMask, addManageForwardDestination, revertDomainPermBtn;
 	var webmailPanel, webmailMask, namePanel, nameMask, mailLogGrid;
 	var logSummaryMask, statsMask, logSummaryCombo, loginCookie, tailTimer;
-
+	var autoReplyEnabled, autoReplyFieldSet, autoReplyLoaded, autoReplyMask, autoReplyPanel;
 
 	var priorities = [
 		'Emergency',
@@ -1204,7 +1204,7 @@ RubixConsulting.user = function() {
 								}
 							]
 						}),
-						new Ext.form.FormPanel({
+						autoReplyPanel = new Ext.form.FormPanel({
 							url: 'data/autoReply.php',
 							timeout: timeout,
 							monitorValid: true,
@@ -1221,22 +1221,33 @@ RubixConsulting.user = function() {
 								msgTarget: 'side'
 							},
 							items: [
-								new Ext.form.Checkbox({
-									boxLabel:'Enabled'
+								autoReplyEnabled = new Ext.form.Checkbox({
+									boxLabel:'Enabled',
+									name: 'active'
 								}),
-								new Ext.form.DateField({
-									fieldLabel: 'First day',
-									allowBlank: false
-								}),
-								new Ext.form.DateField({
-									fieldLabel: 'Ends'
-								}),
-								new Ext.form.TextArea({
-									fieldLabel: 'Message',
-									width: 400,
-									height: 250,
-									name: 'auto-reply-message',
-									allowBlank: false
+								autoReplyFieldSet = new Ext.form.FieldSet({
+									border: false,
+									//hidden: true,
+									bodyStyle: 'padding: 0px',
+									cls: 'no-padding',
+									items: [
+										new Ext.form.DateField({
+											fieldLabel: 'First day',
+											name: 'begins',
+											allowBlank: false
+										}),
+										new Ext.form.DateField({
+											fieldLabel: 'Ends',
+											name: 'ends'
+										}),
+										new Ext.form.TextArea({
+											fieldLabel: 'Message',
+											name: 'message',
+											width: 400,
+											height: 250,
+											allowBlank: false
+										})
+									]
 								})
 							],
 							buttons: [
@@ -3254,6 +3265,8 @@ RubixConsulting.user = function() {
 			loadName();
 		} else if((node.id == 'log-summary') && (!logSummaryLoaded)) {
 			loadLogSummary();
+		} else if((node.id == 'auto-reply') && (!autoReplyLoaded)) {
+			loadAutoReply();
 		} else if(node.id == 'last-day-stats') {
 			loadStats('day');
 		} else if(node.id == 'last-week-stats') {
@@ -3456,6 +3469,22 @@ RubixConsulting.user = function() {
 			success: function(form, action) {
 				nameLoaded = true;
 				nameMask.hide();
+			},
+			failure: formFailure
+		});
+	}
+
+	var loadAutoReply = function() {
+		autoReplyLoaded = false;
+		autoReplyMask = new Ext.LoadMask(Ext.get('auto-reply-panel'), {msg: 'Loading...'});
+		autoReplyMask.show();
+		autoReplyPanel.getForm().load({
+			params: {
+				mode: 'load'
+			},
+			success: function(form, action) {
+				autoReplyLoaded = true;
+				autoReplyMask.hide();
 			},
 			failure: formFailure
 		});
@@ -3779,7 +3808,7 @@ RubixConsulting.user = function() {
 	}
 
 	var resetAutoReply = function() {
-		// TODO
+		autoReplyPanel.getForm().reset();
 	}
 
 	var resetChangePassword = function() {

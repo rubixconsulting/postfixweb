@@ -441,6 +441,17 @@ function resetPassword($user, $new, $rep) {
 	print json_encode(array('success' => false, 'errors' => array('newpass' => 'Unknown Error')));
 }
 
+function getAutoReply($userId) {
+	$sql = "SELECT begins, ends, message, active FROM autoreply WHERE user_id = ?";
+	$ret = db_getrow($sql, array($userId));
+	if($ret["active"] == "t") {
+		$ret["active"] = true;
+	} else {
+		$ret["active"] = false;
+	}
+	return $ret;
+}
+
 function changePassword($old, $new, $rep) {
 	$foundError = FALSE;
 	$errors = array();
