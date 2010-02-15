@@ -1209,12 +1209,9 @@ RubixConsulting.user = function() {
 							timeout: timeout,
 							monitorValid: true,
 							autoScroll: true,
-							labelWidth: 125,
+							labelWidth: 75,
 							border: false,
 							id: 'auto-reply-panel',
-							layoutConfig: {
-								labelSeparator: ''
-							},
 							defaultType: 'textfield',
 							bodyStyle: 'padding:15px',
 							defaults: {
@@ -1226,8 +1223,11 @@ RubixConsulting.user = function() {
 									name: 'active'
 								}),
 								autoReplyFieldSet = new Ext.form.FieldSet({
+									layoutConfig: {
+										labelSeparator: ''
+									},
 									border: false,
-									//hidden: true,
+									hidden: true,
 									bodyStyle: 'padding: 0px',
 									cls: 'no-padding',
 									items: [
@@ -1484,7 +1484,16 @@ RubixConsulting.user = function() {
 		}, this);
 		domainPermCombo.on('select', loadDomainPerms, this);
 		logSummaryCombo.on('select', loadLogSummary,  this);
+		autoReplyEnabled.on('check', checkAutoReplyEnabled, this);
 		enablePage();
+	}
+
+	var checkAutoReplyEnabled = function(checkbox, checked) {
+		if(checked) {
+			autoReplyFieldSet.show();
+		} else {
+			autoReplyFieldSet.hide();
+		}
 	}
 
 	var priorityRenderer = function(id) {
