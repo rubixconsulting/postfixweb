@@ -14,7 +14,7 @@ $cssUri = Minify_groupUri('css');
 	</head>
 	<body>
 		<noscript>This page requires javascript.</noscript>
-		<div id="login" />
+		<div id="login"></div>
 <?php
 if($config['page']['google_analytics']['enabled']) {
 	$code = $config['page']['google_analytics']['code'];
