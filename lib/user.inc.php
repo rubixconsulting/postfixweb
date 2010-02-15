@@ -452,6 +452,29 @@ function getAutoReply($userId) {
 	return $ret;
 }
 
+function saveAutoReply($userId, $active, $begins, $ends, $message) {
+	if($active) {
+		$active = 't';
+	} else {
+		$active = 'f';
+	}
+	if(!$ends) {
+		$ends = NULL;
+	}
+	$conditions = array(
+		'user_id' => $userId
+	);
+	$params = array(
+		'user_id' => $userId,
+		'begins'  => $begins,
+		'ends'    => $ends,
+		'message' => $message,
+		'active'  => $active
+	);
+	db_delete('autoreply', $conditions);
+	return db_insert('autoreply', $params, 'user_id');
+}
+
 function changePassword($old, $new, $rep) {
 	$foundError = FALSE;
 	$errors = array();

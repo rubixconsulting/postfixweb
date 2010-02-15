@@ -1493,6 +1493,7 @@ RubixConsulting.user = function() {
 			autoReplyFieldSet.show();
 		} else {
 			autoReplyFieldSet.hide();
+			autoReplyPanel.getForm().reset();
 		}
 	}
 
