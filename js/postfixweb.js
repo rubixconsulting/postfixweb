@@ -3791,7 +3791,15 @@ RubixConsulting.user = function() {
 	}
 
 	var saveAutoReply = function() {
-		// TODO
+		autoReplyMask = new Ext.LoadMask(Ext.get('auto-reply-panel'), {msg: 'Saving...'});
+		autoReplyMask.show();
+		autoReplyPanel.getForm().submit({
+			params: {
+				mode: 'save'
+			},
+			success: saveAutoReplySuccess,
+			failure: formFailure
+		});
 	}
 
 	var changePassword = function() {
@@ -3818,6 +3826,11 @@ RubixConsulting.user = function() {
 	var changeNameSuccess = function(form, action) {
 		loadName();
 		showInfo('Name changed', 'Name changed successfully');
+	}
+
+	var saveAutoReplySuccess = function(form, action) {
+		loadAutoReply();
+		showInfo('Auto Reply Saved', 'Auto Reply saved successfully');
 	}
 
 	var changePasswordSuccess = function(form, action) {
