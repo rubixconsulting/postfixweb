@@ -3875,42 +3875,8 @@ RubixConsulting.user = function() {
 	}
 
 	var completeLogout = function() {
-		viewport.destroy();
-		viewport = null;
-		user = null;
-		// TODO LOGOUT clear all necessary variables here
-		domainPermStore.removeAll();
-		domainPermsLoaded = false;
-		domainListStore.removeAll();
-		domainsLoaded = false;
-		userStore.removeAll();
-		usersLoaded = false;
-		siteAdminStore.removeAll();
-		siteAdminLoaded = false;
-		domainPermStore.removeAll();
-		domainPermsLoaded = false;
-		localAliasStore.removeAll();
-		localAliasesLoaded = false;
-		manageForwardStore.removeAll();
-		manageForwardsLoaded = false;
-		aliasStore.removeAll();
-		aliasesLoaded = false;
-		localForwardStore.removeAll();
-		localForwardsLoaded = false;
-		catchAllStore.removeAll();
-		catchAllLoaded = false;
-		forwardStore.removeAll();
-		forwardsLoaded = false;
-		logSummaryStore.removeAll();
-		logSummaryLoaded = false;
-		mailLogStore.removeAll();
-		if(tailTimer) {
-			tailTimer.cancel();
-		}
-		webmailLoaded = false;
-		nameLoaded = false;
 		cookie.clear('pass');
-		getUserInfo();
+		window.location.reload();
 	}
 
 	// public space
