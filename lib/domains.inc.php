@@ -83,6 +83,7 @@ function validDomain($domain) {
 }
 
 function updateDomain($domainId, $domain) {
+	## NOTE this is not used, but if it ever is, alias destinations might need to be updated too
 	if(!isSiteAdmin() || !$domainId || !$domain || !validDomain($domain)) {
 		return FALSE;
 	}

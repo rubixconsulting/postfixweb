@@ -654,7 +654,7 @@ function addUser($newUser) {
 		'username'    => $username,
 		'domain_id'   => $domainId,
 		'destination' => $email,
-		'active'      => 't'
+		'active'      => $active
 	);
 
 	$aliasId = db_insert('virtual_aliases', $alias, 'alias_id');
@@ -726,7 +726,14 @@ function removeUser($userId) {
 		'user_id' => $userId
 	);
 	## TODO remove the virtual home directory
-	return db_delete('virtual_users', $condition);
+	$aliasCondition = array(
+		'username'  => $userObj['user'],
+		'domain_id' => $userObj['domain_id']
+	);
+	beginTransaction();
+	db_delete('virtual_aliases', $aliasCondition);
+	db_delete('virtual_users', $condition);
+	endTransaction();
 }
 
 function modifyCatchAll($catchAllId, $destination, $active) {
@@ -794,7 +801,17 @@ function modifyUser($userId, $description, $active) {
 	$conditions = array(
 		'user_id' => $userId
 	);
-	return db_update('virtual_users', $updates, $conditions);
+	$aliasUpdates = array(
+		'active' => $active
+	);
+	$aliasConditions = array(
+		'username'  => $userObj['user'],
+		'domain_id' => $userObj['domain_id']
+	);
+	beginTransaction();
+	db_update('virtual_users', $updates, $conditions);
+	db_update('virtual_aliases', $aliasUpdates, $aliasConditions);
+	endTransaction();
 }
 
 function modifySiteAdminUser($userId, $siteAdmin) {

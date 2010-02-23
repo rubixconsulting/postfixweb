@@ -21,6 +21,8 @@ function getActiveUserForwards($email = FALSE) {
 		'  WHERE active = \'t\''.
 		'    AND (username || \'@\' || domain) = ?'.
 		'    AND destination != ?'.
+		'    AND (username || \'@\' || domain) != destination'.
+		'    AND (username || \'@\' || domain || \'@autoreply.\' || domain) != destination'.
 		'  ORDER BY destination';
 	$rows = db_getrows($sql, array($email, $email));
 	$i = 0;
@@ -48,6 +50,8 @@ function getUserForwards($email = FALSE) {
 		'  FROM virtual_aliases'.
 		'  JOIN virtual_domains USING(domain_id)'.
 		'    WHERE (username || \'@\' || domain) = ?'.
+		'      AND (username || \'@\' || domain) != destination'.
+		'      AND (username || \'@\' || domain || \'@autoreply.\' || domain) != destination'.
 		'  ORDER BY destination';
 	$rows = db_getrows($sql, array($email));
 	$i = 0;
@@ -80,6 +84,8 @@ function getForwards() {
 		'  AND (username || \'@\' || domain) IN ('.
 			quotedAdminUserString().
 		'  )'.
+		'  AND (username || \'@\' || domain) != destination'.
+		'  AND (username || \'@\' || domain || \'@autoreply.\' || domain) != destination'.
 		'  ORDER BY domain, username, destination';
 	$rows = db_getrows($sql);
 	$i = 0;
