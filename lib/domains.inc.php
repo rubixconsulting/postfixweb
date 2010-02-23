@@ -29,11 +29,27 @@ function addDomain($domain) {
 	$add = array(
 		'domain' => $domain
 	);
+
+	beginTransaction();
 	$domain_id = db_insert('virtual_domains', $add, 'domain_id');
 	if(!$domain_id) {
+		cancelTransaction();
 		print json_encode(array('success' => FALSE, 'errors' => array('domain' => 'Unknown error')));
 		return;
 	}
+	$transport = array(
+		'subdomain'   => 'autoreply',
+		'domain_id'   => $domain_id,
+		'destination' => 'autoreply:',
+		'active'      => 't'
+	);
+	$transport_id = db_insert('transport_maps', $transport, 'transport_id');
+	if(!$transport_id) {
+		cancelTransaction();
+		print json_encode(array('success' => FALSE, 'errors' => array('domain' => 'Unknown error')));
+		return;
+	}
+	endTransaction();
 	print json_encode(array('success' => true));
 }
 
