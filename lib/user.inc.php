@@ -601,17 +601,23 @@ function addUser($newUser) {
 		$name,
 		$active
 	);
+	beginTransaction();
 	$rs = db_do($sql, $params);
 	if(!$rs) {
+		cancelTransaction();
 		print json_encode(array('success' => false, 'errors' => array('username' => 'Unknown Error')));
 		return;
 	}
+
 	$userId = getUserId($email);
-	if($userId) {
-		print json_encode(array('success' => true));
+	if(!$userId) {
+		cancelTransaction();
+		print json_encode(array('success' => false, 'errors' => array('username' => 'Unknown Error')));
 		return;
 	}
-	print json_encode(array('success' => false, 'errors' => array('username' => 'Unknown Error')));
+
+	endTransaction();
+	print json_encode(array('success' => true));
 }
 
 function removeCatchAll($catchAllId) {
