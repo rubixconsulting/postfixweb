@@ -1,0 +1,5 @@
+hosts = localhost
+user = postfix
+password = <DB PASSWORD>
+dbname = mail
+query = SELECT destination FROM virtual_aliases JOIN virtual_domains USING(domain_id) WHERE active = 't' AND (username || '@' || domain) = '%s'

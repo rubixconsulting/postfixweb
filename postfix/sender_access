@@ -1,0 +1,13 @@
+hosts = localhost
+user = postfix
+password = <DB PASSWORD>
+dbname = mail
+query = SELECT CASE WHEN (
+		SELECT EXISTS(
+			SELECT action FROM sender_access JOIN sender_access_actions USING (access_action_id) WHERE pattern = '%s' AND active='t')
+		) = 't'
+	THEN (
+		SELECT action FROM sender_access JOIN sender_access_actions USING (access_action_id) WHERE pattern = '%s' AND active='t')
+	ELSE
+		'prepend X-Envelope-From: <%s>'
+	END;

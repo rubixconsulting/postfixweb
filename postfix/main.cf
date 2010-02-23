@@ -1,0 +1,24 @@
+## These are some useful options to add to your main.cf
+
+alias_maps     = pgsql:/etc/postfix/local_aliases
+alias_database = pgsql:/etc/postfix/local_aliases
+smtpd_sender_restrictions =
+	# other restrictions...
+	check_sender_access pgsql:/etc/postfix/sender_access
+	# other restrictions...
+smtpd_recipient_restrictions =
+	# other restrictions...
+	check_recipient_access pgsql:/etc/postfix/recipient_access
+	# other restrictions...
+smtpd_sasl_authenticated_header    = yes
+broken_sasl_auth_clients           = yes
+smtpd_sasl_type                    = dovecot
+smtpd_sasl_path                    = auth
+virtual_mailbox_domains            = pgsql:/etc/postfix/virtual_domains
+virtual_mailbox_base               = /var/mail/vmail
+virtual_mailbox_maps               = pgsql:/etc/postfix/virtual_users
+virtual_minimum_uid                = 100
+virtual_uid_maps                   = static:<YOUR VMAIL UID>
+virtual_gid_maps                   = static:<YOUR VMAIL GID>
+virtual_alias_maps                 = pgsql:/etc/postfix/virtual_aliases
+transport_maps                     = pgsql:/etc/postfix/transport

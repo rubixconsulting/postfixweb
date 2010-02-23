@@ -1,0 +1,4 @@
+## Add this to your postfix master.cf file updating the path as necessary
+
+autoreply unix  -       n       n       -       -       pipe
+  flags= user=nobody user=vmail argv=/var/www/secure/mailuser/bin/autoreply.php ${sender} ${mailbox}

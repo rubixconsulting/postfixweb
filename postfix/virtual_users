@@ -1,0 +1,5 @@
+hosts = localhost
+user = postfix
+password = <DB PASSWORD>
+dbname = mail
+query = SELECT (domain || '/' || username || '/Maildir/') AS maildir FROM virtual_users JOIN virtual_domains USING(domain_id) WHERE active='t' AND (username || '@' || domain)='%s'

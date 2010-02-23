@@ -1,0 +1,5 @@
+hosts = localhost
+user = postfix
+password = <DB PASSWORD>
+dbname = mail
+query = SELECT destination FROM transport_maps JOIN virtual_domains USING(domain_id) WHERE active = 't' AND ((subdomain = '' AND domain = '%s') OR (subdomain != '' AND (subdomain || '.' || domain) = '%s'))

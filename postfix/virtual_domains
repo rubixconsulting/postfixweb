@@ -1,0 +1,5 @@
+hosts = localhost
+user = postfix
+password = <DB PASSWORD>
+dbname = mail
+query = SELECT domain FROM virtual_domains WHERE domain='%s'

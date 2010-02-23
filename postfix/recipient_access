@@ -1,0 +1,5 @@
+hosts = localhost
+user = postfix
+password = <DB PASSWORD>
+dbname = mail
+query = SELECT action FROM recipient_access WHERE pattern = '%s' AND active='t';
