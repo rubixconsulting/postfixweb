@@ -650,6 +650,29 @@ function addUser($newUser) {
 		return;
 	}
 
+	$alias = array(
+		'username'    => $username,
+		'domain_id'   => $domainId,
+		'destination' => $email,
+		'active'      => 't'
+	);
+
+	$aliasId = db_insert('virtual_aliases', $alias, 'alias_id');
+	if(!$aliasId) {
+		cancelTransaction();
+		print json_encode(array('success' => false, 'errors' => array('username' => 'Unknown Error')));
+		return;
+	}
+
+	$alias['destination'] = $email.'@autoreply.'.$domain;
+
+	$aliasId = db_insert('virtual_aliases', $alias, 'alias_id');
+	if(!$aliasId) {
+		cancelTransaction();
+		print json_encode(array('success' => false, 'errors' => array('username' => 'Unknown Error')));
+		return;
+	}
+
 	endTransaction();
 	print json_encode(array('success' => true));
 }
