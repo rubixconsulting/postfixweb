@@ -441,7 +441,8 @@ RubixConsulting.user = function() {
 									border: false
 								},{
 									cellCls: 'alignTop',
-									id: 'forwards',
+									id: 'info-forwards',
+									html: 'Loading...',
 									border: false
 								},{
 									html: '<b>Aliases</b>',
@@ -449,7 +450,8 @@ RubixConsulting.user = function() {
 									border: false
 								},{
 									cellCls: 'alignTop',
-									id: 'aliases',
+									id: 'info-aliases',
+									html: 'Loading...',
 									border: false
 								}
 							]
@@ -1321,12 +1323,12 @@ RubixConsulting.user = function() {
 			});
 			infoPanel.add({
 				id: 'you-administer',
+				html: 'Loading...',
 				cellCls: 'alignTop',
 				border: false
 			});
 		}
-		infoPanel.doLayout();
-		updateUserInfoPage();
+		infoPanel.on('show', updateUserInfoPage);
 		west.on('load', function(node) {
 			if(node.id != 'tools-root') {
 				return;
@@ -3249,7 +3251,6 @@ RubixConsulting.user = function() {
 			return;
 		}
 		center.getLayout().setActiveItem(node.id+'-panel');
-		center.doLayout();
 		center.setTitle(node.text);
 		if((node.id == 'manage-domains') && (!domainsLoaded)) {
 			loadDomains();
@@ -3681,11 +3682,11 @@ RubixConsulting.user = function() {
 		if(user.aliases.length > 0) {
 			aliases = user.aliases.join('<br />');
 		}
-		forwardsDiv = Ext.get('forwards');
+		forwardsDiv = Ext.get('info-forwards');
 		if(forwardsDiv) {
 			forwardsDiv.update(forwards);
 		}
-		aliasesDiv = Ext.get('aliases');
+		aliasesDiv = Ext.get('info-aliases');
 		if(aliasesDiv) {
 			aliasesDiv.update(aliases);
 		}
