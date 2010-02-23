@@ -29,7 +29,7 @@ RubixConsulting.user = function() {
 	var forwardMask, addManageForwardDestination, revertDomainPermBtn;
 	var webmailPanel, webmailMask, namePanel, nameMask, mailLogGrid;
 	var logSummaryMask, statsMask, logSummaryCombo, loginCookie, tailTimer;
-
+	var autoReplyEnabled, autoReplyFieldSet, autoReplyLoaded, autoReplyMask, autoReplyPanel;
 
 	var priorities = [
 		'Emergency',
@@ -1204,39 +1204,50 @@ RubixConsulting.user = function() {
 								}
 							]
 						}),
-						new Ext.form.FormPanel({
+						autoReplyPanel = new Ext.form.FormPanel({
 							url: 'data/autoReply.php',
 							timeout: timeout,
 							monitorValid: true,
 							autoScroll: true,
-							labelWidth: 125,
+							labelWidth: 75,
 							border: false,
 							id: 'auto-reply-panel',
-							layoutConfig: {
-								labelSeparator: ''
-							},
 							defaultType: 'textfield',
 							bodyStyle: 'padding:15px',
 							defaults: {
 								msgTarget: 'side'
 							},
 							items: [
-								new Ext.form.Checkbox({
-									boxLabel:'Enabled'
+								autoReplyEnabled = new Ext.form.Checkbox({
+									boxLabel:'Enabled',
+									name: 'active'
 								}),
-								new Ext.form.DateField({
-									fieldLabel: 'First day',
-									allowBlank: false
-								}),
-								new Ext.form.DateField({
-									fieldLabel: 'Ends'
-								}),
-								new Ext.form.TextArea({
-									fieldLabel: 'Message',
-									width: 400,
-									height: 250,
-									name: 'auto-reply-message',
-									allowBlank: false
+								autoReplyFieldSet = new Ext.form.FieldSet({
+									layoutConfig: {
+										labelSeparator: ''
+									},
+									border: false,
+									hidden: true,
+									bodyStyle: 'padding: 0px',
+									cls: 'no-padding',
+									items: [
+										new Ext.form.DateField({
+											fieldLabel: 'First day',
+											name: 'begins',
+											allowBlank: false
+										}),
+										new Ext.form.DateField({
+											fieldLabel: 'Ends',
+											name: 'ends'
+										}),
+										new Ext.form.TextArea({
+											fieldLabel: 'Message',
+											name: 'message',
+											width: 400,
+											height: 250,
+											allowBlank: false
+										})
+									]
 								})
 							],
 							buttons: [
@@ -1473,7 +1484,17 @@ RubixConsulting.user = function() {
 		}, this);
 		domainPermCombo.on('select', loadDomainPerms, this);
 		logSummaryCombo.on('select', loadLogSummary,  this);
+		autoReplyEnabled.on('check', checkAutoReplyEnabled, this);
 		enablePage();
+	}
+
+	var checkAutoReplyEnabled = function(checkbox, checked) {
+		if(checked) {
+			autoReplyFieldSet.show();
+		} else {
+			autoReplyFieldSet.hide();
+			autoReplyPanel.getForm().reset();
+		}
 	}
 
 	var priorityRenderer = function(id) {
@@ -3254,6 +3275,8 @@ RubixConsulting.user = function() {
 			loadName();
 		} else if((node.id == 'log-summary') && (!logSummaryLoaded)) {
 			loadLogSummary();
+		} else if((node.id == 'auto-reply') && (!autoReplyLoaded)) {
+			loadAutoReply();
 		} else if(node.id == 'last-day-stats') {
 			loadStats('day');
 		} else if(node.id == 'last-week-stats') {
@@ -3456,6 +3479,22 @@ RubixConsulting.user = function() {
 			success: function(form, action) {
 				nameLoaded = true;
 				nameMask.hide();
+			},
+			failure: formFailure
+		});
+	}
+
+	var loadAutoReply = function() {
+		autoReplyLoaded = false;
+		autoReplyMask = new Ext.LoadMask(Ext.get('auto-reply-panel'), {msg: 'Loading...'});
+		autoReplyMask.show();
+		autoReplyPanel.getForm().load({
+			params: {
+				mode: 'load'
+			},
+			success: function(form, action) {
+				autoReplyLoaded = true;
+				autoReplyMask.hide();
 			},
 			failure: formFailure
 		});
@@ -3762,7 +3801,15 @@ RubixConsulting.user = function() {
 	}
 
 	var saveAutoReply = function() {
-		// TODO
+		autoReplyMask = new Ext.LoadMask(Ext.get('auto-reply-panel'), {msg: 'Saving...'});
+		autoReplyMask.show();
+		autoReplyPanel.getForm().submit({
+			params: {
+				mode: 'save'
+			},
+			success: saveAutoReplySuccess,
+			failure: formFailure
+		});
 	}
 
 	var changePassword = function() {
@@ -3779,7 +3826,7 @@ RubixConsulting.user = function() {
 	}
 
 	var resetAutoReply = function() {
-		// TODO
+		autoReplyPanel.getForm().reset();
 	}
 
 	var resetChangePassword = function() {
@@ -3789,6 +3836,11 @@ RubixConsulting.user = function() {
 	var changeNameSuccess = function(form, action) {
 		loadName();
 		showInfo('Name changed', 'Name changed successfully');
+	}
+
+	var saveAutoReplySuccess = function(form, action) {
+		loadAutoReply();
+		showInfo('Auto Reply Saved', 'Auto Reply saved successfully');
 	}
 
 	var changePasswordSuccess = function(form, action) {
@@ -3875,42 +3927,8 @@ RubixConsulting.user = function() {
 	}
 
 	var completeLogout = function() {
-		viewport.destroy();
-		viewport = null;
-		user = null;
-		// TODO LOGOUT clear all necessary variables here
-		domainPermStore.removeAll();
-		domainPermsLoaded = false;
-		domainListStore.removeAll();
-		domainsLoaded = false;
-		userStore.removeAll();
-		usersLoaded = false;
-		siteAdminStore.removeAll();
-		siteAdminLoaded = false;
-		domainPermStore.removeAll();
-		domainPermsLoaded = false;
-		localAliasStore.removeAll();
-		localAliasesLoaded = false;
-		manageForwardStore.removeAll();
-		manageForwardsLoaded = false;
-		aliasStore.removeAll();
-		aliasesLoaded = false;
-		localForwardStore.removeAll();
-		localForwardsLoaded = false;
-		catchAllStore.removeAll();
-		catchAllLoaded = false;
-		forwardStore.removeAll();
-		forwardsLoaded = false;
-		logSummaryStore.removeAll();
-		logSummaryLoaded = false;
-		mailLogStore.removeAll();
-		if(tailTimer) {
-			tailTimer.cancel();
-		}
-		webmailLoaded = false;
-		nameLoaded = false;
 		cookie.clear('pass');
-		getUserInfo();
+		window.location.reload();
 	}
 
 	// public space

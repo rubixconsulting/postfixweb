@@ -33,3 +33,7 @@
 .log_row_Debug {
 	background-color: #CCCCFF;
 }
+
+.no-padding {
+	padding: 0px !important;
+}
