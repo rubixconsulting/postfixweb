@@ -6,7 +6,7 @@ include_once('domains.inc.php');
 function sendEmail($to, $from, $subject, $body, $cc = FALSE, $bcc = FALSE) {
 	if(is_array($to)) {
 		foreach($to as $addr) {
-			if(!validEmailAddress($to)) {
+			if(!validEmailAddress($addr)) {
 				return FALSE;
 			}
 		}
