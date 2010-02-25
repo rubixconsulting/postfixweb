@@ -27,6 +27,9 @@ if($mode == 'load') {
 	}
 
 	if(saveAutoReply($userId, $active, $begins, $ends, $message)) {
+		if(!$active) {
+			db_delete('autoreply_log', array('user_id' => $userId));
+		}
 		print json_encode(array('success' => TRUE));
 	} else {
 		print json_encode(array('success' => FALSE, 'errors' => array('message' => 'Error saving auto reply')));
