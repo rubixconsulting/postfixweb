@@ -24,7 +24,8 @@ function db_connect() {
 		$config['db'][$ACTIVE_DB]['name']
 	);
 	if(!$DB->IsConnected()) {
-		unset($DB);
+		print "could not connect to db\n";
+		exit(1);
 	}
 	$CONNECTED_DB = $ACTIVE_DB;
 }
@@ -57,6 +58,9 @@ function db_getrows($sql, $params = FALSE) {
 
 function db_getrow($sql, $params = FALSE) {
 	$rows = db_getrows($sql, $params);
+	if (!$rows) {
+		return FALSE;
+	}
 	return $rows[0];
 }
 

@@ -471,6 +471,7 @@ function saveAutoReply($userId, $active, $begins, $ends, $message) {
 		'message' => $message,
 		'active'  => $active
 	);
+	db_delete('autoreply_log', array('user_id' => $userId));
 	db_delete('autoreply', $conditions);
 	return db_insert('autoreply', $params, 'user_id');
 }

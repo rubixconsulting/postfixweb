@@ -8,20 +8,20 @@ include_once("db.inc.php");
 include_once("email.inc.php");
 include_once("Mail/mimeDecode.php");
 
-$from = $argv[1];
-$to   = $argv[2];
-
-if(!$from) {
+if($argc < 2) {
 	printErr("Error: missing 'from' address");
 	usage($argv[0]);
 	exit(1);
 }
 
-if(!$to) {
+if($argc < 3) {
 	printErr("Error: missing 'to' address");
 	usage($argv[0]);
 	exit(1);
 }
+
+$from = $argv[1];
+$to   = $argv[2];
 
 $sql  = "SELECT user_id, message";
 $sql .= "  FROM autoreply";
@@ -100,5 +100,8 @@ function getOrigSubject() {
 	$params['decode_headers'] = true;
 	$params['input'] = getStdin();
 	$orig = Mail_mimeDecode::decode($params);
+	if (!array_key_exists('subject', $orig->headers)) {
+		return '';
+	}
 	return $orig->headers['subject'];
 }
