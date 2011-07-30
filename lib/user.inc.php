@@ -37,6 +37,23 @@ function userIsActive($userId) {
 	return FALSE;
 }
 
+function userLocal($email) {
+	if(!$email) {
+		return FALSE;
+	}
+	$sql = 'SELECT active'.
+		'  FROM virtual_aliases'.
+		'  JOIN virtual_domains USING(domain_id)'.
+		'  WHERE destination = ?'.
+		'    AND (username || \'@\' || domain) = ?';
+	$active = db_getval($sql, array($email, $email));
+
+	if($active == 't') {
+		return TRUE;
+	}
+	return FALSE;
+}
+
 function getUserRole($userId) {
 	$sql = 'SELECT '.
 		'  role'.
@@ -247,7 +264,7 @@ function getAdminUsers($like = FALSE, $userId = FALSE) {
 		'    description AS name,'.
 		'    active'.
 		'  FROM virtual_users'.
-		'  JOIN virtual_domains USING(domain_id)'.
+		'    JOIN virtual_domains USING(domain_id)'.
 		'  WHERE domain IN ('.
 			quotedAdminDomainString().
 		'  )';
@@ -266,12 +283,20 @@ function getAdminUsers($like = FALSE, $userId = FALSE) {
 	}
 	$i = 0;
 	foreach($users as $tmpUser) {
-		$users[$i]['active'] = FALSE;
+		$u = $users[$i];
+
+		$u['local'] = userLocal($u['email']);
+
+		$u['active'] = FALSE;
 		if($tmpUser['active'] == 't') {
-			$users[$i]['active'] = TRUE;
+			$u['active'] = TRUE;
 		}
+
+		$users[$i] = $u;
+
 		$i++;
 	}
+
 	return $users;
 }
 
@@ -547,7 +572,9 @@ function addUser($newUser) {
 	$repPass  = $newUser['repPass'];
 	$name     = $newUser['name'];
 	$active   = $newUser['active'];
+
 	$errors = array();
+
 	$foundError = FALSE;
 	if(!$username) {
 		$foundError = TRUE;
@@ -626,8 +653,9 @@ function addUser($newUser) {
 		'    password,'.
 		'    role_id,'.
 		'    description,'.
+		'    local,'.
 		'    active'.
-		'  ) VALUES (?, ?, CRYPT(?, GEN_SALT(\'bf\', 8)), ?, ?, ?)';
+		'  ) VALUES (?, ?, CRYPT(?, GEN_SALT(\'bf\', 8)), ?, ?, \'t\', ?)';
 	$params = array(
 		$username,
 		$domainId,
@@ -665,6 +693,7 @@ function addUser($newUser) {
 		return;
 	}
 
+	$alias['active'] = $active;
 	$alias['destination'] = $email.'@autoreply.'.$domain;
 
 	$aliasId = db_insert('virtual_aliases', $alias, 'alias_id');
@@ -774,16 +803,15 @@ function modifyCatchAll($catchAllId, $destination, $active) {
 	return db_update('virtual_aliases', $updates, $conditions);
 }
 
-function modifyUser($userId, $description, $active) {
+function modifyUser($userId, $description, $local, $active) {
 	if(!$active) {
 		$active = 'f';
 	} else {
 		$active = 't';
 	}
-	if(!$userId || !$active) {
+	if(!$userId) {
 		return FALSE;
-	}
-	if(!isSiteAdmin() && isSiteAdmin($userId)) {
+	} else if(!isSiteAdmin() && isSiteAdmin($userId)) {
 		return FALSE;
 	}
 	$userObj = loadUser($userId);
@@ -795,6 +823,9 @@ function modifyUser($userId, $description, $active) {
 	if(!in_array($domain, $adminDomains)) {
 		return FALSE;
 	}
+
+	$oldActive = userIsActive($userId);
+
 	$updates = array(
 		'description' => $description,
 		'active' => $active
@@ -802,17 +833,86 @@ function modifyUser($userId, $description, $active) {
 	$conditions = array(
 		'user_id' => $userId
 	);
+
+	$activeChanged = FALSE;
+	if ($oldActive && ($active == 'f')) {
+		$activeChanged = TRUE;
+	} else if (!$oldActive && ($active == 't')) {
+		$activeChanged = TRUE;
+	}
+
 	$aliasUpdates = array(
 		'active' => $active
 	);
+	$username = $userObj['user'];
 	$aliasConditions = array(
-		'username'  => $userObj['user'],
+		'username'  => $username,
 		'domain_id' => $userObj['domain_id']
 	);
+	$email = $username.'@'.$domain;
+
 	beginTransaction();
 	db_update('virtual_users', $updates, $conditions);
-	db_update('virtual_aliases', $aliasUpdates, $aliasConditions);
+	if ($activeChanged) {
+		db_update('virtual_aliases', $aliasUpdates, $aliasConditions);
+	}
+	setUserLocal($local, $email);
 	endTransaction();
+}
+
+function setUserLocalIfNecessary($email) {
+	setUserLocal(userLocal($email), $email);
+}
+
+function setUserLocal($value, $email = FALSE) {
+	if (!$email) {
+		$email = $_SESSION['user']['email'];
+	}
+
+	if (!validEmailAddress($email)) {
+		return;
+	} else if (!userExists($email)) {
+		return;
+	} else if (isSiteAdmin(getUserId($email))) {
+		## site admin should not manipulate own delivery
+		return;
+	}
+
+	$parts = split('@', $email);
+
+	if ($email != $_SESSION['user']['email']) {
+		$adminDomains = getAdminDomains();
+		if(!in_array($parts[1], $adminDomains)) {
+			return;
+		}
+	}
+
+	if (($value !== 't') && ($value !== 'f')) {
+		if (!$value) {
+			$value = 'f';
+		} else {
+			$value = 't';
+		}
+	}
+
+	$count = 0;
+	if ($value == 'f') {
+		## user must have at least one active forward to disable local delivery
+		$count = count(getActiveUserForwards($email));
+	}
+
+	if (($value == 'f') && ($count == 0)) {
+		## TODO notify user
+		$value = 't';
+	}
+
+	$conditions = array(
+		'username'  => $parts[0],
+		'domain_id' => getDomainId($parts[1]),
+		'destination' => $email
+	);
+
+	db_update('virtual_aliases', array('active' => $value), $conditions);
 }
 
 function modifySiteAdminUser($userId, $siteAdmin) {

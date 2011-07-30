@@ -27,7 +27,7 @@ RubixConsulting.user = function() {
 	var catchAllMask, forwardGrid, addForwardBtn, removeForwardBtn, revertForwardsBtn;
 	var saveForwardsBtn, addForwardWindow, addForwardDestination, cookie;
 	var forwardMask, addManageForwardDestination, revertDomainPermBtn;
-	var webmailPanel, webmailMask, namePanel, nameMask, mailLogGrid;
+	var webmailPanel, webmailMask, namePanel, nameMask, mailLogGrid, localMask;
 	var logSummaryMask, statsMask, logSummaryCombo, loginCookie, tailTimer;
 	var autoReplyEnabled, autoReplyFieldSet, autoReplyLoaded, autoReplyMask, autoReplyPanel;
 
@@ -65,6 +65,7 @@ RubixConsulting.user = function() {
 	var nameLoaded           = false;
 	var logSummaryLoaded     = false;
 	var loginInProgress      = false;
+	var localLoaded          = false;
 
 	var timeout = 300000;
 	Ext.Ajax.timeout = timeout;
@@ -90,6 +91,7 @@ RubixConsulting.user = function() {
 		{name: 'name',     type: 'string'},
 		{name: 'role_id',  type: 'int'},
 		{name: 'name',     type: 'string'},
+		{name: 'local',    type: 'boolean'},
 		{name: 'active',   type: 'boolean'}
 	]);
 
@@ -331,6 +333,8 @@ RubixConsulting.user = function() {
 			forwardMask.hide();
 		} else if(form.url == 'data/name.php') {
 			nameMask.hide();
+		} else if(form.url == 'data/local.php') {
+			localMask.hide();
 		}
 		if(action && action.response && action.response.statusText && (action.response.statusText != 'OK')) {
 			if(action.response.statusText == 'Forbidden: Not logged in') {
@@ -650,6 +654,14 @@ RubixConsulting.user = function() {
 									editor: new Ext.form.TextField({
 										allowBlank: true
 									})
+								},{
+									header: 'Deliver Locally',
+									sortable: true,
+									dataIndex: 'local',
+									id: 'local',
+									width: 100,
+									editor: boolEditor(),
+									renderer: boolRenderer
 								},{
 									header: 'Active',
 									sortable: true,
@@ -1172,6 +1184,40 @@ RubixConsulting.user = function() {
 								defaultSrc: 'about:blank'
 							}]
 						}),
+						localPanel = new Ext.form.FormPanel({
+							url: 'data/local.php',
+							timeout: timeout,
+							monitorValid: true,
+							autoScroll: true,
+							labelWidth: 150,
+							border: false,
+							id: 'local-panel',
+							layoutConfig: {
+								labelSeparator: ''
+							},
+							defaultType: 'checkbox',
+							bodyStyle: 'padding:15px',
+							defaults: {
+								width: 150,
+								msgTarget: 'side'
+							},
+							items: [{
+								fieldLabel: 'Local Delivery',
+								name: 'local',
+								id: 'local-field',
+								allowBlank: false
+							}],
+							buttons: [
+								{
+									text: 'Reset Form',
+									handler: resetLocalForm
+								},{
+									text: 'Change Local Delivery',
+									formBind: true,
+									handler: changeLocal
+								}
+							]
+						}),
 						namePanel = new Ext.form.FormPanel({
 							url: 'data/name.php',
 							timeout: timeout,
@@ -1473,7 +1519,7 @@ RubixConsulting.user = function() {
 			return true;
 		}, this);
 		userGrid.on('beforeedit', function(e) {
-			if((e.record.get('email') == user.email) && (e.column == 4)) {
+			if((e.record.get('email') == user.email) && (e.column >= 4)) {
 				return false;
 			}
 			return true;
@@ -3050,6 +3096,7 @@ RubixConsulting.user = function() {
 			modifiedUsers.push({
 				user_id: modified[i].get('user_id'),
 				name:    modified[i].get('name'),
+				local:   modified[i].get('local'),
 				active:  modified[i].get('active')
 			});
 		}
@@ -3288,6 +3335,8 @@ RubixConsulting.user = function() {
 			loadStats('year');
 		} else if(node.id == 'mail-log') {
 			loadMailLog();
+		} else if((node.id == 'local') && (!localLoaded)) {
+			loadLocal();
 		}
 	}
 
@@ -3466,6 +3515,22 @@ RubixConsulting.user = function() {
 				}
 			},
 			scope: this
+		});
+	}
+
+	var loadLocal = function() {
+		localLoaded = false;
+		localMask = new Ext.LoadMask(Ext.get('local-panel'), {msg: 'Loading...'});
+		localMask.show();
+		localPanel.getForm().load({
+			params: {
+				mode: 'load'
+			},
+			success: function(form, action) {
+				localLoaded = true;
+				localMask.hide();
+			},
+			failure: formFailure
 		});
 	}
 
@@ -3789,6 +3854,18 @@ RubixConsulting.user = function() {
 		Ext.Msg.hide();
 	}
 
+	var changeLocal = function() {
+		localMask = new Ext.LoadMask(Ext.get('local-panel'), {msg: 'Changing local delivery...'});
+		localMask.show();
+		Ext.getCmp('local-panel').getForm().submit({
+			params: {
+				mode: 'save'
+			},
+			success: changeLocalSuccess,
+			failure: formFailure
+		});
+	}
+
 	var changeName = function() {
 		nameMask = new Ext.LoadMask(Ext.get('name-panel'), {msg: 'Changing name...'});
 		nameMask.show();
@@ -3822,6 +3899,10 @@ RubixConsulting.user = function() {
 		});
 	}
 
+	var resetLocalForm = function() {
+		loadLocal();
+	}
+
 	var resetNameForm = function() {
 		loadName();
 	}
@@ -3832,6 +3913,11 @@ RubixConsulting.user = function() {
 
 	var resetChangePassword = function() {
 		Ext.getCmp('change-password-panel').getForm().reset();
+	}
+
+	var changeLocalSuccess = function(form, action) {
+		loadLocal();
+		showInfo('Local delivery changed', 'Local delivery changed successfully');
 	}
 
 	var changeNameSuccess = function(form, action) {

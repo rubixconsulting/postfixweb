@@ -38,6 +38,7 @@ if($query && !$mode && ($query != 'all')) {
 		'pass'     => $_POST['password'],
 		'repPass'  => $_POST['reppassword'],
 		'name'     => $_POST['name'],
+		'local'    => $_POST['local'],
 		'active'   => $_POST['active']
 	);
 	addUser($newUser);
@@ -54,8 +55,9 @@ if($query && !$mode && ($query != 'all')) {
 		foreach($updates as $tmpUser) {
 			$userId = $tmpUser->user_id;
 			$description = trim($tmpUser->name);
+			$local = $tmpUser->local;
 			$active = $tmpUser->active;
-			modifyUser($userId, $description, $active);
+			modifyUser($userId, $description, $local, $active);
 		}
 	}
 	if($remove) {

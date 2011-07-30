@@ -22,31 +22,41 @@ if($config['webmail']['enabled']) {
 	);
 }
 
+$yourSettings = array(
+	array(
+		'text' => 'Password',
+		'id'   => 'change-password',
+		'leaf' => TRUE
+	),
+	array(
+		'text' => 'Forwards',
+		'id'   => 'forwards',
+		'leaf' => TRUE
+	),
+	array(
+		'text' => 'Name',
+		'id'   => 'name',
+		'leaf' => TRUE
+	),
+	array(
+		'text' => 'Auto Reply',
+		'id'   => 'auto-reply',
+		'leaf' => TRUE
+	)
+);
+
+if (!isSiteAdmin()) {
+	$yourSettings[] = array(
+		'text' => 'Local Delivery',
+		'id'   => 'local',
+		'leaf' => TRUE
+	);
+}
+
 $tree[] = array(
 	'text' => 'Your Settings',
 	'id'   => 'your-settings',
-	'children' => array(
-		array(
-			'text' => 'Password',
-			'id'   => 'change-password',
-			'leaf' => TRUE
-		),
-		array(
-			'text' => 'Forwards',
-			'id'   => 'forwards',
-			'leaf' => TRUE
-		),
-		array(
-			'text' => 'Name',
-			'id'   => 'name',
-			'leaf' => TRUE
-		),
-		array(
-			'text' => 'Auto Reply',
-			'id'   => 'auto-reply',
-			'leaf' => TRUE
-		)
-	)
+	'children' => $yourSettings
 );
 
 $siteAdministration   = array();

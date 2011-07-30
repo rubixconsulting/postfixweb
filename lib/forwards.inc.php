@@ -255,8 +255,7 @@ function modifyForward($aliasId, $destination, $active) {
 	}
 	if(!userExists($email)) {
 		return FALSE;
-	}
-	if(!validEmailAddress($destination)) {
+	} else if(!validEmailAddress($destination)) {
 		return FALSE;
 	}
 	$destinationParts = split('@', $destination);
@@ -277,7 +276,12 @@ function modifyForward($aliasId, $destination, $active) {
 	$conditions = array(
 		'alias_id' => $aliasId
 	);
-	return db_update('virtual_aliases', $updates, $conditions);
+	beginTransaction();
+	$ret = db_update('virtual_aliases', $updates, $conditions);
+	if ($active == 'f') {
+		setUserLocalIfNecessary($email);
+	}
+	endTransaction();
 }
 
 function removeForward($aliasId) {
@@ -299,5 +303,11 @@ function removeForward($aliasId) {
 	$conditions = array(
 		'alias_id' => $aliasId
 	);
-	return db_delete('virtual_aliases', $conditions);
+
+	beginTransaction();
+	$ret = db_delete('virtual_aliases', $conditions);
+	setUserLocalIfNecessary($email);
+	endTransaction();
+
+	return $ret;
 }
