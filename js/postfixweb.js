@@ -3382,7 +3382,7 @@ RubixConsulting.user = function() {
 	var webmailGetPass = function() {
 		Ext.Ajax.request({
 			url: 'data/getPass.php',
-			success: completeLoadWebmail,
+			success: webmailGetToken,
 			failure: ajaxFailure,
 			scope: this,
 			params: {
@@ -3391,8 +3391,21 @@ RubixConsulting.user = function() {
 		});
 	}
 
-	var completeLoadWebmail = function(response, options) {
-		var parsed = Ext.util.JSON.decode(response.responseText);
+	var webmailGetToken = function(response, options) {
+		var pass = Ext.util.JSON.decode(response.responseText).pass;
+		Ext.Ajax.request({
+			url: '../roundcube/',
+			success: function(rclogin) {
+				var re = /input.*name=\"_token\".*value=\"(.*?)"/im;
+				var matches = re.exec(rclogin.responseText);
+				completeLoadWebmail(pass, matches[1]);
+			},
+			failure: ajaxFailure,
+			scope: this
+		});
+	}
+
+	var completeLoadWebmail = function(pass, token) {
 		Ext.Ajax.request({
 			url: '../roundcube/',
 			success: loadWebmailSuccess,
@@ -3402,7 +3415,8 @@ RubixConsulting.user = function() {
 				'_action': 'login',
 				'_task': 'login',
 				'_url': '_task=login',
-				'_pass': parsed.pass,
+				'_pass': pass,
+				'_token': token,
 				'_user': user.email
 			}
 		});
