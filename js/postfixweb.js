@@ -3400,6 +3400,8 @@ RubixConsulting.user = function() {
 			scope: this,
 			params: {
 				'_action': 'login',
+				'_task': 'login',
+				'_url': '_task=login',
 				'_pass': parsed.pass,
 				'_user': user.email
 			}
@@ -3410,7 +3412,7 @@ RubixConsulting.user = function() {
 		webmailMask = new Ext.LoadMask(Ext.get('rubixWebmailDiv'), {msg: 'Loading...'});
 		webmailMask.show();
 		Ext.Ajax.request({
-			url: '../roundcube/?_task=mail&_action=logout',
+			url: '../roundcube/?_task=logout',
 			success: webmailGetPass,
 			scope: this,
 			failure: ajaxFailure
@@ -3419,7 +3421,7 @@ RubixConsulting.user = function() {
 
 	var webmailLogout = function() {
 		Ext.Ajax.request({
-			url: '../roundcube/?_task=mail&_action=logout'
+			url: '../roundcube/?_task=logout'
 		});
 	}
 
