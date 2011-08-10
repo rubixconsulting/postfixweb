@@ -653,9 +653,8 @@ function addUser($newUser) {
 		'    password,'.
 		'    role_id,'.
 		'    description,'.
-		'    local,'.
 		'    active'.
-		'  ) VALUES (?, ?, CRYPT(?, GEN_SALT(\'bf\', 8)), ?, ?, \'t\', ?)';
+		'  ) VALUES (?, ?, CRYPT(?, GEN_SALT(\'bf\', 8)), ?, ?, ?)';
 	$params = array(
 		$username,
 		$domainId,
