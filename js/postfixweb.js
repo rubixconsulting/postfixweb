@@ -3798,7 +3798,7 @@ RubixConsulting.user = function() {
 			applyTo: 'login',
 			layout: 'fit',
 			width: 355,
-			height: 320,
+			height: 330,
 			closable: false,
 			plain: false,
 			resizable: false,
